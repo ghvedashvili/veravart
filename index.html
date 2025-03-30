@@ -354,7 +354,30 @@
             msTilHint,
             matched = false,
             art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
-            found = 0;
+            found = 0,
+            isTabActive = true,
+            lastActiveTime = Date.now();
+
+        // Add visibility change listeners
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', function() { isTabActive = true; });
+        window.addEventListener('blur', function() { isTabActive = false; });
+
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                isTabActive = false;
+                lastActiveTime = Date.now();
+            } else {
+                isTabActive = true;
+                // Adjust timeLeft for the time the tab was inactive
+                if (timeInt !== undefined) {
+                    var inactiveTime = Date.now() - lastActiveTime;
+                    timeLeft -= inactiveTime;
+                    // Ensure time doesn't go negative
+                    if (timeLeft < 0) timeLeft = 0;
+                }
+            }
+        }
 
         // Make 16 buttons
         for (var i = 1; i <= 16; i++) { 
@@ -450,6 +473,8 @@
         }
 
         function updateTime() {
+            if (!isTabActive) return; // Don't update time if tab is inactive
+            
             if (timeLeft > 0) {
                 timeLeft -= 10;
                 var mil = Math.floor(timeLeft % 1000 / 10);
