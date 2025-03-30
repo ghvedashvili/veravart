@@ -553,6 +553,8 @@ function saveScore(name, score) {
     hintCount = 0; // Reset hint counter after saving
 }
 
+// ... (keep all previous code until the loadLeaderboard function) ...
+
 function loadLeaderboard() {
     database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
         const scores = [];
@@ -560,8 +562,13 @@ function loadLeaderboard() {
             scores.push(childSnapshot.val());
         });
         
-        // Sort by score (descending)
-        scores.sort((a, b) => b.score - a.score);
+        // Sort by score (descending) and then by hints used (ascending)
+        scores.sort((a, b) => {
+            if (b.score === a.score) {
+                return (a.hintsUsed || 0) - (b.hintsUsed || 0);
+            }
+            return b.score - a.score;
+        });
         
         // Clear previous leaderboard
         leaderboardList.innerHTML = '';
@@ -574,6 +581,8 @@ function loadLeaderboard() {
         });
     });
 }
+
+// ... (keep all remaining code the same) ...
 
 // Event listeners
 submitName.addEventListener('click', () => {
