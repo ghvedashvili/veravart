@@ -4,7 +4,6 @@
     <title>Memory Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
-    <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -76,14 +75,16 @@
             user-select: none;
         }
 
-        /* Timer at bottom */
+  
+        /* Adjust timer position to prevent overlap */
         .timeTxt {
             left: 50%;
-            bottom: 20px;
+            bottom: 30px; /* Moved up slightly */
             transform: translateX(-50%);
             font-size: 40px;
             text-align: center;
             width: 100%;
+            z-index: 4;
         }
 
         .timePlus {
@@ -103,9 +104,6 @@
             width: 100%;
             font-size: 25px;
             text-align: center;
-            textContent: 'Find the matching pair...';
-            fontWeight: 300;
-            letterSpacing: 0.25;
         }
 
         #hintBtn {
@@ -114,12 +112,13 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            font-size: 20px;
+            font-size: 30px;
             text-align: center;
             line-height: 60px;
             cursor: pointer;
             background: rgba(0, 110, 166, 0.7);
-            opacity: 0;
+            opacity: 1;
+            z-index: 10;
         }
 
         #leaderboardBtn {
@@ -128,12 +127,13 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            font-size: 16px;
+            font-size: 30px;
             text-align: center;
             line-height: 60px;
             cursor: pointer;
             background: rgba(255, 193, 7, 0.7);
             opacity: 1;
+            z-index: 10;
         }
 
         .end {
@@ -157,6 +157,7 @@
         }
 
         #replayBtn {
+        top:50%;
             width: 120px;
             height: 120px;
             cursor: pointer;
@@ -207,12 +208,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
             width: 80%;
             max-width: 400px;
             max-height: 60%;
-            overflow-y: auto;
+            overflow-y: hidden;
             text-align: center;
             z-index: 100;
         }
@@ -228,7 +229,7 @@
         }
 
         #leaderboardList li {
-            padding: 8px 0;
+            padding: 5px 0;
             border-bottom: 1px solid #333;
         }
 
@@ -236,14 +237,30 @@
             background: #006da6;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 10px;
             border-radius: 5px;
-            font-size: 18px;
+            font-size: 15px;
             cursor: pointer;
             margin-top: 15px;
         }
+        #viewLeaderboard {
+            display:none;
+        }
+        
+      /* Timer at bottom */
+         #dedication {
+           position: absolute;
+            bottom: 10px; /* Positioned above the timer */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            z-index: 5; /* Below buttons but above game */
+            white-space: nowrap;
+            width: 100%;
+        }
 
-        /* Landscape orientation adjustments */
         @media (orientation: landscape) {
             .btn {
                 width: 50px;
@@ -258,8 +275,8 @@
             }
             
             .timeTxt {
-                font-size: 30px;
-                bottom: 10px;
+                
+                bottom: 20px;
             }
             
             .timePlus {
@@ -270,8 +287,12 @@
             #hintBtn, #leaderboardBtn {
                 width: 50px;
                 height: 50px;
-                font-size: 16px;
+                font-size: 25px;
                 line-height: 50px;
+            }
+            #dedication {
+                bottom: 60px;
+                font-size: 12px;
             }
         }
     </style>
@@ -279,8 +300,6 @@
 <body>
     <div id="container" style="opacity:0;">
         <div id="game">
-            <div id="hintBtn">Hint</div>
-            <div id="leaderboardBtn">Top</div>
             <div class="foundTxt"></div>
             <div class="timeTxt">30:00</div>
             <div class="timePlus">+3 sec</div>
@@ -299,6 +318,11 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Control buttons now properly positioned outside #game but inside #container -->
+        <div id="hintBtn">💡</div>
+        <!-- <div id="dedication">სპეციალურად ალექსანდრე ღვედაშვილისთვის</div>-->
+        <div id="leaderboardBtn">🏆</div>
     </div>
 
     <!-- Name Input Form -->
@@ -307,7 +331,7 @@
         <p>You found <span id="finalScore">0</span> pairs</p>
         <input type="text" id="nameInput" placeholder="Enter your name" maxlength="20">
         <button id="submitName">Submit</button>
-        <button id="viewLeaderboard">View Leaderboard</button>
+       <button id="viewLeaderboard">View</button>
     </div>
 
     <!-- Leaderboard -->
@@ -317,331 +341,340 @@
         <button id="closeLeaderboard">Close</button>
     </div>
 
+   
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
-            authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
-            databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
-            projectId: "newspaperveravart",
-            storageBucket: "newspaperveravart.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:1234567890abcdef"
-        };
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+    authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+    databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+    projectId: "newspaperveravart",
+    storageBucket: "newspaperveravart.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:1234567890abcdef"
+};
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-        var game = document.getElementById('game'),
-            btnArea = document.getElementById('btnArea'),
-            hintBtn = document.getElementById('hintBtn'),
-            leaderboardBtn = document.getElementById('leaderboardBtn'),
-            replayBtn = document.getElementById('replayBtn'),
-            nameForm = document.getElementById('nameForm'),
-            nameInput = document.getElementById('nameInput'),
-            submitName = document.getElementById('submitName'),
-            finalScore = document.getElementById('finalScore'),
-            viewLeaderboard = document.getElementById('viewLeaderboard'),
-            leaderboard = document.getElementById('leaderboard'),
-            leaderboardList = document.getElementById('leaderboardList'),
-            closeLeaderboard = document.getElementById('closeLeaderboard'),
-            timeLimit = 30 * 1000, // in millisec
-            timeLeft,
-            timeInt,
-            lastBtn,
-            hint,
-            msTilHint,
-            matched = false,
-            art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
-            found = 0,
-            isTabActive = true,
-            lastActiveTime = Date.now();
+var game = document.getElementById('game'),
+    btnArea = document.getElementById('btnArea'),
+    hintBtn = document.getElementById('hintBtn'),
+    leaderboardBtn = document.getElementById('leaderboardBtn'),
+    replayBtn = document.getElementById('replayBtn'),
+    nameForm = document.getElementById('nameForm'),
+    nameInput = document.getElementById('nameInput'),
+    submitName = document.getElementById('submitName'),
+    finalScore = document.getElementById('finalScore'),
+    viewLeaderboard = document.getElementById('viewLeaderboard'),
+    leaderboard = document.getElementById('leaderboard'),
+    leaderboardList = document.getElementById('leaderboardList'),
+    closeLeaderboard = document.getElementById('closeLeaderboard'),
+    timeLimit = 30 * 1000, // in millisec
+    timeLeft,
+    timeInt,
+    lastBtn,
+    hint,
+    msTilHint,
+    matched = false,
+    art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
+    found = 0,
+    isTabActive = true,
+    lastActiveTime = Date.now(),
+    lastTabSwitchTime = Date.now(),
+    isInspecting = false;
 
-        // Add visibility change listeners
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', function() { isTabActive = true; });
-        window.addEventListener('blur', function() { isTabActive = false; });
+// Make 16 buttons
+for (var i = 1; i <= 16; i++) { 
+    var b;
+    if (i == 1) b = document.getElementById('b1');
+    else {
+        b = document.getElementById('b1').cloneNode(true);
+        b.id = 'b' + (i);
+        btnArea.appendChild(b);
+    }
+    b.onclick = b.ontouchend = btnClick;
+}
 
-        function handleVisibilityChange() {
-            if (document.hidden) {
-                isTabActive = false;
-                lastActiveTime = Date.now();
-            } else {
-                isTabActive = true;
-                // Adjust timeLeft for the time the tab was inactive
-                if (timeInt !== undefined) {
-                    var inactiveTime = Date.now() - lastActiveTime;
-                    timeLeft -= inactiveTime;
-                    // Ensure time doesn't go negative
-                    if (timeLeft < 0) timeLeft = 0;
-                }
-            }
+// Initial states...
+new TimelineMax({onStart: populate})
+    .set(game, {userSelect: 'none', background: 'radial-gradient(#333, #000 120%)'})
+    .set('.foundTxt', {textContent: 'Find the matching pair...'})
+    .set('.end', {autoAlpha: 0})
+    .set('#replayBtn', {transformOrigin: 'center'})
+    .to('#container', 0.2, {opacity: 1, ease: Power2.easeIn}, 0);
+
+// Visibility change handler that ignores quick switches (like inspect element)
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // Check if this is likely from inspecting element
+        var timeSinceLastInteraction = Date.now() - lastTabSwitchTime;
+        if (timeSinceLastInteraction < 500) { // Threshold for quick tab switch
+            isInspecting = true;
+            return; // Don't pause for quick inspection
         }
-
-        // Make 16 buttons
-        for (var i = 1; i <= 16; i++) { 
-            var b;
-            if (i == 1) b = document.getElementById('b1');
-            else {
-                b = document.getElementById('b1').cloneNode(true);
-                b.id = 'b' + (i);
-                btnArea.appendChild(b);
-            }
-            b.onclick = b.ontouchend = btnClick;
+        isTabActive = false;
+        lastActiveTime = Date.now();
+    } else {
+        isTabActive = true;
+        lastTabSwitchTime = Date.now();
+        // Adjust timeLeft for the time the tab was inactive
+        if (timeInt !== undefined && !isInspecting) {
+            var inactiveTime = Date.now() - lastActiveTime;
+            timeLeft -= inactiveTime;
+            // Ensure time doesn't go negative
+            if (timeLeft < 0) timeLeft = 0;
         }
+        isInspecting = false;
+    }
+}
 
-        // Initial states...
-        new TimelineMax({onStart: populate})
-            .set(game, {userSelect: 'none', background: 'radial-gradient(#333, #000 120%)'})
-            .set('.foundTxt', {textContent: 'Find the matching pair...'})
-            .set('.end', {autoAlpha: 0})
-            .set('#replayBtn', {transformOrigin: 'center'})
-            .to('#container', 0.2, {opacity: 1, ease: Power2.easeIn}, 0);
+hintBtn.onclick = hintBtn.ontouchend = function(e) {
+    if (e.type == 'touchend') hintBtn.onclick = undefined;
+    TweenMax.set(hintBtn, {textContent: hint, fontSize: 30});
+}
 
-        hintBtn.onclick = hintBtn.ontouchend = function(e) {
-            if (e.type == 'touchend') hintBtn.onclick = undefined;
-            TweenMax.set(hintBtn, {textContent: hint, fontSize: 30});
+leaderboardBtn.onclick = leaderboardBtn.ontouchend = function(e) {
+    if (e.type == 'touchend') leaderboardBtn.onclick = undefined;
+    loadLeaderboard();
+    leaderboard.style.display = 'block';
+}
+
+function populate() {
+    lastBtn = undefined;
+    matched = false;
+    msTilHint = 5000;
+    TweenMax.set(hintBtn, {autoAlpha: 0, textContent: "💡", fontSize: 30});
+    TweenMax.staggerFromTo('.btn', 0.3, {scale: 0.2, alpha: 0, rotation: 1}, {
+        rotation: 0,
+        alpha: 1,
+        scale: 1,
+        ease: Back.easeOut.config(4),
+        stagger: {grid: [4, 4], from: "center", amount: 0.2}
+    });
+
+    var btns = [];    
+
+    for (var i = 0; i < 15; i++) makeNewNum();
+    
+    function makeNewNum() {
+        var n = art[Math.ceil(rand(0, art.length - 1))], valExists = false;
+        for (var i = 0; i < btns.length; i++) if (n == btns[i]) valExists = true;
+        (valExists) ? makeNewNum() : btns.push(n);
+    }
+
+    hint = btns[14];
+    btns.push(btns[14]);
+    shuffleArray(btns);
+    for (var b = 1; b <= 16; b++) window['b' + b].textContent = btns[b - 1];
+}
+
+function btnClick(e) {
+    if (e.type == 'touchend') e.currentTarget.onclick = undefined;
+    if (matched) return;
+    if (timeInt == undefined) {
+        timeLeft = timeLimit;
+        timeInt = setInterval(updateTime, 10);
+    }
+
+    var b = e.currentTarget;
+    TweenMax.to(b, 0.05, {scale: 0.95, yoyo: true, repeat: 1});
+    
+    if (lastBtn != undefined && lastBtn != b) {
+        if (b.textContent == lastBtn.textContent) {
+            found++;
+            matched = true;
+            timeLeft += 3000;
+            new TimelineMax({onComplete: populate})
+                .set('.foundTxt', {textContent: 'Found: ' + found, fontWeight: 500}, 0)
+                .to('.timePlus', 0.1, {autoAlpha: 1, yoyo: true, repeat: 1, repeatDelay: 0.4}, 0)
+                .fromTo('.timePlus', 0.3, {scale: 0, rotation: 0.1}, {scale: 1, rotation: 0}, 0)
+                .to([b, lastBtn], 0.1, {border: '3px solid #08c04d'}, 0)
+                .to(b, 0.3, {rotation: 1, scale: 0.8, ease: Back.easeIn.config(7), yoyo: true, repeat: 1}, 0)
+                .to(lastBtn, 0.3, {rotation: 1, scale: 0.8, ease: Back.easeIn.config(7), yoyo: true, repeat: 1}, 0)
+                .to('.btn', 0.1, {border: '3px solid transparent'}, 0.5);
+            return;
+        } else {
+            TweenMax.to(lastBtn, 0.1, {border: '3px solid transparent'});
         }
+    }
+    TweenMax.to(b, 0.1, {border: '3px solid #006da6'});
+    lastBtn = e.currentTarget;
+}
 
-        leaderboardBtn.onclick = leaderboardBtn.ontouchend = function(e) {
-            if (e.type == 'touchend') leaderboardBtn.onclick = undefined;
-            loadLeaderboard();
-            leaderboard.style.display = 'block';
-        }
-
-        function populate() {
-            lastBtn = undefined;
-            matched = false;
-            msTilHint = 5000;
-            TweenMax.set(hintBtn, {autoAlpha: 0, textContent: "Hint?", fontSize: 20});
-            TweenMax.staggerFromTo('.btn', 0.3, {scale: 0.2, alpha: 0, rotation: 1}, {
-                rotation: 0,
-                alpha: 1,
-                scale: 1,
-                ease: Back.easeOut.config(4),
-                stagger: {grid: [4, 4], from: "center", amount: 0.2}
-            });
-
-            var btns = [];    
-
-            for (var i = 0; i < 15; i++) makeNewNum();
-            
-            function makeNewNum() {
-                var n = art[Math.ceil(rand(0, art.length - 1))], valExists = false;
-                for (var i = 0; i < btns.length; i++) if (n == btns[i]) valExists = true;
-                (valExists) ? makeNewNum() : btns.push(n);
-            }
-
-            hint = btns[14];
-            btns.push(btns[14]);
-            shuffleArray(btns);
-            for (var b = 1; b <= 16; b++) window['b' + b].textContent = btns[b - 1];
-        }
-
-        function btnClick(e) {
-            if (e.type == 'touchend') e.currentTarget.onclick = undefined;
-            if (matched) return;
-            if (timeInt == undefined) {
-                timeLeft = timeLimit;
-                timeInt = setInterval(updateTime, 10);
-            }
-
-            var b = e.currentTarget;
-            TweenMax.to(b, 0.05, {scale: 0.95, yoyo: true, repeat: 1});
-            
-            if (lastBtn != undefined && lastBtn != b) {
-                if (b.textContent == lastBtn.textContent) {
-                    found++;
-                    matched = true;
-                    timeLeft += 3000;
-                    new TimelineMax({onComplete: populate})
-                        .set('.foundTxt', {textContent: 'Found: ' + found, fontWeight: 500}, 0)
-                        .to('.timePlus', 0.1, {autoAlpha: 1, yoyo: true, repeat: 1, repeatDelay: 0.4}, 0)
-                        .fromTo('.timePlus', 0.3, {scale: 0, rotation: 0.1}, {scale: 1, rotation: 0}, 0)
-                        .to([b, lastBtn], 0.1, {border: '3px solid #08c04d'}, 0)
-                        .to(b, 0.3, {rotation: 1, scale: 0.8, ease: Back.easeIn.config(7), yoyo: true, repeat: 1}, 0)
-                        .to(lastBtn, 0.3, {rotation: 1, scale: 0.8, ease: Back.easeIn.config(7), yoyo: true, repeat: 1}, 0)
-                        .to('.btn', 0.1, {border: '3px solid transparent'}, 0.5);
-                    return;
-                } else {
-                    TweenMax.to(lastBtn, 0.1, {border: '3px solid transparent'});
-                }
-            }
-            TweenMax.to(b, 0.1, {border: '3px solid #006da6'});
-            lastBtn = e.currentTarget;
-        }
-
-        function updateTime() {
-            if (!isTabActive) return; // Don't update time if tab is inactive
-            
-            if (timeLeft > 0) {
-                timeLeft -= 10;
-                var mil = Math.floor(timeLeft % 1000 / 10);
-                var sec = Math.floor(timeLeft / 1000);
-                if (mil < 10) mil = "0" + mil;
-                if (sec < 10) sec = "0" + sec;
-                var t = sec + ":" + mil;
-                TweenMax.set('.timeTxt', {textContent: t});      
-                (msTilHint < 1) ? TweenMax.to(hintBtn, 0.5, {autoAlpha: 1}) : msTilHint -= 10;
-            } else {
-                clearInterval(timeInt);
-                timeInt = undefined;
-                if (found == 0) TweenMax.set('.foundTxt', {textContent: 'Found: 0', fontWeight: 500});
-                TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
-                
-                new TimelineMax()
-                    .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
-                    .to(hintBtn, 0.3, {autoAlpha: 0}, 0)
-                    .to(btnArea, 0.3, {autoAlpha: 0}, 0)
-                    .to('.btn', 0.1, {border: '3px solid transparent'}, 0.3)
-                    .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 2.5, y: 130, ease: Power2.easeInOut}, 0.2)
-                    .to('.end', 0.6, {autoAlpha: 1, ease: Power2.easeInOut}, 0)
-                    .fromTo(replayBtn, 1.0, {rotation: 360, scale: 0}, {scale: 0.6, rotation: 0, ease: Power1.easeInOut}, 0.5)
-                    .call(showNameInput, [], "+=0.5");
-            }
-        }
-
-        function showNameInput() {
-            finalScore.textContent = found;
-            nameForm.style.display = 'block';
-        }
-
-        function saveScore(name, score) {
-            const timestamp = new Date().getTime();
-            database.ref('scores').push({
-                name: name,
-                score: score,
-                timestamp: timestamp
-            });
-        }
-
-        function loadLeaderboard() {
-            database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-                const scores = [];
-                snapshot.forEach((childSnapshot) => {
-                    scores.push(childSnapshot.val());
-                });
-                
-                // Sort by score (descending)
-                scores.sort((a, b) => b.score - a.score);
-                
-                // Clear previous leaderboard
-                leaderboardList.innerHTML = '';
-                
-                // Add entries to leaderboard
-                scores.forEach((entry, index) => {
-                    const li = document.createElement('li');
-                    li.textContent = `${index + 1}. ${entry.name}: ${entry.score} pairs`;
-                    leaderboardList.appendChild(li);
-                });
-            });
-        }
-
-        // Event listeners
-        submitName.addEventListener('click', () => {
-            const name = nameInput.value.trim();
-            if (name) {
-                saveScore(name, found);
-                nameForm.style.display = 'none';
-                loadLeaderboard();
-                leaderboard.style.display = 'block';
-            }
-        });
-
-        viewLeaderboard.addEventListener('click', () => {
-            nameForm.style.display = 'none';
-            loadLeaderboard();
-            leaderboard.style.display = 'block';
-        });
-
-        closeLeaderboard.addEventListener('click', () => {
-            leaderboard.style.display = 'none';
-            if (timeInt === undefined) {
-                // Only reset game if it's not already running
-                resetGame();
-            }
-        });
-
-        replayBtn.onclick = replayBtn.ontouchend = function() {
-            resetGame();
-        }
-
-        function resetGame() {
-            new TimelineMax()      
-                .to(replayBtn, 0.5, {rotation: -180, scale: 0, ease: Back.easeIn.config(3)}, 0)
-                .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 1, y: 0, ease: Power1.easeInOut}, 0.4)
-                .to('.end', 0.3, {autoAlpha: 0}, 0.5)
-                .to(['.timeTxt', btnArea], 0.3, {autoAlpha: 1}, 0.8)      
-                .call(function() {
-                    TweenMax.set('.foundTxt', {textContent: 'Found: 0'});
-                    TweenMax.set('.timeTxt', {textContent: '30:00'});
-                    found = 0;
-                    lastBtn = hint = undefined;        
-                    populate();
-                }, null, null, 0.8);
-        }
-
-        // Handle resize
-        function doResize() {
-            var cw = window.innerWidth;
-            var ch = window.innerHeight;
-            
-            // Adjust button sizes based on screen size
-            var btnSize = Math.min(cw, ch) * 0.15;
-            if (btnSize > 80) btnSize = 80;
-            if (btnSize < 50) btnSize = 50;
-            
-            var fontSize = btnSize * 0.7;
-            
-            TweenMax.set('.btn', {
-                width: btnSize,
-                height: btnSize,
-                fontSize: fontSize,
-                lineHeight: btnSize + 'px'
-            });
-            
-            // Adjust grid gap based on screen size
-            var gridGap = Math.min(cw, ch) * 0.02;
-            if (gridGap < 5) gridGap = 5;
-            TweenMax.set('#btnArea', {gridGap: gridGap + 'px'});
-            
-            // Adjust hint button size
-            var hintBtnSize = btnSize * 0.8;
-            TweenMax.set('#hintBtn', {
-                width: hintBtnSize,
-                height: hintBtnSize,
-                fontSize: hintBtnSize * 0.4,
-                lineHeight: hintBtnSize + 'px'
-            });
-            
-            // Adjust leaderboard button size
-            TweenMax.set('#leaderboardBtn', {
-                width: hintBtnSize,
-                height: hintBtnSize,
-                fontSize: hintBtnSize * 0.4,
-                lineHeight: hintBtnSize + 'px'
-            });
-        }
+function updateTime() {
+    if (!isTabActive) return; // Don't update time if tab is inactive
+    
+    if (timeLeft > 0) {
+        timeLeft -= 10;
+        var mil = Math.floor(timeLeft % 1000 / 10);
+        var sec = Math.floor(timeLeft / 1000);
+        if (mil < 10) mil = "0" + mil;
+        if (sec < 10) sec = "0" + sec;
+        var t = sec + ":" + mil;
+        TweenMax.set('.timeTxt', {textContent: t});      
+        (msTilHint < 1) ? TweenMax.to(hintBtn, 0.5, {autoAlpha: 1}) : msTilHint -= 10;
+    } else {
+        clearInterval(timeInt);
+        timeInt = undefined;
+        if (found == 0) TweenMax.set('.foundTxt', {textContent: 'Found: 0', fontWeight: 500});
+        TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
         
-        doResize();
-        window.addEventListener("resize", doResize);
+        new TimelineMax()
+            .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
+            .to(hintBtn, 0.3, {autoAlpha: 0}, 0)
+            .to(btnArea, 0.3, {autoAlpha: 0}, 0)
+            .to('.btn', 0.1, {border: '3px solid transparent'}, 0.3)
+            .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 2.5, y: 130, ease: Power2.easeInOut}, 0.2)
+            .to('.end', 0.6, {autoAlpha: 1, ease: Power2.easeInOut}, 0)
+            .fromTo(replayBtn, 1.0, {rotation: 360, scale: 0}, {scale: 0.6, rotation: 0, ease: Power1.easeInOut}, 0.5)
+            .call(showNameInput, [], "+=0.5");
+    }
+}
 
-        // Helper Functions
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
+function showNameInput() {
+    finalScore.textContent = found;
+    nameForm.style.display = 'block';
+}
 
-        function rand(min, max) {
-            min = min || 0;
-            max = max || 1;
-            return min + (max - min) * Math.random();
-        }
+function saveScore(name, score) {
+    const timestamp = new Date().getTime();
+    database.ref('scores').push({
+        name: name,
+        score: score,
+        timestamp: timestamp
+    });
+}
+
+function loadLeaderboard() {
+    database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        const scores = [];
+        snapshot.forEach((childSnapshot) => {
+            scores.push(childSnapshot.val());
+        });
+        
+        // Sort by score (descending)
+        scores.sort((a, b) => b.score - a.score);
+        
+        // Clear previous leaderboard
+        leaderboardList.innerHTML = '';
+        
+        // Add entries to leaderboard
+        scores.forEach((entry, index) => {
+            const li = document.createElement('li');
+            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} pairs`;
+            leaderboardList.appendChild(li);
+        });
+    });
+}
+
+// Event listeners
+submitName.addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    if (name) {
+        saveScore(name, found);
+        nameForm.style.display = 'none';
+        loadLeaderboard();
+        leaderboard.style.display = 'block';
+    }
+});
+
+viewLeaderboard.addEventListener('click', () => {
+    nameForm.style.display = 'none';
+    loadLeaderboard();
+    leaderboard.style.display = 'block';
+});
+
+closeLeaderboard.addEventListener('click', () => {
+    leaderboard.style.display = 'none';
+    if (timeInt === undefined) {
+        // Only reset game if it's not already running
+        resetGame();
+    }
+});
+
+replayBtn.onclick = replayBtn.ontouchend = function() {
+    resetGame();
+}
+
+function resetGame() {
+    new TimelineMax()      
+        .to(replayBtn, 0.5, {rotation: -180, scale: 0, ease: Back.easeIn.config(3)}, 0)
+        .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 1, y: 0, ease: Power1.easeInOut}, 0.4)
+        .to('.end', 0.3, {autoAlpha: 0}, 0.5)
+        .to(['.timeTxt', btnArea], 0.3, {autoAlpha: 1}, 0.8)      
+        .call(function() {
+            TweenMax.set('.foundTxt', {textContent: 'Found: 0'});
+            TweenMax.set('.timeTxt', {textContent: '30:00'});
+            found = 0;
+            lastBtn = hint = undefined;        
+            populate();
+        }, null, null, 0.8);
+}
+
+// Handle resize
+function doResize() {
+    var cw = window.innerWidth;
+    var ch = window.innerHeight;
+    
+    // Adjust button sizes based on screen size
+    var btnSize = Math.min(cw, ch) * 0.15;
+    if (btnSize > 80) btnSize = 80;
+    if (btnSize < 50) btnSize = 50;
+    
+    var fontSize = btnSize * 0.7;
+    
+    TweenMax.set('.btn', {
+        width: btnSize,
+        height: btnSize,
+        fontSize: fontSize,
+        lineHeight: btnSize + 'px'
+    });
+    
+    // Adjust grid gap based on screen size
+    var gridGap = Math.min(cw, ch) * 0.02;
+    if (gridGap < 5) gridGap = 5;
+    TweenMax.set('#btnArea', {gridGap: gridGap + 'px'});
+    
+    // Adjust hint button size
+    var hintBtnSize = btnSize * 0.8;
+    TweenMax.set('#hintBtn', {
+        width: hintBtnSize,
+        height: hintBtnSize,
+        fontSize: hintBtnSize * 0.5,
+        lineHeight: hintBtnSize + 'px'
+    });
+    
+    // Adjust leaderboard button size
+    TweenMax.set('#leaderboardBtn', {
+        width: hintBtnSize,
+        height: hintBtnSize,
+        fontSize: hintBtnSize * 0.5,
+        lineHeight: hintBtnSize + 'px'
+    });
+}
+
+doResize();
+window.addEventListener("resize", doResize);
+
+// Helper Functions
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+function rand(min, max) {
+    min = min || 0;
+    max = max || 1;
+    return min + (max - min) * Math.random();
+}
     </script>
 </body>
 </html>
