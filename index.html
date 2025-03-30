@@ -380,6 +380,7 @@ var game = document.getElementById('game'),
     matched = false,
     art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
     found = 0,
+    hintCount = 0, // Track hint usage
     isTabActive = true,
     lastActiveTime = Date.now(),
     lastTabSwitchTime = Date.now(),
@@ -435,6 +436,7 @@ function handleVisibilityChange() {
 hintBtn.onclick = hintBtn.ontouchend = function(e) {
     if (e.type == 'touchend') hintBtn.onclick = undefined;
     TweenMax.set(hintBtn, {textContent: hint, fontSize: 30});
+    hintCount++; // Increment hint counter
 }
 
 leaderboardBtn.onclick = leaderboardBtn.ontouchend = function(e) {
@@ -545,8 +547,10 @@ function saveScore(name, score) {
     database.ref('scores').push({
         name: name,
         score: score,
+        hintsUsed: hintCount, // Save hint count with the score
         timestamp: timestamp
     });
+    hintCount = 0; // Reset hint counter after saving
 }
 
 function loadLeaderboard() {
@@ -562,10 +566,10 @@ function loadLeaderboard() {
         // Clear previous leaderboard
         leaderboardList.innerHTML = '';
         
-        // Add entries to leaderboard
+        // Add entries to leaderboard with hint info
         scores.forEach((entry, index) => {
             const li = document.createElement('li');
-            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} pairs`;
+            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} pairs (Hints: ${entry.hintsUsed || 0})`;
             leaderboardList.appendChild(li);
         });
     });
@@ -610,6 +614,7 @@ function resetGame() {
             TweenMax.set('.foundTxt', {textContent: 'Found: 0'});
             TweenMax.set('.timeTxt', {textContent: '30:00'});
             found = 0;
+            hintCount = 0; // Reset hint counter on game reset
             lastBtn = hint = undefined;        
             populate();
         }, null, null, 0.8);
