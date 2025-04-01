@@ -4,7 +4,18 @@
     <title>Alex's Game World</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Modak&display=swap');
+        
+        :root {
+            --orange: #ff9f1c;
+            --red: #e71d36;
+            --blue: #2ec4b6;
+            --green: #3d7a3b;
+            --dark: #011627;
+            --light: #acbdba;
+            --boxborder: 6px;
+            --ballborder: 12px;
+        }
         
         * {
             box-sizing: border-box;
@@ -14,92 +25,68 @@
         
         body {
             font-family: 'Comic Neue', cursive;
-            padding: 15px;
-            background-color: #323b43;
-            background-image: radial-gradient(circle at 10% 20%, #445566 0%, #223344 90%);
+            background-color: var(--dark);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .anarchy {
+            position: absolute;
+            visibility: hidden;
+            z-index: 10;
         }
         
         h1 {
+            font-family: 'Modak', cursive;
+            font-size: 30px;
+            background-color: var(--orange);
+            border: var(--boxborder) solid var(--dark);
+            padding: 10px;
+            width: 320px;
+            height: 140px;
             text-align: center;
-            margin: 20px 0 30px;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            font-size: 2.5rem;
-            
         }
         
-        .game-buttons {
-            list-style-type: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            padding: 0;
-            perspective: 1000px;
-        }
-        
-        .button__game {
+        .game-button {
             color: #fff;
             font-weight: bold;
             padding: 20px 15px;
-            border-radius: 12px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 10px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            border: var(--boxborder) solid var(--dark);
+        }
+        
+        /* მართკუთხა ღილაკები */
+        .block {
+            border-radius: 12px;
             min-height: 80px;
-            transform: rotate(-3deg);
-            position: relative;
-            overflow: hidden;
+            width: 200px;
         }
         
-        .button__game:nth-child(even) {
-            transform: rotate(2deg);
+        /* წრიული ღილაკები */
+        .ball {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            padding: 10px;
         }
         
-        .button__game:nth-child(3n) {
-            transform: rotate(-1deg);
-        }
-        
-        .button__game:nth-child(5n) {
-            transform: rotate(-4deg);
-        }
-        
-        .button__game::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(45deg, 
-                        rgba(255,255,255,0.1) 0%, 
-                        rgba(255,255,255,0) 50%);
-            transform: rotate(45deg);
-            z-index: 0;
-        }
-        
-        .button__game a {
+        .game-button a {
             color: #fff;
             text-decoration: none;
             display: block;
             width: 100%;
             height: 100%;
-            position: relative;
-            z-index: 1;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
         
-        .button__game:hover {
-            transform: scale(1.05) rotate(0deg) !important;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            animation: wiggle 0.3s ease;
-        }
-        
-        /* Fun colors for buttons */
+        /* ფერები ღილაკებისთვის */
         .game-1 {
             background-color: #0077b5;
             background: linear-gradient(135deg, #0077b5 0%, #00a1f1 100%);
@@ -112,113 +99,315 @@
             background-color: #dc4e41;
             background: linear-gradient(135deg, #dc4e41 0%, #ff6b6b 100%);
         }
-        .coming-soon {
-            background-color: #f39c12;
+        
+        /* სხვადასხვა Coming Soon სტილები */
+        .coming-soon-1 {
             background: linear-gradient(135deg, #f39c12 0%, #f9ca24 100%);
-            pointer-events: none;
+            opacity: 0.8;
+        }
+        .coming-soon-2 {
+            background: linear-gradient(135deg, #9b59b6 0%, #e74c3c 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-3 {
+            background: linear-gradient(135deg, #1abc9c 0%, #2ecc71 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-4 {
+            background: linear-gradient(135deg, #3498db 0%, #9b59b6 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-5 {
+            background: linear-gradient(135deg, #e74c3c 0%, #f39c12 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-6 {
+            background: linear-gradient(135deg, #2ecc71 0%, #3498db 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-7 {
+            background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-8 {
+            background: linear-gradient(135deg, #e67e22 0%, #e74c3c 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-9 {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-10 {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-11 {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-12 {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-13 {
+            background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-14 {
+            background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);
+            opacity: 0.8;
+        }
+        .coming-soon-15 {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             opacity: 0.8;
         }
         
-        /* Animations */
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes wiggle {
-            0%, 100% { transform: scale(1.05) rotate(0deg); }
-            25% { transform: scale(1.05) rotate(2deg); }
-            75% { transform: scale(1.05) rotate(-2deg); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        /* Floating stars decoration */
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        .star {
-            position: absolute;
-            background-color: white;
-            border-radius: 50%;
-            animation: float 3s infinite ease-in-out;
-        }
-        
-        /* Mobile-specific styles */
+        /* მობილურის სტილები (600px-ზე ნაკლები სიგანისთვის) */
         @media (max-width: 600px) {
-            .game-buttons {
-                grid-template-columns: 1fr;
-            }
-            
-            .button__game {
-                padding: 25px 15px;
-                font-size: 20px;
-            }
-            
             h1 {
-                font-size: 2rem;
+                font-size: 24px;
+                width: 200px;
+                height: 100px;
+                padding: 5px;
             }
-        }
-        
-        @media (min-width: 601px) and (max-width: 900px) {
-            .game-buttons {
-                grid-template-columns: repeat(2, 1fr);
+            
+            /* მართკუთხა ღილაკების მობილური ვერსია */
+            .block {
+                width: 150px !important;
+                height: 70px !important;
+                min-height: 70px !important;
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            /* წრიული ღილაკების მობილური ვერსია */
+            .ball {
+                width: 100px !important;
+                height: 100px !important;
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            /* ტექსტის გასწორება წრიულ ღილაკებში */
+            .ball a {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                line-height: 1.2;
             }
         }
     </style>
 </head>
 <body>
-    <h1>Games For Alex </h1>
+    <h1 class="anarchy block prio1">შექმნილია ალექსანდრესთვის</h1>
     
-    <div class="stars" id="stars"></div>
+    <!-- წრიული ღილაკები -->
+    <div class="anarchy ball prio1 game-button game-1">
+        <a href="Findthematchingpair.html">იპოვე ერთნაირი სმაილები</a>
+    </div>
+    <div class="anarchy ball prio1 game-button game-2">
+        <a href="RockPaperScissors.html">ქვა ქაღალდი მაკრატელი</a>
+    </div>
     
-    <ul class="game-buttons">
-        <li class="button__game game-1"><a href="Findthematchingpair.html">იპოვე ერთნაირი სმაილები</a></li>
-        <li class="button__game game-2"><a href="RockPaperScissors.html">ქვა,ქაღალდი,მაკრატელი</a></li>
-        <li class="button__game game-3"><a href="StickHeroGame.html">ნინძა</a></li>
-        <li class="button__game game-3"><a href="circus.html">ცირკი</a></li>
-        <li class="button__game coming-soon">Coming Soon!</li>
-        <li class="button__game coming-soon">Coming Soon!</li>
-        <li class="button__game coming-soon">Coming Soon!</li>
-    </ul>
+    <!-- მართკუთხა ღილაკები -->
+    <div class="anarchy block prio1 game-button game-3">
+        <a href="StickHeroGame.html">ნინძა</a>
+    </div>
+    <div class="anarchy block prio1 game-button game-3">
+        <a href="circus.html">ცირკი</a>
+    </div>
+    
+    <!-- 15 სხვადასხვა Coming Soon ღილაკი -->
+    <div class="anarchy ball prio1 game-button coming-soon-1">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-2">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-3">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-4">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-5">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-6">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-7">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-8">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-9">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-10">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-11">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-12">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-13">
+        Coming Soon!
+    </div>
+    <div class="anarchy block prio1 game-button coming-soon-14">
+        Coming Soon!
+    </div>
+    <div class="anarchy ball prio1 game-button coming-soon-15">
+        Coming Soon!
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.12.0/matter.min.js"></script>
     <script>
-        // Create floating stars
-        const starsContainer = document.getElementById('stars');
-        const starCount = 100;
-        
-        for (let i = 0; i < starCount; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star');
-            
-            // Random properties
-            const size = Math.random() * 4 + 2;
-            const posX = Math.random() * 100;
-            const posY = Math.random() * 100;
-            const opacity = Math.random() * 0.5 + 0.3;
-            const delay = Math.random() * 5;
-            const duration = Math.random() * 3 + 3;
-            
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.left = `${posX}%`;
-            star.style.top = `${posY}%`;
-            star.style.opacity = opacity;
-            star.style.animationDelay = `${delay}s`;
-            star.style.animationDuration = `${duration}s`;
-            
-            starsContainer.appendChild(star);
+        // module aliases
+        var Engine = Matter.Engine,
+            Render = Matter.Render,
+            World = Matter.World,
+            Body = Matter.Body,
+            Bodies = Matter.Bodies;
+
+        var worldW = window.innerWidth;
+        var worldH = window.innerHeight;
+
+        var engine;
+        var render;
+
+        // bodies
+        var blocks = [];
+        var walls = [];
+        var ground;
+
+        // DOM elements
+        var hBlocks = document.getElementsByClassName("anarchy");
+
+        var pageWidth = 0;
+
+        window.onload = function() {
+            pageWidth = window.innerWidth;
+        };
+
+        window.onresize = function() {
+            var newpageWidth = window.innerWidth;
+            if (newpageWidth < pageWidth) {
+                for (var i = 0; i < blocks.length; i++) {
+                    Body.setPosition(blocks[i].body, {
+                        x: newpageWidth / 2,
+                        y: window.innerHeight + 500 + 50 * i
+                    });
+                }
+            }
+            pageWidth = newpageWidth;
+        };
+
+        function Box(x, y, w, h) {
+            var options = {
+                density: 0.00005,
+                friction: 0.5,
+                restitution: 0.3,
+                chamfer: { radius: hBlocks[blocks.length].classList.contains("ball") ? 50 : 12 }
+            };
+            this.body = Bodies.rectangle(x, y, w, h, options);
+            xVel = 10 * Math.random() - 5;
+            Body.setVelocity(this.body, { x: xVel, y: 0 });
+            World.add(engine.world, [this.body]);
         }
+
+        function setup() {
+            engine = Engine.create();
+            engine.world.gravity.y = -0.5;
+
+            render = Render.create({
+                element: document.body,
+                engine: engine,
+                options: {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    wireframes: false,
+                    background: 'transparent',
+                    showAngleIndicator: false
+                }
+            });
+            
+            // Make renderer transparent
+            render.canvas.style.display = 'none';
+            
+            Render.run(render);
+            
+            // Create all the physics bodies for our elements
+            for (var i = 0; i < hBlocks.length; i++) {
+                var startHeight = window.innerHeight;
+                if (hBlocks[i].classList.contains("prio1")) {
+                    startHeight += 500;
+                } else if (hBlocks[i].classList.contains("prio2")) {
+                    startHeight += 1500;
+                } else if (hBlocks[i].classList.contains("prio3")) {
+                    startHeight += 2500;
+                } else if (hBlocks[i].classList.contains("prio4")) {
+                    startHeight += 3500;
+                } else if (hBlocks[i].classList.contains("prio5")) {
+                    startHeight += 4500;
+                } else if (hBlocks[i].classList.contains("prio6")) {
+                    startHeight += 5500;
+                } else {
+                    startHeight += 6500;
+                }
+                
+                blocks.push(
+                    new Box(
+                        window.innerWidth / 2,
+                        startHeight,
+                        hBlocks[i].offsetWidth,
+                        hBlocks[i].offsetHeight
+                    )
+                );
+            }
+            
+            // Create boundaries
+            ground = Bodies.rectangle(10000, -50, 20000, 100, { isStatic: true });
+            ceiling = Bodies.rectangle(10000, 40050, 20000, 100, { isStatic: true });
+            walls[0] = Bodies.rectangle(-50, 20000, 100, 40000, { isStatic: true });
+            walls[1] = Bodies.rectangle(window.innerWidth + 50, 20000, 100, 40000, {
+                isStatic: true
+            });
+        }
+
+        function draw() {
+            World.add(engine.world, [ground, ceiling, walls[0], walls[1]]);
+        }
+
+        setup();
+        draw();
+
+        // Animation loop
+        (function render() {
+            Engine.update(engine, 20);
+            Body.setPosition(walls[1], { x: document.body.clientWidth + 50, y: 0 });
+            
+            for (var i = 0; i < blocks.length; i++) {
+                var xTrans = blocks[i].body.position.x - hBlocks[i].offsetWidth / 2;
+                var yTrans = blocks[i].body.position.y - hBlocks[i].offsetHeight / 2;
+                
+                hBlocks[i].style.transform =
+                    "translate(" +
+                    xTrans +
+                    "px, " +
+                    yTrans +
+                    "px) rotate(" +
+                    blocks[i].body.angle +
+                    "rad)";
+                hBlocks[i].style.visibility = "visible";
+            }
+            
+            window.requestAnimationFrame(render);
+        })();
     </script>
 </body>
 </html>
