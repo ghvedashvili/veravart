@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Game Links</title>
+    <title>Alex's Game World</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -11,38 +13,73 @@
         }
         
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Comic Neue', cursive;
             padding: 15px;
-           background-color: #323b43;
+            background-color: #323b43;
+            background-image: radial-gradient(circle at 10% 20%, #445566 0%, #223344 90%);
+            min-height: 100vh;
         }
         
         h1 {
             text-align: center;
-            margin-bottom: 20px;
+            margin: 20px 0 30px;
             color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 2.5rem;
+            
         }
         
         .game-buttons {
             list-style-type: none;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
             padding: 0;
+            perspective: 1000px;
         }
         
         .button__game {
             color: #fff;
             font-weight: bold;
-            padding: 15px 10px;
-            border-radius: 8px;
+            padding: 20px 15px;
+            border-radius: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 60px;
+            min-height: 80px;
+            transform: rotate(-3deg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .button__game:nth-child(even) {
+            transform: rotate(2deg);
+        }
+        
+        .button__game:nth-child(3n) {
+            transform: rotate(-1deg);
+        }
+        
+        .button__game:nth-child(5n) {
+            transform: rotate(-4deg);
+        }
+        
+        .button__game::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, 
+                        rgba(255,255,255,0.1) 0%, 
+                        rgba(255,255,255,0) 50%);
+            transform: rotate(45deg);
+            z-index: 0;
         }
         
         .button__game a {
@@ -51,27 +88,70 @@
             display: block;
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 1;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
         
         .button__game:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: scale(1.05) rotate(0deg) !important;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            animation: wiggle 0.3s ease;
         }
         
         /* Fun colors for buttons */
         .game-1 {
-            background-color: #0077b5; /* Red */
+            background-color: #0077b5;
+            background: linear-gradient(135deg, #0077b5 0%, #00a1f1 100%);
         }
         .game-2 {
-            background-color: #ff6600; /* Blue */
+            background-color: #ff6600;
+            background: linear-gradient(135deg, #ff6600 0%, #ff9933 100%);
         }
         .game-3 {
-            background-color: #dc4e41; /* Green */
+            background-color: #dc4e41;
+            background: linear-gradient(135deg, #dc4e41 0%, #ff6b6b 100%);
         }
         .coming-soon {
-            background-color: #f39c12; /* Orange */
+            background-color: #f39c12;
+            background: linear-gradient(135deg, #f39c12 0%, #f9ca24 100%);
             pointer-events: none;
-            opacity: 0.7;
+            opacity: 0.8;
+        }
+        
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes wiggle {
+            0%, 100% { transform: scale(1.05) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(2deg); }
+            75% { transform: scale(1.05) rotate(-2deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        /* Floating stars decoration */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: float 3s infinite ease-in-out;
         }
         
         /* Mobile-specific styles */
@@ -81,8 +161,12 @@
             }
             
             .button__game {
-                padding: 20px 10px;
-                font-size: 18px;
+                padding: 25px 15px;
+                font-size: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
             }
         }
         
@@ -94,16 +178,47 @@
     </style>
 </head>
 <body>
-    <h1>Game For Alex</h1>
+    <h1>Games For Alex </h1>
+    
+    <div class="stars" id="stars"></div>
     
     <ul class="game-buttons">
         <li class="button__game game-1"><a href="Findthematchingpair.html">Find the Matching Pair</a></li>
         <li class="button__game game-2"><a href="RockPaperScissors.html">Rock-Paper-Scissors</a></li>
         <li class="button__game game-3"><a href="StickHeroGame.html">Stick Hero Game</a></li>
-        <li class="button__game coming-soon">Coming Soon</li>
-        <li class="button__game coming-soon">Coming Soon</li>
-        <li class="button__game coming-soon">Coming Soon</li>
-        <li class="button__game coming-soon">Coming Soon</li>
+        <li class="button__game coming-soon">Coming Soon!</li>
+        <li class="button__game coming-soon">Coming Soon!</li>
+        <li class="button__game coming-soon">Coming Soon!</li>
+        <li class="button__game coming-soon">Coming Soon!</li>
     </ul>
+
+    <script>
+        // Create floating stars
+        const starsContainer = document.getElementById('stars');
+        const starCount = 100;
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            // Random properties
+            const size = Math.random() * 4 + 2;
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100;
+            const opacity = Math.random() * 0.5 + 0.3;
+            const delay = Math.random() * 5;
+            const duration = Math.random() * 3 + 3;
+            
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${posX}%`;
+            star.style.top = `${posY}%`;
+            star.style.opacity = opacity;
+            star.style.animationDelay = `${delay}s`;
+            star.style.animationDuration = `${duration}s`;
+            
+            starsContainer.appendChild(star);
+        }
+    </script>
 </body>
 </html>
