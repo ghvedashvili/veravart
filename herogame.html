@@ -447,7 +447,7 @@ function generatePlatform() {
 }
 
 function saveScore(name, score) {
-  const scoresRef = database.ref('scores');
+  const scoresRef = database.ref('hero');
   const newScoreRef = scoresRef.push();
   newScoreRef.set({
     name: name,
