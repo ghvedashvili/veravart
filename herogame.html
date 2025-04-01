@@ -366,8 +366,8 @@ const walkingSpeed = 4;
 const transitioningSpeed = 2;
 const fallingSpeed = 2;
 
-let heroWidth = 17; // 24
-let heroHeight = 30; // 40
+const heroWidth = 17; // 24
+const heroHeight = 30; // 40
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -488,7 +488,7 @@ function generatePlatform() {
 
 // Save score to Firebase
 function saveScore(name, score) {
-  const scoresRef = database.ref('hero');
+  const scoresRef = database.ref('scores');
   const newScoreRef = scoresRef.push();
   newScoreRef.set({
     name: name,
@@ -501,8 +501,8 @@ function saveScore(name, score) {
 
 // Load leaderboard data
 function loadLeaderboard() {
-  const scoresRef = database.ref('hero');
-  scoresRef.orderByChild('hero').limitToLast(10).once('value', (snapshot) => {
+  const scoresRef = database.ref('scores');
+  scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
     const scores = [];
     snapshot.forEach((childSnapshot) => {
       scores.push(childSnapshot.val());
@@ -545,8 +545,6 @@ function showScoreForm() {
 
 // Show leaderboard modal
 function showLeaderboard() {
-  // Prevent game from starting when clicking leaderboard
-  event.stopPropagation();
   loadLeaderboard();
   leaderboardModal.style.display = 'flex';
 }
@@ -568,10 +566,7 @@ submitScoreButton.addEventListener("click", function() {
   }
 });
 
-showLeaderboardButton.addEventListener("click", function(event) {
-  showLeaderboard(event);
-});
-
+showLeaderboardButton.addEventListener("click", showLeaderboard);
 closeLeaderboardButton.addEventListener("click", hideLeaderboard);
 
 // If space was pressed restart the game
@@ -591,11 +586,6 @@ window.addEventListener("mouseup", stopStretching);
 window.addEventListener("touchend", stopStretching, { passive: false });
 
 function startStretching(event) {
-  // Don't start game if clicking on leaderboard or other UI elements
-  if (event.target.tagName === 'BUTTON' || event.target.id === 'leaderboard-modal') {
-    return;
-  }
-  
   if (event.type === "touchstart") {
     event.preventDefault(); // Prevent scrolling on mobile
   }
