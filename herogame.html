@@ -2,35 +2,10 @@
 <html>
 <head>
 <title>Stick Hero Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <!-- Add Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-</head>
-<body>
-<div class="container">
-  <div id="score"></div>
-  <canvas id="game"></canvas>
-  <div id="introduction">Tap and hold to stretch out a stick</div>
-  <div id="perfect">DOUBLE SCORE</div>
-  <button id="restart">RESTART</button>
-  
-  <!-- Score submission form (hidden initially) -->
-  <div id="score-form" style="display: none; position: absolute; background: white; padding: 20px; border-radius: 10px; text-align: center;">
-    <h3>Game Over!</h3>
-    <p>Your score: <span id="final-score"></span></p>
-    <input type="text" id="player-name" placeholder="Enter your name" style="padding: 8px; margin: 10px 0; width: 80%;">
-    <button id="submit-score" style="padding: 8px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px;">Submit Score</button>
-  </div>
-</div>
-
-<a id="youtube" href="https://youtu.be/eue3UdFvwPo" target="_top">
-  <span>See how this game was made</span>
-</a>
-<div id="youtube-card">
-  How to create a Stick Hero game with JavaScript and HTML Canvas
-</div>
-
-</body>
 <style>
 html,
 body {
@@ -43,12 +18,12 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  overflow: hidden;
 }
 
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   cursor: pointer;
-  overflow: hidden;
 }
 
 .container {
@@ -66,18 +41,26 @@ body {
   font-size: 2em;
   font-weight: 900;
   z-index: 10;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 #introduction {
-  width: 200px;
-  height: 150px;
+  width: 80%;
+  max-width: 300px;
+  height: auto;
   position: absolute;
   font-weight: 600;
-  font-size: 0.8em;
+  font-size: 1.2em;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   transition: opacity 2s;
   z-index: 10;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
 }
 
 #restart {
@@ -94,6 +77,7 @@ body {
   display: none;
   cursor: pointer;
   z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 #perfect {
@@ -101,76 +85,138 @@ body {
   opacity: 0;
   transition: opacity 2s;
   z-index: 10;
+  font-size: 2em;
+  font-weight: bold;
+  color: gold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-#youtube,
-#youtube-card {
+/* Score submission form */
+#score-form {
   display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  z-index: 100;
+  width: 80%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-@media (min-height: 425px) {
-  /** Youtube logo by https://codepen.io/alvaromontoro */
-  #youtube {
-    z-index: 2;
-    display: block;
-    width: 100px;
-    height: 70px;
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    background: red;
-    border-radius: 50% / 11%;
-    transform: scale(0.8);
-    transition: transform 0.5s;
-  }
+#score-form h3 {
+  margin-top: 0;
+  color: #333;
+}
 
-  #youtube:hover,
-  #youtube:focus {
-    transform: scale(0.9);
-  }
+#final-score {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #4CAF50;
+}
 
-  #youtube::before {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 7.5%;
-    left: -6%;
-    width: 112%;
-    height: 85%;
-    background: red;
-    border-radius: 9% / 50%;
-  }
+#player-name {
+  padding: 12px;
+  margin: 15px 0;
+  width: 80%;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+}
 
-  #youtube::after {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 20px;
-    left: 40px;
-    width: 45px;
-    height: 30px;
-    border: 15px solid transparent;
-    box-sizing: border-box;
-    border-left: 30px solid white;
-  }
+#submit-score {
+  padding: 12px 25px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.3s;
+}
 
-  #youtube span {
-    font-size: 0;
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-  }
+#submit-score:hover {
+  background: #45a049;
+}
 
-  #youtube:hover + #youtube-card {
-    display: block;
-    position: absolute;
-    bottom: 12px;
-    left: 10px;
-    padding: 25px 25px 25px 130px;
-    width: 300px;
-    background-color: white;
-  }
+/* Leaderboard modal */
+#leaderboard-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+#leaderboard-content {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#leaderboard-content h2 {
+  margin-top: 0;
+  color: #333;
+  text-align: center;
+}
+
+#leaderboard-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+#leaderboard-list li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+}
+
+#leaderboard-list li:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+#leaderboard-list li span:first-child {
+  font-weight: bold;
+}
+
+#close-leaderboard {
+  padding: 10px 20px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+#show-leaderboard {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 15px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 1em;
 }
 
 /* Mobile specific styles */
@@ -182,20 +228,65 @@ body {
   }
   
   #score {
-    font-size: 1.5em;
+    font-size: 1.8em;
     top: 15px;
     right: 15px;
   }
   
   #introduction {
-    font-size: 0.7em;
-    width: 180px;
+    font-size: 1.1em;
+    width: 80%;
+  }
+  
+  #perfect {
+    font-size: 1.8em;
+  }
+  
+  #player-name {
+    font-size: 16px;
+    padding: 10px;
+  }
+  
+  #submit-score {
+    padding: 10px 20px;
+  }
+  
+  #show-leaderboard {
+    padding: 8px 12px;
+    font-size: 0.9em;
   }
 }
-
 </style>
+</head>
+<body>
+<div class="container">
+  <div id="score">0</div>
+  <canvas id="game"></canvas>
+  <div id="introduction">Tap and hold to stretch out a stick</div>
+  <div id="perfect">DOUBLE SCORE</div>
+  <button id="restart">RESTART</button>
+  <button id="show-leaderboard">Leaderboard</button>
+  
+  <!-- Score submission form -->
+  <div id="score-form">
+    <h3>Game Over!</h3>
+    <p>Your score: <span id="final-score">0</span></p>
+    <input type="text" id="player-name" placeholder="Enter your name">
+    <button id="submit-score">Submit Score</button>
+  </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div id="leaderboard-modal">
+  <div id="leaderboard-content">
+    <h2>Top Scores</h2>
+    <ul id="leaderboard-list"></ul>
+    <button id="close-leaderboard">Close</button>
+  </div>
+</div>
+
 <script>
-// Firebase configuration - REPLACE WITH YOUR ACTUAL CONFIG
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
     authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
@@ -258,12 +349,14 @@ const walkingSpeed = 4;
 const transitioningSpeed = 2;
 const fallingSpeed = 2;
 
-const heroWidth = 17; // 24
-const heroHeight = 30; // 40
+// Hero dimensions - will be adjusted for mobile
+let heroWidth = 17;
+let heroHeight = 30;
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+// UI Elements
 const introductionElement = document.getElementById("introduction");
 const perfectElement = document.getElementById("perfect");
 const restartButton = document.getElementById("restart");
@@ -272,24 +365,41 @@ const scoreForm = document.getElementById("score-form");
 const finalScoreElement = document.getElementById("final-score");
 const playerNameInput = document.getElementById("player-name");
 const submitScoreButton = document.getElementById("submit-score");
+const leaderboardModal = document.getElementById("leaderboard-modal");
+const leaderboardList = document.getElementById("leaderboard-list");
+const showLeaderboardButton = document.getElementById("show-leaderboard");
+const closeLeaderboardButton = document.getElementById("close-leaderboard");
 
-// Adjust canvas size for mobile
-function adjustCanvasSize() {
+// Adjust canvas size and game elements for mobile
+function adjustForMobile() {
   const isMobile = window.innerWidth <= 768;
-  canvasWidth = isMobile ? window.innerWidth : 375;
-  canvasHeight = isMobile ? window.innerHeight : 375;
+  
+  if (isMobile) {
+    // Larger dimensions for mobile
+    heroWidth = 25;
+    heroHeight = 45;
+    
+    // Adjust canvas size to fit screen
+    canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+  } else {
+    // Default dimensions for desktop
+    heroWidth = 17;
+    heroHeight = 30;
+    canvasWidth = 375;
+    canvasHeight = 375;
+  }
   
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
 
 // Initialize layout
-adjustCanvasSize();
+adjustForMobile();
 resetGame();
 
-// Resets game variables and layouts but does not start the game (game starts on keypress)
+// Resets game variables and layouts
 function resetGame() {
-  // Reset game progress
   phase = "waiting";
   lastTimestamp = undefined;
   sceneOffset = 0;
@@ -301,8 +411,7 @@ function resetGame() {
   scoreForm.style.display = "none";
   scoreElement.innerText = score;
 
-  // The first platform is always the same
-  // x + w has to match paddingX
+  // Initial platforms
   platforms = [{ x: 50, w: 50 }];
   generatePlatform();
   generatePlatform();
@@ -311,17 +420,11 @@ function resetGame() {
 
   sticks = [{ x: platforms[0].x + platforms[0].w, length: 0, rotation: 0 }];
 
+  // Generate trees
   trees = [];
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
-  generateTree();
+  for (let i = 0; i < 10; i++) {
+    generateTree();
+  }
 
   heroX = platforms[0].x + platforms[0].w - heroDistanceFromEdge;
   heroY = 0;
@@ -333,15 +436,10 @@ function generateTree() {
   const minimumGap = 30;
   const maximumGap = 150;
 
-  // X coordinate of the right edge of the furthest tree
   const lastTree = trees[trees.length - 1];
   let furthestX = lastTree ? lastTree.x : 0;
 
-  const x =
-    furthestX +
-    minimumGap +
-    Math.floor(Math.random() * (maximumGap - minimumGap));
-
+  const x = furthestX + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap));
   const treeColors = ["#6D8821", "#8FAC34", "#98B333"];
   const color = treeColors[Math.floor(Math.random() * 3)];
 
@@ -354,16 +452,11 @@ function generatePlatform() {
   const minimumWidth = 20;
   const maximumWidth = 100;
 
-  // X coordinate of the right edge of the furthest platform
   const lastPlatform = platforms[platforms.length - 1];
   let furthestX = lastPlatform.x + lastPlatform.w;
 
-  const x =
-    furthestX +
-    minimumGap +
-    Math.floor(Math.random() * (maximumGap - minimumGap));
-  const w =
-    minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
+  const x = furthestX + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap));
+  const w = minimumWidth + Math.floor(Math.random() * (maximumWidth - minimumWidth));
 
   platforms.push({ x, w });
 }
@@ -376,13 +469,59 @@ function saveScore(name, score) {
     name: name,
     score: score,
     timestamp: firebase.database.ServerValue.TIMESTAMP
+  }).then(() => {
+    loadLeaderboard();
+  });
+}
+
+// Load leaderboard data
+function loadLeaderboard() {
+  const scoresRef = database.ref('hero');
+  scoresRef.orderByChild('hero').limitToLast(10).once('value', (snapshot) => {
+    const scores = [];
+    snapshot.forEach((childSnapshot) => {
+      scores.push(childSnapshot.val());
+    });
+    
+    // Sort in descending order
+    scores.sort((a, b) => b.score - a.score);
+    updateLeaderboardUI(scores);
+  });
+}
+
+// Update leaderboard UI
+function updateLeaderboardUI(scores) {
+  leaderboardList.innerHTML = '';
+  
+  if (scores.length === 0) {
+    leaderboardList.innerHTML = '<li>No scores yet</li>';
+    return;
+  }
+  
+  scores.forEach((score, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${index + 1}. ${score.name}</span><span>${score.score}</span>`;
+    leaderboardList.appendChild(li);
   });
 }
 
 // Show score submission form
 function showScoreForm() {
   finalScoreElement.textContent = score;
-  scoreForm.style.display = "block";
+  scoreForm.style.display = 'block';
+  playerNameInput.focus();
+}
+
+// Show leaderboard modal
+function showLeaderboard(event) {
+  if (event) event.stopPropagation();
+  loadLeaderboard();
+  leaderboardModal.style.display = 'flex';
+}
+
+// Hide leaderboard modal
+function hideLeaderboard() {
+  leaderboardModal.style.display = 'none';
 }
 
 // Event listeners
@@ -397,27 +536,36 @@ submitScoreButton.addEventListener("click", function() {
   }
 });
 
-// If space was pressed restart the game
+showLeaderboardButton.addEventListener("click", showLeaderboard);
+closeLeaderboardButton.addEventListener("click", hideLeaderboard);
+
+// Keyboard control
 window.addEventListener("keydown", function (event) {
   if (event.key == " ") {
     event.preventDefault();
     resetGame();
-    return;
   }
 });
 
 // Mouse and touch event listeners
 window.addEventListener("mousedown", startStretching);
-window.addEventListener("touchstart", startStretching);
+window.addEventListener("touchstart", function(event) {
+  // Only start game if tapping on canvas, not UI elements
+  if (event.target === canvas) {
+    event.preventDefault();
+    startStretching(event);
+  }
+}, { passive: false });
 
 window.addEventListener("mouseup", stopStretching);
-window.addEventListener("touchend", stopStretching);
+window.addEventListener("touchend", function(event) {
+  if (phase === "stretching") {
+    event.preventDefault();
+    stopStretching(event);
+  }
+}, { passive: false });
 
 function startStretching(event) {
-  if (event.type === "touchstart") {
-    event.preventDefault(); // Prevent scrolling on mobile
-  }
-  
   if (phase == "waiting") {
     lastTimestamp = undefined;
     introductionElement.style.opacity = 0;
@@ -427,20 +575,17 @@ function startStretching(event) {
 }
 
 function stopStretching(event) {
-  if (event.type === "touchend") {
-    event.preventDefault(); // Prevent scrolling on mobile
-  }
-  
   if (phase == "stretching") {
     phase = "turning";
   }
 }
 
-window.addEventListener("resize", function (event) {
-  adjustCanvasSize();
+window.addEventListener("resize", function() {
+  adjustForMobile();
   draw();
 });
 
+// Initialize the game loop
 window.requestAnimationFrame(animate);
 
 // The main game loop
@@ -453,7 +598,7 @@ function animate(timestamp) {
 
   switch (phase) {
     case "waiting":
-      return; // Stop the loop
+      return;
     case "stretching": {
       sticks.last().length += (timestamp - lastTimestamp) / stretchingSpeed;
       break;
@@ -466,13 +611,12 @@ function animate(timestamp) {
 
         const [nextPlatform, perfectHit] = thePlatformTheStickHits();
         if (nextPlatform) {
-          // Increase score
           score += perfectHit ? 2 : 1;
           scoreElement.innerText = score;
 
           if (perfectHit) {
             perfectElement.style.opacity = 1;
-            setTimeout(() => (perfectElement.style.opacity = 0), 1000);
+            setTimeout(() => perfectElement.style.opacity = 0, 1000);
           }
 
           generatePlatform();
@@ -489,14 +633,12 @@ function animate(timestamp) {
 
       const [nextPlatform] = thePlatformTheStickHits();
       if (nextPlatform) {
-        // If hero will reach another platform then limit it's position at it's edge
         const maxHeroX = nextPlatform.x + nextPlatform.w - heroDistanceFromEdge;
         if (heroX > maxHeroX) {
           heroX = maxHeroX;
           phase = "transitioning";
         }
       } else {
-        // If hero won't reach another platform then limit it's position at the end of the pole
         const maxHeroX = sticks.last().x + sticks.last().length + heroWidth;
         if (heroX > maxHeroX) {
           heroX = maxHeroX;
@@ -510,7 +652,6 @@ function animate(timestamp) {
 
       const [nextPlatform] = thePlatformTheStickHits();
       if (sceneOffset > nextPlatform.x + nextPlatform.w - paddingX) {
-        // Add the next step
         sticks.push({
           x: nextPlatform.x + nextPlatform.w,
           length: 0,
@@ -525,25 +666,21 @@ function animate(timestamp) {
         sticks.last().rotation += (timestamp - lastTimestamp) / turningSpeed;
 
       heroY += (timestamp - lastTimestamp) / fallingSpeed;
-      const maxHeroY =
-        platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
+      const maxHeroY = platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
       if (heroY > maxHeroY) {
         showScoreForm();
         return;
       }
       break;
     }
-    default:
-      throw Error("Wrong phase");
   }
 
   draw();
   window.requestAnimationFrame(animate);
-
   lastTimestamp = timestamp;
 }
 
-// Returns the platform the stick hit (if it didn't hit any stick then return undefined)
+// Returns the platform the stick hit
 function thePlatformTheStickHits() {
   if (sticks.last().rotation != 90)
     throw Error(`Stick is ${sticks.last().rotation}°`);
@@ -553,14 +690,10 @@ function thePlatformTheStickHits() {
     (platform) => platform.x < stickFarX && stickFarX < platform.x + platform.w
   );
 
-  // If the stick hits the perfect area
-  if (
-    platformTheStickHits &&
-    platformTheStickHits.x + platformTheStickHits.w / 2 - perfectAreaSize / 2 <
-      stickFarX &&
-    stickFarX <
-      platformTheStickHits.x + platformTheStickHits.w / 2 + perfectAreaSize / 2
-  )
+  // Check for perfect hit
+  if (platformTheStickHits &&
+      platformTheStickHits.x + platformTheStickHits.w / 2 - perfectAreaSize / 2 < stickFarX &&
+      stickFarX < platformTheStickHits.x + platformTheStickHits.w / 2 + perfectAreaSize / 2)
     return [platformTheStickHits, true];
 
   return [platformTheStickHits, false];
@@ -572,23 +705,20 @@ function draw() {
 
   drawBackground();
 
-  // Center main canvas area to the middle of the screen
+  // Center main canvas area
   ctx.translate(
     (window.innerWidth - canvasWidth) / 2 - sceneOffset,
     (window.innerHeight - canvasHeight) / 2
   );
 
-  // Draw scene
   drawPlatforms();
   drawHero();
   drawSticks();
 
-  // Restore transformation
   ctx.restore();
 }
 
-restartButton.addEventListener("click", function (event) {
-  event.preventDefault();
+restartButton.addEventListener("click", function() {
   resetGame();
 });
 
@@ -603,7 +733,7 @@ function drawPlatforms() {
       platformHeight + (window.innerHeight - canvasHeight) / 2
     );
 
-    // Draw perfect area only if hero did not yet reach the platform
+    // Draw perfect area
     if (sticks.last().x < x) {
       ctx.fillStyle = "red";
       ctx.fillRect(
@@ -619,10 +749,12 @@ function drawPlatforms() {
 function drawHero() {
   ctx.save();
   ctx.fillStyle = "black";
-  ctx.translate(
-    heroX - heroWidth / 2,
-    heroY + canvasHeight - platformHeight - heroHeight / 2
-  );
+  
+  // Adjust position for mobile scaling
+  const drawX = heroX - heroWidth / 2;
+  const drawY = heroY + canvasHeight - platformHeight - heroHeight / 2;
+  
+  ctx.translate(drawX, drawY);
 
   // Body
   drawRoundedRect(
@@ -682,8 +814,6 @@ function drawRoundedRect(x, y, width, height, radius) {
 function drawSticks() {
   sticks.forEach((stick) => {
     ctx.save();
-
-    // Move the anchor point to the start of the stick and rotate
     ctx.translate(stick.x, canvasHeight - platformHeight);
     ctx.rotate((Math.PI / 180) * stick.rotation);
 
@@ -694,7 +824,6 @@ function drawSticks() {
     ctx.lineTo(0, -stick.length);
     ctx.stroke();
 
-    // Restore transformations
     ctx.restore();
   });
 }
@@ -715,7 +844,6 @@ function drawBackground() {
   trees.forEach((tree) => drawTree(tree.x, tree.color));
 }
 
-// A hill is a shape under a stretched out sinus wave
 function drawHill(baseHeight, amplitude, stretch, color) {
   ctx.beginPath();
   ctx.moveTo(0, window.innerHeight);
@@ -773,6 +901,5 @@ function getTreeY(x, baseHeight, amplitude) {
   const sineBaseY = window.innerHeight - baseHeight;
   return Math.sinus(x) * amplitude + sineBaseY;
 }
-
 </script>
 </html>
