@@ -513,6 +513,31 @@ button:hover {
     padding: 40px;
   }
 }
+  #icons > div {
+  position: relative;
+  touch-action: manipulation;
+}
+
+label {
+  /* Keep existing styles but add: */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Increase tap target size on mobile */
+@media (max-width: 767px) {
+  #icons > div {
+    width: 80px;
+    height: 80px;
+  }
+  
+  label {
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    font-size: 2.5rem;
+  }
+}
 </style>
 
 </head>
@@ -593,203 +618,236 @@ button:hover {
 
 <script>
   // Initialize Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
-    authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
-    databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
-    projectId: "newspaperveravart",
-    storageBucket: "newspaperveravart.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:1234567890abcdef"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+  authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+  databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+  projectId: "newspaperveravart",
+  storageBucket: "newspaperveravart.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:1234567890abcdef"
+};
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-  const scoresRef = database.ref('score2');
-  const statsRef = database.ref('stats');
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const scoresRef = database.ref('score2');
+const statsRef = database.ref('stats');
 
-  // Game state
-  let gameState = {
-    playerScore: 0,
-    computerScore: 0,
-    gameActive: true,
-    maxScore: 3,  // Changed to 3 as requested
-    roundActive: false,
-    playerWins: 0,
-    computerWins: 0
-  };
+// Game state
+let gameState = {
+  playerScore: 0,
+  computerScore: 0,
+  gameActive: true,
+  maxScore: 3,
+  roundActive: false,
+  playerWins: 0,
+  computerWins: 0
+};
 
-  // DOM elements
-  const scoreDisplay = document.getElementById('score-display');
-  const gameOverDiv = document.getElementById('game-over');
-  const finalResult = document.getElementById('final-result');
-  const playAgainBtn = document.getElementById('play-again-btn');
-  const overallScoreDisplay = document.getElementById('overall-score');
-  const iconsContainer = document.getElementById('icons');
-  const labels = document.querySelectorAll('#icons label');
+// DOM elements
+const scoreDisplay = document.getElementById('score-display');
+const gameOverDiv = document.getElementById('game-over');
+const finalResult = document.getElementById('final-result');
+const playAgainBtn = document.getElementById('play-again-btn');
+const overallScoreDisplay = document.getElementById('overall-score');
+const iconsContainer = document.getElementById('icons');
+const labels = document.querySelectorAll('#icons label');
 
-  // Load overall stats
-  function loadOverallStats() {
-    statsRef.once('value', (snapshot) => {
-      const stats = snapshot.val() || { playerWins: 0, computerWins: 0 };
-      gameState.playerWins = stats.playerWins || 0;
-      gameState.computerWins = stats.computerWins || 0;
-      updateOverallScore();
-    });
-  }
-
-  // Update overall score display
-  function updateOverallScore() {
-    overallScoreDisplay.textContent = `${gameState.playerWins} - ${gameState.computerWins}`;
-  }
-
-  // Update score display
-  function updateScoreDisplay() {
-    scoreDisplay.textContent = `Score: You ${gameState.playerScore} - ${gameState.computerScore} Computer`;
-  }
-
-  // Reset selections after 2 seconds
-  function resetAfterDelay() {
-    setTimeout(() => {
-      resetSelections();
-      checkGameEnd();
-      gameState.roundActive = false;
-      enableChoices();
-    }, 2000);
-  }
-
-  // Reset radio buttons
-  function resetSelections() {
-    const radios = document.querySelectorAll('input[type="radio"]');
-    radios.forEach(radio => radio.checked = false);
-  }
-
-  // Disable choices during round
-  function disableChoices() {
-    iconsContainer.classList.add('disabled');
-  }
-
-  // Enable choices after round
-  function enableChoices() {
-    iconsContainer.classList.remove('disabled');
-  }
-
-  // Check if game should end
-  function checkGameEnd() {
-    if (gameState.playerScore >= gameState.maxScore || gameState.computerScore >= gameState.maxScore) {
-      handleGameOver();
-    }
-  }
-
-  // Handle game over
-  function handleGameOver() {
-    gameState.gameActive = false;
+// Add touch event support
+function setupTouchEvents() {
+  labels.forEach(label => {
+    // Add both click and touch events
+    label.addEventListener('click', handleChoice);
+    label.addEventListener('touchend', handleChoice);
     
-    // Determine winner
-    let resultMessage;
-    if (gameState.playerScore > gameState.computerScore) {
-      resultMessage = `You won ${gameState.playerScore}-${gameState.computerScore}!`;
-      gameState.playerWins++;
-    } else {
-      resultMessage = `Computer won ${gameState.computerScore}-${gameState.playerScore}!`;
-      gameState.computerWins++;
-    }
-    
-    finalResult.textContent = resultMessage;
-    gameOverDiv.style.display = 'block';
-    
-    // Save stats to Firebase
-    saveStats();
+    // Prevent default touch behavior
+    label.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+  });
+}
+
+function handleChoice(e) {
+  e.preventDefault();
+  if (!gameState.gameActive || gameState.roundActive) return;
+  
+  const label = e.currentTarget;
+  const radioId = label.getAttribute('for');
+  const radio = document.getElementById(radioId);
+  
+  if (radio) {
+    radio.checked = true;
+    processChoice(radioId);
+  }
+}
+
+// Load overall stats
+function loadOverallStats() {
+  statsRef.once('value', (snapshot) => {
+    const stats = snapshot.val() || { playerWins: 0, computerWins: 0 };
+    gameState.playerWins = stats.playerWins || 0;
+    gameState.computerWins = stats.computerWins || 0;
     updateOverallScore();
-  }
+  });
+}
 
-  // Reset the game
-  function resetGame() {
-    // Reset game state
-    gameState.playerScore = 0;
-    gameState.computerScore = 0;
-    gameState.gameActive = true;
-    gameState.roundActive = false;
-    
-    updateScoreDisplay();
+// Update overall score display
+function updateOverallScore() {
+  overallScoreDisplay.textContent = `${gameState.playerWins} - ${gameState.computerWins}`;
+}
+
+// Update score display
+function updateScoreDisplay() {
+  scoreDisplay.textContent = `Score: You ${gameState.playerScore} - ${gameState.computerScore} Computer`;
+}
+
+// Reset selections after 2 seconds
+function resetAfterDelay() {
+  setTimeout(() => {
     resetSelections();
-    gameOverDiv.style.display = 'none';
+    checkGameEnd();
+    gameState.roundActive = false;
     enableChoices();
-  }
+  }, 2000);
+}
 
-  // Save score to Firebase
-  function saveScore(name, score) {
-    const newScoreRef = scoresRef.push();
-    newScoreRef.set({
-      name: name,
-      score: score,
-      date: new Date().toISOString()
-    });
-  }
+// Reset radio buttons
+function resetSelections() {
+  const radios = document.querySelectorAll('input[type="radio"]');
+  radios.forEach(radio => radio.checked = false);
+}
 
+// Disable choices during round
+function disableChoices() {
+  iconsContainer.classList.add('disabled');
+}
+
+// Enable choices after round
+function enableChoices() {
+  iconsContainer.classList.remove('disabled');
+}
+
+// Check if game should end
+function checkGameEnd() {
+  if (gameState.playerScore >= gameState.maxScore || gameState.computerScore >= gameState.maxScore) {
+    handleGameOver();
+  }
+}
+
+// Handle game over
+function handleGameOver() {
+  gameState.gameActive = false;
+  
+  // Determine winner
+  let resultMessage;
+  if (gameState.playerScore > gameState.computerScore) {
+    resultMessage = `You won ${gameState.playerScore}-${gameState.computerScore}!`;
+    gameState.playerWins++;
+  } else {
+    resultMessage = `Computer won ${gameState.computerScore}-${gameState.playerScore}!`;
+    gameState.computerWins++;
+  }
+  
+  finalResult.textContent = resultMessage;
+  gameOverDiv.style.display = 'block';
+  
   // Save stats to Firebase
-  function saveStats() {
-    statsRef.set({
-      playerWins: gameState.playerWins,
-      computerWins: gameState.computerWins
-    });
+  saveStats();
+  updateOverallScore();
+}
+
+// Reset the game
+function resetGame() {
+  // Reset game state
+  gameState.playerScore = 0;
+  gameState.computerScore = 0;
+  gameState.gameActive = true;
+  gameState.roundActive = false;
+  
+  updateScoreDisplay();
+  resetSelections();
+  gameOverDiv.style.display = 'none';
+  enableChoices();
+}
+
+// Save score to Firebase
+function saveScore(name, score) {
+  const newScoreRef = scoresRef.push();
+  newScoreRef.set({
+    name: name,
+    score: score,
+    date: new Date().toISOString()
+  });
+}
+
+// Save stats to Firebase
+function saveStats() {
+  statsRef.set({
+    playerWins: gameState.playerWins,
+    computerWins: gameState.computerWins
+  });
+}
+
+// Process the player's choice
+function processChoice(id) {
+  if (!gameState.gameActive || gameState.roundActive) return;
+  
+  gameState.roundActive = true;
+  disableChoices();
+  
+  // Update scores based on result
+  if (id.includes('-rock')) {
+    if (id.startsWith('rock')) {
+      // Tie - no score change
+    } else if (id.startsWith('paper')) {
+      gameState.computerScore++;
+    } else if (id.startsWith('scissors')) {
+      gameState.playerScore++;
+    }
+  } else if (id.includes('-paper')) {
+    if (id.startsWith('paper')) {
+      // Tie - no score change
+    } else if (id.startsWith('scissors')) {
+      gameState.computerScore++;
+    } else if (id.startsWith('rock')) {
+      gameState.playerScore++;
+    }
+  } else if (id.includes('-scissors')) {
+    if (id.startsWith('scissors')) {
+      // Tie - no score change
+    } else if (id.startsWith('rock')) {
+      gameState.computerScore++;
+    } else if (id.startsWith('paper')) {
+      gameState.playerScore++;
+    }
   }
+  
+  updateScoreDisplay();
+  resetAfterDelay();
+}
 
-  // Event listeners
-  playAgainBtn.addEventListener('click', () => {
-    resetGame();
-  });
-
-  // Update scores when a choice is made
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      if (!gameState.gameActive || gameState.roundActive) return;
-      
-      gameState.roundActive = true;
-      disableChoices();
-      
-      const id = this.id;
-      
-      // Update scores based on result
-      if (id.includes('-rock')) {
-        if (id.startsWith('rock')) {
-          // Tie - no score change
-        } else if (id.startsWith('paper')) {
-          
-          gameState.computerScore++;
-        } else if (id.startsWith('scissors')) {
-          gameState.playerScore++;
-        }
-      } else if (id.includes('-paper')) {
-        if (id.startsWith('paper')) {
-          // Tie - no score change
-        } else if (id.startsWith('scissors')) {
-          
-          gameState.computerScore++;
-        } else if (id.startsWith('rock')) {
-          gameState.playerScore++;
-        }
-      } else if (id.includes('-scissors')) {
-        if (id.startsWith('scissors')) {
-          // Tie - no score change
-        } else if (id.startsWith('rock')) {
-        gameState.computerScore++;
-          
-        } else if (id.startsWith('paper')) {
-          gameState.playerScore++;
-        }
-      }
-      
-      updateScoreDisplay();
-      resetAfterDelay();
-    });
-  });
-
-  // Initialize game
+// Initialize game
+function initGame() {
+  setupTouchEvents();
   updateScoreDisplay();
   gameOverDiv.style.display = 'none';
   loadOverallStats();
+  
+  // Also keep the original radio change listeners for desktop
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      processChoice(this.id);
+    });
+  });
+  
+  playAgainBtn.addEventListener('click', () => {
+    resetGame();
+  });
+}
+
+// Start the game
+initGame();
 </script>
 </body>
 </html>
