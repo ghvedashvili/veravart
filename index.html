@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ალექსის თამაშების სამყარო</title>
+    <title>ალექსას თამაშები</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Modak&display=swap');
         
         :root {
             --orange: #ff9f1c;
-            --red: #e71d36;
-            --blue: #2ec4b6;
             --dark: #011627;
             --boxborder: 6px;
         }
@@ -48,20 +46,22 @@
             text-align: center;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .game-button {
             color: #fff;
             font-weight: bold;
-            padding: 20px 15px;
             text-align: center;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 20px;
             border: var(--boxborder) solid var(--dark);
             user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         /* მართკუთხა ღილაკები */
@@ -69,6 +69,7 @@
             border-radius: 12px;
             min-height: 80px;
             width: 200px;
+            padding: 15px;
         }
         
         /* წრიული ღილაკები */
@@ -76,35 +77,71 @@
             border-radius: 50%;
             width: 150px;
             height: 150px;
-            padding: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         
         .game-button a {
             color: #fff;
             text-decoration: none;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
             height: 100%;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            text-align: center;
         }
         
-        /* ფერები ღილაკებისთვის */
+        /* ძირითადი თამაშების ფერები */
         .game-1 {
-            background: linear-gradient(135deg, #0077b5 0%, #00a1f1 100%);
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
         }
         .game-2 {
-            background: linear-gradient(135deg, #ff6600 0%, #ff9933 100%);
+            background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
         }
         .game-3 {
-            background: linear-gradient(135deg, #dc4e41 0%, #ff6b6b 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
-        
-        /* Coming Soon სტილები */
-        .coming-soon {
-            background: linear-gradient(135deg, #f39c12 0%, #f9ca24 100%);
-            opacity: 0.8;
+        .game-4 {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
         }
-        
+        .game-5 {
+            background: linear-gradient(135deg, #7b4397 0%, #dc2430 100%);
+        }
+        .game-6 {
+            background: linear-gradient(135deg, #1e9600 0%, #fff200 100%);
+        }
+
+        /* Coming Soon ფერები */
+        .coming-soon1 {
+            background: linear-gradient(135deg, #ff0084 0%, #33001b 100%);
+        }
+        .coming-soon2 {
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+        }
+        .coming-soon3 {
+            background: linear-gradient(135deg, #f46b45 0%, #eea849 100%);
+        }
+        .coming-soon4 {
+            background: linear-gradient(135deg, #4776e6 0%, #8e54e9 100%);
+        }
+        .coming-soon5 {
+            background: linear-gradient(135deg, #614385 0%, #516395 100%);
+        }
+        .coming-soon6 {
+            background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
+        }
+        .coming-soon7 {
+            background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+        }
+        .coming-soon8 {
+            background: linear-gradient(135deg, #4568dc 0%, #b06ab3 100%);
+        }
+
         /* მობილურის სტილები */
         @media (max-width: 600px) {
             h1 {
@@ -115,14 +152,20 @@
             
             .block {
                 width: 160px !important;
-                height: 70px !important;
+                min-height: 70px !important;
                 font-size: 16px;
+                padding: 10px;
             }
             
             .ball {
                 width: 100px !important;
                 height: 100px !important;
                 font-size: 14px;
+                padding: 10px;
+            }
+            
+            .game-button a {
+                line-height: 1.2;
             }
         }
     </style>
@@ -134,22 +177,25 @@
     <div class="game-element ball game-button game-1">
         <a href="Findthematchingpair.html">იპოვე ერთნაირი სმაილები</a>
     </div>
-    <div class="game-element ball game-button game-2">
+    <div class="game-element block game-button game-2">
         <a href="RockPaperScissors.html">ქვა ქაღალდი მაკრატელი</a>
     </div>
     <div class="game-element block game-button game-3">
         <a href="StickHeroGame.html">ნინძა</a>
     </div>
-    <div class="game-element block game-button game-3">
+    <div class="game-element ball game-button game-4">
         <a href="circus.html">ცირკი</a>
     </div>
     
     <!-- Coming Soon ღილაკები -->
-    <div class="game-element ball game-button coming-soon">Coming Soon 1</div>
-    <div class="game-element block game-button coming-soon">Coming Soon 2</div>
-    <div class="game-element ball game-button coming-soon">Coming Soon 3</div>
-    <div class="game-element block game-button coming-soon">Coming Soon 4</div>
-    <div class="game-element ball game-button coming-soon">Coming Soon 5</div>
+    <div class="game-element ball game-button coming-soon1">Coming Soon 1</div>
+    <div class="game-element block game-button coming-soon2">Coming Soon 2</div>
+    <div class="game-element ball game-button coming-soon3">Coming Soon 3</div>
+    <div class="game-element block game-button coming-soon4">Coming Soon 4</div>
+    <div class="game-element ball game-button coming-soon5">Coming Soon 5</div>
+    <div class="game-element block game-button coming-soon6">Coming Soon 6</div>
+    <div class="game-element ball game-button coming-soon7">Coming Soon 7</div>
+    <div class="game-element block game-button coming-soon8">Coming Soon 8</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
     <script>
@@ -167,7 +213,7 @@
             // ფიზიკის კონფიგურაცია
             const engine = Engine.create({
                 enableSleeping: true,
-                gravity: { x: 0, y: isMobile ? 0.5 : 0.7 } // ქვემოთ მიმართული გრავიტაცია
+                gravity: { x: 0, y: isMobile ? 0.5 : 0.7 }
             });
             
             // ელემენტების შექმნა
@@ -176,7 +222,7 @@
                 const isBall = el.classList.contains('ball');
                 const body = Bodies.rectangle(
                     window.innerWidth / 2,
-                    -100 - (index * 100), // ეკრანის ზემოთ იწყება
+                    -100 - (index * 100),
                     el.offsetWidth,
                     el.offsetHeight,
                     {
@@ -189,9 +235,8 @@
                 );
                 bodies.push(body);
                 
-                // საწყისი იმპულსი
                 Body.setVelocity(body, { 
-                    x: (Math.random() * 2) - 1, // მცირე შემთხვევითი ჰორიზონტალური მოძრაობა
+                    x: (Math.random() * 2) - 1,
                     y: 0 
                 });
             });
@@ -223,7 +268,6 @@
                 elements.forEach((el, i) => {
                     const body = bodies[i];
                     
-                    // აკრძალვა ეკრანის გვერდებზე გასვლის
                     if (body.position.x < el.offsetWidth/2) {
                         Body.setPosition(body, { 
                             x: el.offsetWidth/2, 
@@ -237,7 +281,6 @@
                         });
                     }
                     
-                    // გლუვი მოძრაობა
                     el.style.transform = `translate(${body.position.x - el.offsetWidth/2}px, 
                                           ${body.position.y - el.offsetHeight/2}px) 
                                          rotate(${body.angle}rad)`;
