@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>გველები და კიბეები</title>
+  <style>
+    :root {
+      --lineColour: black;
+      --p1Colour: #f36;
+      --p2Colour: #8a2;
+      --p1ColourA: rgba(255, 51, 102, 0.1);
+      --p2ColourA: rgba(136, 170, 34, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #eed;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .wrapper {
+      font-size: 1.5rem;
+      width: 100%;
+      position: relative;
+    }
+
+    canvas {
+      background-image: url("https://assets.codepen.io/215128/snakesAndLaddersBoard.jpg");
+      background-size: cover;
+      border: 5px solid grey;
+      border-radius: 7px;
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      aspect-ratio: 1/1;
+    }
+
+    /* მობილურის სტილები */
+    @media (max-width: 600px) {
+      .wrapper {
+        font-size: 1.2rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* მოთამაშის სახელის შეყვანის მოდალი */
+    .modal {
+      display: flex;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 90%;
+      max-width: 300px;
+    }
+    .modal h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    #playerNameInput {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    #startGameBtn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    #startGameBtn:hover {
+      background: #45a049;
+    }
+
+    /* მოთამაშის სტილები */
+    .playerYou .wrapper { color: #a00; }
+    .playerYou canvas { border-color: var(--p1Colour); }
+    .playerYou #diceThrow { 
+      background-color: var(--p1ColourA);
+      border-color: #c00; 
+    }
+    .playerAutoBot .wrapper { color: #480; }
+    .playerAutoBot canvas { border-color: var(--p2Colour); }
+    .playerAutoBot #diceThrow { 
+      background-color: var(--p2ColourA);
+      border-color: #680; 
+    }
+    
+    /* კამათლის სტილები */
+    #diceThrow {
+      background-image: url("https://assets.codepen.io/215128/diceSpots.png");
+      background-size: 60px;
+      border: 2px solid var(--lineColour);
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-block;
+      height: 60px;
+      width: 60px;
+      transition: transform 0.2s;
+    }
+    #diceThrow:active {
+      transform: scale(0.95);
+    }
+    #diceThrow.s6 { background-position: 0 0; }
+    #diceThrow.s5 { background-position: 0 -60px; }
+    #diceThrow.s4 { background-position: 0 -120px; }
+    #diceThrow.s3 { background-position: 0 -180px; }
+    #diceThrow.s2 { background-position: 0 -240px; }
+    #diceThrow.s1 { background-position: 0 -300px; }
+    
+    /* ღილაკების სტილები */
+    .buttonWrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin: 15px 0;
+    }
+    button {
+      border-radius: 7px;
+      padding: 8px 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .hidden { display: none; }
+    
+    h1 { 
+      margin-bottom: 5px;
+      color: #333;
+    }
+    h2 { 
+      margin-top: 0;
+      color: #555;
+      min-height: 1.5em;
+    }
+    
+    /* Scoreboard styles */
+    .scoreboard {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-around;
+    }
+    .score {
+      text-align: center;
+    }
+    .score span {
+      font-weight: bold;
+      display: block;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <!-- მოთამაშის სახელის შეყვანის მოდალი -->
+  <div class="modal" id="nameModal">
+    <div class="modal-content">
+      <h2>შეიყვანეთ თქვენი სახელი</h2>
+      <input type="text" id="playerNameInput" placeholder="თქვენი სახელი">
+      <button id="startGameBtn">დაწყება</button>
+    </div>
+  </div>
+
+  <!-- თამაშის კონტეინერი -->
+  <div class="game-container">
+    <div class="wrapper">
+      <h1>მოთამაშე: <span class="playerName"></span></h1>
+      <h2 class="message">მოემზადეთ თამაშისთვის</h2>
+      <div class="buttonWrapper">
+        <div id="diceThrow" class="s6"></div>
+        <button id="reset" class="hidden">თავიდან</button>
+      </div>
+      <canvas></canvas>
+      <div class="scoreboard">
+        <div class="score">
+          <div>მოთამაშე:</div>
+          <span id="playerWins">0</span>
+        </div>
+        <div class="score">
+          <div>კომპიუტერი:</div>
+          <span id="computerWins">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+      authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+      databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+      projectId: "newspaperveravart",
+      storageBucket: "newspaperveravart.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:1234567890abcdef"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const scoresRef = database.ref('circus/scores');
+
+    // ელემენტები
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
+    const diceDisplay = document.querySelector("#diceThrow");
+    const playerDisplay = document.querySelector(".playerName");
+    const message = document.querySelector(".message");
+    const resetGameBtn = document.querySelector("#reset");
+    const nameModal = document.querySelector("#nameModal");
+    const playerNameInput = document.querySelector("#playerNameInput");
+    const startGameBtn = document.querySelector("#startGameBtn");
+    const playerWinsDisplay = document.querySelector("#playerWins");
+    const computerWinsDisplay = document.querySelector("#computerWins");
+
+    // თამაშის ცვლადები
+    let gridSize, gridMid;
+    let walking, walkSpeed = 450;
+    let locked = false;
+    let slideSpeed = 0.5;
+    let rolled = "", rolling, rollCount, rollMax, rollSpeed = 85;
+    
+    let player1 = { current: 0, target: 0, x: 0, y: 0, colour: "#f36d", id: "You" };
+    let player2 = { current: 0, target: 0, x: 0, y: 0, colour: "#8a2d", id: "AutoBot" };
+    let activePlayer = player1;
+    let walkSequence = [];
+    
+    // Scores
+    let playerWins = 0;
+    let computerWins = 0;
+
+    const obstacles = [
+      { type: "snake", start: 97, end: 78 },
+      { type: "snake", start: 95, end: 56 },
+      { type: "snake", start: 88, end: 24 },
+      { type: "snake", start: 62, end: 18 },
+      { type: "snake", start: 48, end: 26 },
+      { type: "snake", start: 36, end: 6 },
+      { type: "snake", start: 32, end: 10 },
+      { start: 1, end: 38, type: "ladder" },
+      { start: 4, end: 14, type: "ladder" },
+      { start: 8, end: 30, type: "ladder" },
+      { start: 21, end: 42, type: "ladder" },
+      { start: 28, end: 76, type: "ladder" },
+      { start: 50, end: 67, type: "ladder" },
+      { start: 71, end: 92, type: "ladder" },
+      { start: 80, end: 99, type: "ladder" }
+    ];
+
+    // Load scores from Firebase
+    function loadScores() {
+      scoresRef.once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          playerWins = data.playerWins || 0;
+          computerWins = data.computerWins || 0;
+          updateScoreDisplay();
+        }
+      });
+    }
+
+    // Update scores in Firebase
+    function updateScores() {
+      scoresRef.set({
+        playerWins: playerWins,
+        computerWins: computerWins
+      });
+    }
+
+    // Update score display
+    function updateScoreDisplay() {
+      playerWinsDisplay.textContent = playerWins;
+      computerWinsDisplay.textContent = computerWins;
+    }
+
+    // თამაშის დაწყება
+    startGameBtn.addEventListener("click", () => {
+      const playerName = playerNameInput.value.trim();
+      if (playerName) {
+        player1.id = playerName;
+        nameModal.style.display = "none";
+        initGame();
+      } else {
+        alert("გთხოვთ შეიყვანოთ თქვენი სახელი!");
+      }
+    });
+
+    // თამაშის ინიციალიზაცია
+    function initGame() {
+      const size = Math.min(window.innerWidth - 40, 500);
+      canvas.width = size;
+      canvas.height = size;
+      gridSize = size / 10;
+      gridMid = gridSize / 2;
+
+      walkSequence = boustrophedonWalk(10, 10);
+      setPlayerID();
+      drawPlayers();
+      
+      // Load scores when game starts
+      loadScores();
+      
+      // კამათლის კლიკის მოსმენა
+      diceDisplay.addEventListener("click", rollDice);
+      resetGameBtn.addEventListener("click", resetGame);
+    }
+
+    // დაფის გენერირება
+    function boustrophedonWalk(cols, rows) {
+      let temp = [];
+      for (let row = 0; row < rows; row++) {
+        let t = Array.from({length: cols}, (_, col) => {
+          return {
+            id: col + row * cols,
+            y: canvas.height - gridSize - row * gridSize,
+            x: col * gridSize
+          };
+        });
+        t = row % 2 ? t.reverse() : t;
+        temp = [...temp, ...t];
+      }
+      return temp;
+    }
+
+    // მოთამაშეების დახატვა
+    function drawPlayers() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (player1.current > 0) {
+        ctx.fillStyle = player1.colour;
+        ctx.beginPath();
+        ctx.arc(player1.x + gridMid, player1.y + gridMid, gridSize * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      
+      if (player2.current > 0) {
+        ctx.fillStyle = player2.colour;
+        ctx.beginPath();
+        if (player2.current === player1.current) {
+          ctx.arc(player2.x + gridMid, player2.y + gridMid, gridSize * 0.32, Math.PI * 0.25, Math.PI * 1.25);
+        } else {
+          ctx.arc(player2.x + gridMid, player2.y + gridMid, gridSize * 0.32, 0, Math.PI * 2);
+        }
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    // სვლის ფუნქცია
+    function walk() {
+      let activeCounter = activePlayer.current++;
+      let sliding = false;
+      
+      activePlayer.x = walkSequence[activeCounter].x;
+      activePlayer.y = walkSequence[activeCounter].y;
+      drawPlayers();
+
+      // გამარჯვების შემოწმება
+      if (activeCounter === 99) {
+        clearInterval(walking);
+        showWinner();
+        return;
+      }
+
+      // სამიზნემდე მისვლის შემოწმება
+      if (activePlayer.current >= activePlayer.target) {
+        clearInterval(walking);
+
+        // დაბრკოლებების შემოწმება
+        for (let obstacle of obstacles) {
+          if (obstacle.start === activePlayer.target) {
+            activePlayer.target = obstacle.end;
+            sliding = true;
+            slide(
+              activePlayer,
+              walkSequence[obstacle.end - 1].x,
+              walkSequence[obstacle.end - 1].y,
+              slideSpeed
+            );
+            break;
+          }
+        }
+        
+        if (!sliding) {
+          activePlayer.current = activePlayer.target; // დარწმუნდით, რომ current განახლებულია
+          drawPlayers();
+          resetTurn();
+          togglePlayer();
+        }
+      }
+    }
+
+    // გამარჯვებული
+    function showWinner() {
+      setPlayerID("მოიგო თამაში!");
+      resetGameBtn.classList.remove("hidden");
+      
+      // Update scores
+      if (activePlayer === player1) {
+        playerWins++;
+        message.textContent = `${player1.id} მოიგო თამაში!`;
+      } else {
+        computerWins++;
+        message.textContent = "კომპიუტერმა მოიგო თამაში!";
+      }
+      
+      updateScoreDisplay();
+      updateScores();
+    }
+
+    // მოთამაშის ID დაყენება
+    function setPlayerID(msg = "") {
+      playerDisplay.textContent = `${activePlayer.id} ${msg}`;
+      document.body.className = `player${activePlayer.id.replace(/\s+/g, '')}`;
+    }
+
+    // ტურის დასრულება
+    function resetTurn() {
+      locked = false;
+    }
+
+    // სრიალის ანიმაცია
+    function slide(element, dX, dY, dur = 1) {
+      gsap.to(element, {
+        x: dX,
+        y: dY,
+        duration: dur,
+        delay: 0.25,
+        onUpdate: drawPlayers,
+        onComplete: () => {
+          element.current = element.target;
+          drawPlayers();
+          resetTurn();
+          togglePlayer();
+        }
+      });
+    }
+
+    // მოთამაშის გადართვა
+    function togglePlayer() {
+      activePlayer = activePlayer === player1 ? player2 : player1;
+      setPlayerID();
+      message.textContent = activePlayer === player1 ? "თქვენი სვლა" : "კომპიუტერის სვლა";
+
+      if (activePlayer === player2) {
+        setTimeout(rollDice, 1000);
+      }
+    }
+
+    // კამათლის გაგორება
+    function rollDice(evt) {
+      if (evt) evt.preventDefault();
+      if (locked) return;
+      locked = true;
+
+      message.textContent = activePlayer === player1 ? "გაგორება..." : "კომპიუტერი გაგორებს...";
+
+      rollCount = 0;
+      rollMax = Math.floor(Math.random() * 10) + 15;
+      rolling = setInterval(doRoll, rollSpeed);
+    }
+
+    // კამათლის ანიმაცია
+    function doRoll() {
+      rolled = Math.floor(Math.random() * 6) + 1;
+      diceRollDisplay(rolled);
+      
+      if (rollCount++ >= rollMax) {
+        clearInterval(rolling);
+        message.textContent = "მოძრაობა...";
+        activePlayer.target = Math.min(activePlayer.current + rolled, 100);
+        walking = setInterval(walk, walkSpeed);
+      }
+    }
+
+    // კამათლის გამოსახვა
+    function diceRollDisplay(spots) {
+      diceDisplay.className = `s${spots}`;
+    }
+
+    // თამაშის გადატვირთვა
+    function resetGame() {
+      player1.current = 0;
+      player1.target = 0;
+      player1.x = 0;
+      player1.y = 0;
+      
+      player2.current = 0;
+      player2.target = 0;
+      player2.x = 0;
+      player2.y = 0;
+      
+      activePlayer = player1;
+      locked = false;
+      
+      diceRollDisplay("6");
+      setPlayerID();
+      message.textContent = "მოემზადეთ თამაშისთვის";
+      drawPlayers();
+      
+      resetGameBtn.classList.add("hidden");
+    }
+
+    // ფანჯრის რესაიზზე რეაგირება
+    window.addEventListener("resize", initGame);
+
+    // კლავიატურის მხარდაჭერა
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && !locked) {
+        rollDice();
+      }
+    });
+
+    // Initialize the game when page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      // Show name input modal
+      nameModal.style.display = 'flex';
+    });
+  </script>
+</body>
+</html>
