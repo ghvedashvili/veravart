@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Game Links</title>
+</head>
+<body>
+
+<ul class="game-buttons">
+  <li class="button__game game-1"><a href="Findthematchingpair.html">Find the Matching Pair</a></li>
+  <li class="button__game game-2"><a href="RockPaperScissors.html">Rock-Paper-Scissors</a></li>
+  <li class="button__game game-3"><a href="StickHeroGame.html">Stick Hero Game</a></li>
+  <li class="button__game coming-soon">Coming Soon</li>
+  <li class="button__game coming-soon">Coming Soon</li>
+  <li class="button__game coming-soon">Coming Soon</li>
+  <li class="button__game coming-soon">Coming Soon</li>
+</ul>
+
+</body>
+<style>
+.game-buttons {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+.button__game {
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  padding: 10px 15px;
+  margin: 5px;
+  border-radius: 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.button__game a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+}
+.button__game:hover {
+  opacity: 0.8;
+}
+
+/* Fun colors for buttons */
+.game-1 {
+  background-color: #ff4757; /* Red */
+}
+.game-2 {
+  background-color: #1e90ff; /* Blue */
+}
+.game-3 {
+  background-color: #2ed573; /* Green */
+}
+.coming-soon {
+  background-color: #f39c12; /* Orange */
+  pointer-events: none;
+}
+</style>
+</html>
