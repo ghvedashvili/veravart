@@ -461,7 +461,7 @@ function saveScore(name, score) {
 
 function loadLeaderboard() {
   const scoresRef = database.ref('hero');
-  scoresRef.orderByChild('hero').limitToLast(10).once('value', (snapshot) => {
+  scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
     const scores = [];
     snapshot.forEach((childSnapshot) => {
       scores.push(childSnapshot.val());
