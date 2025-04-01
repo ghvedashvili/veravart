@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>წარმატების ბორბალი</title>
+    <style>
+        /* Main styles */
+        @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,700&Roboto:300");
+        @import url("https://fonts.googleapis.com/css2?family=Teko:wght@600&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@500&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap");
+        
+        :root {
+            --color-win: #78cf82;
+            --color-lose: #d94545;
+            --color-start: #5b85b7;
+            --color-neutral: #445069;
+            --color-neutral-light: #d2d2d2;
+            --color-keys: #37474f;
+            --color-keys-light: #e5e5e5;
+            --font-size-large: 60px;
+            --font-size-medium: 20px;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            justify-content: space-evenly;
+            flex-direction: column;
+            display: flex;
+            height: 100vh;
+            background: rgb(58, 97, 134);
+            background: linear-gradient(87deg, rgba(58, 97, 134, 1) 0%, rgba(137, 37, 62, 1) 100%);
+            margin: 0;
+            padding: 10px;
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 100%;
+            max-height: 900px;
+            text-align: center;
+        }
+
+        .stats {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        #phrase {
+            margin: 20px 0;
+        }
+
+        #phrase ul {
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .letter {
+            font-size: 24px;
+            height: 45px;
+            width: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: transparent;
+            background: var(--color-neutral-light);
+            border-radius: 5px;
+            list-style: none;
+        }
+
+        .show {
+            color: #fff;
+            background-color: #92534e;
+            animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        #hint {
+            font-family: "Caveat", cursive;
+            font-size: 22px;
+            color: #fff;
+            margin-top: 15px;
+            min-height: 30px;
+        }
+
+        #qwerty {
+            margin-top: 20px;
+        }
+
+        .keyrow {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        button {
+            margin: 3px;
+            border: 1px solid transparent;
+            padding: 0.3rem 0.6rem;
+            color: var(--color-keys);
+            font-size: var(--font-size-medium);
+            background-color: #ac9172;
+            border-radius: 10px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #cfcccc;
+            transform: scale(1.1);
+        }
+
+        .chosen {
+            background-color: #43856c;
+            color: #ffffff;
+        }
+
+        #lives-counter {
+            font-size: 24px;
+            color: #fff;
+            margin: 15px auto;
+        }
+
+        @media (max-width: 768px) {
+            .letter {
+                font-size: 25px;
+                height: 35px;
+                width: 35px;
+            }
+            
+            button {
+                padding: 0.2rem 0.4rem;
+                font-size: 25px;
+            }
+            
+            #hint {
+                font-size: 25px;
+            }
+            
+            .stats {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .letter {
+                font-size: 25px;
+                height: 30px;
+                width: 30px;
+            }
+            
+            button {
+                font-size: 25px;
+                padding: 0.1rem 0.3rem;
+            }
+            
+            #hint {
+                font-size: 25px;
+            }
+            
+            .stats {
+                font-size: 16px;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="stats">
+            <div class="stat-item">გამოცნობილი: <span id="guessed-count">0</span></div>
+            <div class="stat-item">ვერ გამოცნობილი: <span id="failed-count">0</span></div>
+        </div>
+
+        <div id="phrase">
+            <ul></ul>
+            <div id="hint"></div>
+        </div>
+
+        <div id="qwerty">
+            <div class="keyrow">
+                <button>ა</button><button>ბ</button><button>გ</button><button>დ</button><button>ე</button><button>ვ</button><button>ზ</button><button>თ</button><button>ი</button><button>კ</button>
+            </div>
+            <div class="keyrow">
+                <button>ლ</button><button>მ</button><button>ნ</button><button>ო</button><button>პ</button><button>ჟ</button><button>რ</button><button>ს</button><button>ტ</button>
+            </div>
+            <div class="keyrow">
+                <button>უ</button><button>ფ</button><button>ქ</button><button>ღ</button><button>ყ</button><button>შ</button><button>ჩ</button><button>ც</button><button>ძ</button><button>წ</button>
+            </div>
+            <div class="keyrow">
+                <button>ჭ</button><button>ხ</button><button>ჯ</button><button>ჰ</button>
+            </div>
+        </div>
+
+        <div id="lives-counter">დარჩენილი სიცოცხლეები: 10</div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+            authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+            databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+            projectId: "newspaperveravart",
+            storageBucket: "newspaperveravart.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:1234567890abcdef"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Game variables
+        const ul = document.querySelector("ul");
+        const livesCounter = document.getElementById("lives-counter");
+        const hintElement = document.getElementById("hint");
+        const guessedCountElement = document.getElementById("guessed-count");
+        const failedCountElement = document.getElementById("failed-count");
+
+        let missed = 0;
+        let totalLives = 10;
+        let currentPhrase = "";
+        let guessedWords = 0;
+        let failedWords = 0;
+
+        // Phrases with hints
+        const phrases = [
+    {word: "ბუშტი", hint: "🎈"},
+    {word: "გოგონა", hint: "👧"},
+    {word: "ბიჭი", hint: "👦"},
+    {word: "კატა", hint: "🐱"},
+    {word: "ძაღლი", hint: "🐶"},
+    {word: "ციყვი", hint: "🐿️"},
+    {word: "კურდღელი", hint: "🐰"},
+    {word: "ბაჭია", hint: "🐇"},
+    {word: "სპილო", hint: "🐘"},
+    {word: "ლომი", hint: "🦁"},
+    {word: "ზღარბი", hint: "🦔"},
+    {word: "ჩიტი", hint: "🐦"},
+    {word: "თევზი", hint: "🐟"},
+    {word: "ჟირაფი", hint: "🦒"},
+    {word: "თოვლი", hint: "❄️"},
+    {word: "მზე", hint: "☀️"},
+    {word: "წვიმა", hint: "🌧️"},
+    {word: "ქარი", hint: "💨"},
+    {word: "სახლი", hint: "🏡"},
+    {word: "ბაღი", hint: "🌳"},
+    {word: "ტორტი", hint: "🎂"},
+    {word: "კარამელი", hint: "🍬"},
+    {word: "შოკოლადი", hint: "🍫"},
+    {word: "ფანქარი", hint: "🖍️"},
+    {word: "წიგნი", hint: "📖"},
+    {word: "თამაში", hint: "🎮"},
+    {word: "ბურთი", hint: "⚽"},
+    {word: "სრიალი", hint: "🛷"},
+    {word: "კალათბურთი", hint: "🏀"},
+    {word: "მატარებელი", hint: "🚄"},
+
+    
+    // საქართველოს ნაკრების ფეხბურთელთა გვარები
+    {word: "კვარაცხელია", hint: "7⚽🇬🇪"},
+    {word: "მიქაუტაძე", hint: "22⚽🇬🇪"},
+    {word: "ლოჩოშვილი", hint: "14⚽🇬🇪"},
+    {word: "მამარდაშვილი", hint: "🧤🇬🇪"}
+];
+
+        // Load statistics from Firebase
+        function loadStats() {
+            database.ref('words/stats').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    guessedWords = data.guessed || 0;
+                    failedWords = data.failed || 0;
+                    guessedCountElement.textContent = guessedWords;
+                    failedCountElement.textContent = failedWords;
+                }
+            });
+        }
+
+        // Update statistics in Firebase
+        function updateStats() {
+            database.ref('words/stats').set({
+                guessed: guessedWords,
+                failed: failedWords
+            });
+        }
+
+        // Get random phrase
+        function getRandomPhrase() {
+            const randomIndex = Math.floor(Math.random() * phrases.length);
+            currentPhrase = phrases[randomIndex].word;
+            hintElement.textContent = `მინიშნება: ${phrases[randomIndex].hint}`;
+            return currentPhrase;
+        }
+
+        // Display phrase as hidden letters
+        function displayPhrase(phrase) {
+            ul.innerHTML = '';
+            for (let i = 0; i < phrase.length; i++) {
+                const li = document.createElement('li');
+                li.className = 'letter';
+                li.textContent = '_';
+                li.dataset.letter = phrase[i];
+                ul.appendChild(li);
+            }
+        }
+
+        // Check if guessed letter exists in phrase
+        function checkLetter(letter) {
+            const letterElements = document.querySelectorAll('.letter');
+            let found = false;
+            
+            letterElements.forEach(el => {
+                if (el.dataset.letter === letter) {
+                    el.textContent = letter;
+                    el.classList.add('show');
+                    found = true;
+                }
+            });
+            
+            return found;
+        }
+
+        // Check win/lose conditions
+        function checkWin() {
+            const hiddenLetters = document.querySelectorAll('.letter:not(.show)');
+            if (hiddenLetters.length === 0) {
+                guessedWords++;
+                updateStats();
+                guessedCountElement.textContent = guessedWords;
+                setTimeout(() => {
+                    alert(`სწორი პასუხია "${currentPhrase}"\nგილოცავ, გაიმარჯვე!`);
+                    resetGame();
+                }, 500);
+            } else if (totalLives <= 0) {
+                failedWords++;
+                updateStats();
+                failedCountElement.textContent = failedWords;
+                setTimeout(() => {
+                    alert(`სწორი პასუხი იყო: "${currentPhrase}"\nწააგე! სცადე თავიდან`);
+                    resetGame();
+                }, 500);
+            }
+        }
+
+        // Reset game state
+        function resetGame() {
+            missed = 0;
+            totalLives = 10;
+            livesCounter.textContent = `დარჩენილი სიცოცხლეები: ${totalLives}`;
+            
+            // Reset keyboard
+            document.querySelectorAll('.chosen').forEach(btn => {
+                btn.classList.remove('chosen');
+                btn.disabled = false;
+            });
+            
+            // Get new phrase
+            const phrase = getRandomPhrase();
+            displayPhrase(phrase);
+        }
+
+        // Initialize game
+        function initGame() {
+            loadStats();
+            const phrase = getRandomPhrase();
+            displayPhrase(phrase);
+            livesCounter.textContent = `დარჩენილი სიცოცხლეები: ${totalLives}`;
+            
+            // Keyboard event listeners
+            document.querySelectorAll('#qwerty button').forEach(button => {
+                button.addEventListener('click', () => {
+                    button.classList.add('chosen');
+                    button.disabled = true;
+                    
+                    if (!checkLetter(button.textContent)) {
+                        missed++;
+                        totalLives--;
+                        livesCounter.textContent = `დარჩენილი სიცოცხლეები: ${totalLives}`;
+                    }
+                    
+                    checkWin();
+                });
+            });
+        }
+
+        // Start game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
