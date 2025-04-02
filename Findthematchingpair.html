@@ -211,7 +211,7 @@
             border-radius: 10px;
             width: 80%;
             max-width: 400px;
-            max-height: 60%;
+            max-height: 70%;
             overflow-y: auto;
             text-align: center;
             z-index: 100;
@@ -332,6 +332,36 @@
                 line-height: 50px;
             }
         }
+.rank-col{
+	display: inline-block;
+    width: 15%;
+}
+.name-col{
+	display: inline-block;
+    width: 45%;
+}
+
+.score-col{
+	display: inline-block;
+    width: 20%;
+}
+.hints-col{
+	display: inline-block;
+    width: 15%;
+}
+.top-1 {
+    color: gold;
+font-weight: bold;
+}
+.top-2 {
+    color: silver;
+font-weight: bold;
+}
+.top-3 {
+    color: #CD7F32;
+font-weight: bold;
+}
+
     </style>
 </head>
 <body>
@@ -637,20 +667,44 @@ function loadLeaderboard() {
         // Clear previous leaderboard
         leaderboardList.innerHTML = '';
         
-        // Add entries to leaderboard with emojis for top 3
+        // Create table header
+        const header = document.createElement('li');
+        header.className = 'leaderboard-header';
+        header.innerHTML = `
+            <span class="rank-col">რანკი</span>
+            <span class="name-col">მოთამაშე</span>
+            <span class="score-col">ქულა</span>
+            <span class="hints-col">💡</span>
+        `;
+        leaderboardList.appendChild(header);
+        
+        // Add entries to leaderboard
         scores.forEach((entry, index) => {
             const li = document.createElement('li');
-            let emoji = '';
-            if (index === 0) emoji = '🥇 ';
-            else if (index === 1) emoji = '🥈 ';
-            else if (index === 2) emoji = '🥉 ';
+            li.className = 'leaderboard-entry';
             
-            li.textContent = `${emoji}${index + 1}. ${entry.name}: ${entry.score} pairs`;
+            // Add emojis for top 3
+            let emoji = '';
+            if (index === 0) emoji = '🥇';
+            else if (index === 1) emoji = '🥈';
+            else if (index === 2) emoji = '🥉';
+            
+            li.innerHTML = `
+                <span class="rank-col">${emoji} ${index + 1}</span>
+                <span class="name-col">${entry.name || 'Anonymous'}</span>
+                <span class="score-col">${entry.score}</span>
+                <span class="hints-col">${entry.hintsUsed || 0}</span>
+            `;
+            
+            // Highlight top 3 entries
+            if (index < 3) {
+                li.classList.add('top-' + (index + 1));
+            }
+            
             leaderboardList.appendChild(li);
         });
     });
 }
-
 // Event listeners
 hintBtn.onclick = hintBtn.ontouchend = function(e) {
     if (e.type == 'touchend') hintBtn.onclick = undefined;
