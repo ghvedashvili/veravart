@@ -11,6 +11,7 @@
             --orange: #ff9f1c;
             --dark: #011627;
             --boxborder: 6px;
+            --rope-color: #8B4513;
         }
         
         * {
@@ -25,8 +26,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             touch-action: manipulation;
-     
-        }
+                    }
         
         .game-element {
             position: absolute;
@@ -34,6 +34,81 @@
             z-index: 10;
             will-change: transform;
             transition: transform 0.1s linear;
+        }
+        
+        /* Updated banner style */
+        .header-banner {
+            position: fixed;
+            top: 40px; /* Lowered by 40px */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background-color: var(--orange);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            font-family: 'Modak', cursive;
+            font-size: 20px;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            border: var(--boxborder) solid var(--dark);
+            border-radius: 8px;
+            animation: bannerDrop 1s ease-out forwards, bannerSwing 2s ease-in-out infinite alternate;
+            transform-origin: top center;
+        }
+        
+        /* თოკების სტილი */
+        .rope {
+            position: absolute;
+            width: 4px;
+            background-color: var(--rope-color);
+            top: -60px;
+            z-index: 99;
+            animation: ropeSwing 2s ease-in-out infinite alternate;
+        }
+        
+        .rope-left {
+            left: 10px;
+            height: 60px;
+            transform-origin: top center;
+        }
+        
+        .rope-right {
+            right: 10px;
+            height: 60px;
+            transform-origin: top center;
+        }
+        
+        /* ანიმაციები */
+        @keyframes bannerDrop {
+            0% {
+                transform: translateX(-50%) translateY(-100px) rotateZ(-5deg);
+            }
+            70% {
+                transform: translateX(-50%) translateY(20px) rotateZ(2deg);
+            }
+            100% {
+                transform: translateX(-50%) translateY(0) rotateZ(0);
+            }
+        }
+        
+        @keyframes bannerSwing {
+            0% {
+                transform: translateX(-50%) rotateZ(-2deg);
+            }
+            100% {
+                transform: translateX(-50%) rotateZ(2deg);
+            }
+        }
+        
+        @keyframes ropeSwing {
+            0% {
+                transform: rotateZ(-4deg);
+            }
+            100% {
+                transform: rotateZ(4deg);
+            }
         }
         
         h1 {
@@ -145,6 +220,21 @@
 
         /* მობილურის სტილები */
         @media (max-width: 600px) {
+            body {
+                           }
+            
+            .header-banner {
+                width: 250px;
+                font-size: 16px;
+                padding: 10px 0;
+                top: 30px; /* Adjusted for mobile */
+            }
+            
+            .rope {
+                top: -50px;
+                height: 50px;
+            }
+            
             h1 {
                 font-size: 24px;
                 width: 200px;
@@ -172,8 +262,14 @@
     </style>
 </head>
 <body>
-    <h1 class="game-element block">შექმნილია ალექსანდრესთვის</h1>
+    <!-- Updated banner with swinging animation -->
+    <div class="header-banner">
+        <div class="rope rope-left"></div>
+        <div class="rope rope-right"></div>
+        შექმნილია ალექსანდრესთვის
+    </div>
     
+        
     <!-- ძირითადი ღილაკები -->
     <div class="game-element ball game-button game-1">
         <a href="Findthematchingpair.html">იპოვე ერთნაირი სმაილები</a>
