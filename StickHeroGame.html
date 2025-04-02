@@ -91,9 +91,9 @@ body {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Score submission form */
-#score-form {
-  display: none;
+/* Name input form */
+#name-form {
+  display: flex;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -106,17 +106,13 @@ body {
   width: 80%;
   max-width: 400px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  flex-direction: column;
+  align-items: center;
 }
 
-#score-form h3 {
+#name-form h3 {
   margin-top: 0;
   color: #333;
-}
-
-#final-score {
-  font-weight: bold;
-  font-size: 1.2em;
-  color: #4CAF50;
 }
 
 #player-name {
@@ -128,7 +124,7 @@ body {
   font-size: 1em;
 }
 
-#submit-score {
+#start-game {
   padding: 12px 25px;
   background: #4CAF50;
   color: white;
@@ -139,8 +135,90 @@ body {
   transition: background 0.3s;
 }
 
-#submit-score:hover {
+#start-game:hover {
   background: #45a049;
+}
+
+/* Game over modal */
+#game-over-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-over-content {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+#game-over-content h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+#player-result {
+  font-size: 1.2em;
+  margin: 15px 0;
+}
+
+#leaderboard-position {
+  font-weight: bold;
+  color: #4CAF50;
+  font-size: 1.5em;
+  margin: 10px 0;
+}
+
+#encouragement {
+  font-style: italic;
+  margin: 15px 0;
+  color: #666;
+}
+
+.trophy {
+  font-size: 2em;
+  margin: 10px 0;
+}
+
+#close-game-over {
+  padding: 10px 20px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+#show-leaderboard {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 23px;
+  height: 45px; 
+  width: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Leaderboard modal */
@@ -205,25 +283,6 @@ body {
   margin-top: 15px;
 }
 
-#show-leaderboard {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-/*   padding: 10px 15px; */
-  background: #2196F3;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  z-index: 10;
-  font-size: 1em;
-  line-height: 45px;
-  font-size: 23px;
-  height: 45px; 
-  width: 45px;
-  border-radius: 50%;
-}
-
 /* Mobile specific styles */
 @media (max-width: 768px) {
   #restart {
@@ -252,13 +311,8 @@ body {
     padding: 10px;
   }
   
-  #submit-score {
+  #start-game {
     padding: 10px 20px;
-  }
-  
-  #show-leaderboard {
-/*     padding: 8px 12px; */
-/*     font-size: 0.9em; */
   }
 }
 </style>
@@ -272,12 +326,23 @@ body {
   <button id="restart">RESTART</button>
   <button id="show-leaderboard">🏆</button>
   
-  <!-- Score submission form -->
-  <div id="score-form">
-    <h3>Game Over!</h3>
-    <p>Your score: <span id="final-score">0</span></p>
-    <input type="text" id="player-name" placeholder="Enter your name">
-    <button id="submit-score">Submit Score</button>
+  <!-- Name input form -->
+  <div id="name-form">
+    <h3>Enter Your Name</h3>
+    <input type="text" id="player-name" placeholder="Your name" maxlength="15">
+    <button id="start-game">Start Game</button>
+  </div>
+</div>
+
+<!-- Game Over Modal -->
+<div id="game-over-modal">
+  <div id="game-over-content">
+    <h2>Game Over!</h2>
+    <div id="player-result"></div>
+    <div id="leaderboard-position"></div>
+    <div id="encouragement"></div>
+    <div class="trophy" id="trophy-display"></div>
+    <button id="close-game-over">Play Again</button>
   </div>
 </div>
 
@@ -325,6 +390,7 @@ let platforms = [];
 let sticks = [];
 let trees = [];
 let score = 0;
+let playerName = "";
 
 // Configuration
 let canvasWidth = 375;
@@ -359,10 +425,16 @@ const introductionElement = document.getElementById("introduction");
 const perfectElement = document.getElementById("perfect");
 const restartButton = document.getElementById("restart");
 const scoreElement = document.getElementById("score");
-const scoreForm = document.getElementById("score-form");
-const finalScoreElement = document.getElementById("final-score");
+const nameForm = document.getElementById("name-form");
 const playerNameInput = document.getElementById("player-name");
-const submitScoreButton = document.getElementById("submit-score");
+const startGameButton = document.getElementById("start-game");
+const gameOverModal = document.getElementById("game-over-modal");
+const gameOverContent = document.getElementById("game-over-content");
+const playerResultElement = document.getElementById("player-result");
+const leaderboardPositionElement = document.getElementById("leaderboard-position");
+const encouragementElement = document.getElementById("encouragement");
+const trophyDisplayElement = document.getElementById("trophy-display");
+const closeGameOverButton = document.getElementById("close-game-over");
 const leaderboardModal = document.getElementById("leaderboard-modal");
 const leaderboardList = document.getElementById("leaderboard-list");
 const showLeaderboardButton = document.getElementById("show-leaderboard");
@@ -390,7 +462,9 @@ function adjustForMobile() {
 
 // Initialize
 adjustForMobile();
-resetGame();
+
+// Show name input form at start
+nameForm.style.display = "flex";
 
 // Game functions
 function resetGame() {
@@ -402,7 +476,6 @@ function resetGame() {
   introductionElement.style.opacity = 1;
   perfectElement.style.opacity = 0;
   restartButton.style.display = "none";
-  scoreForm.style.display = "none";
   scoreElement.innerText = score;
 
   platforms = [{ x: 50, w: 50 }];
@@ -459,21 +532,23 @@ function saveScore(name, score) {
     score: score,
     timestamp: firebase.database.ServerValue.TIMESTAMP
   }).then(() => {
-    loadLeaderboard();
-    resetGame();
+    showGameOverResults(name, score);
   });
 }
 
 function loadLeaderboard() {
-  const scoresRef = database.ref('hero');
-  scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-    const scores = [];
-    snapshot.forEach((childSnapshot) => {
-      scores.push(childSnapshot.val());
+  return new Promise((resolve) => {
+    const scoresRef = database.ref('hero');
+    scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+      const scores = [];
+      snapshot.forEach((childSnapshot) => {
+        scores.push(childSnapshot.val());
+      });
+      
+      scores.sort((a, b) => b.score - a.score);
+      updateLeaderboardUI(scores);
+      resolve(scores);
     });
-    
-    scores.sort((a, b) => b.score - a.score);
-    updateLeaderboardUI(scores);
   });
 }
 
@@ -492,20 +567,38 @@ function updateLeaderboardUI(scores) {
   });
 }
 
-function showScoreForm() {
-  finalScoreElement.textContent = score;
-  scoreForm.style.display = 'block';
-  playerNameInput.focus();
+function showGameOverResults(name, score) {
+  loadLeaderboard().then((scores) => {
+    let position = scores.findIndex(s => s.name === name && s.score === score) + 1;
+    let encouragement = "";
+    let trophy = "";
+    
+    if (position <= 3) {
+      encouragement = "Amazing! You're in the top 3!";
+      trophy = "🏆".repeat(4 - position);
+    } else if (position <= 10) {
+      encouragement = "Great job! You made it to the top 10!";
+      trophy = "🏅";
+    } else {
+      encouragement = "Good effort! Keep playing to reach the top!";
+      trophy = "👍";
+    }
+    
+    playerResultElement.textContent = `${name}, you scored ${score} points!`;
+    leaderboardPositionElement.textContent = position <= 10 ? `Rank: #${position}` : "Rank: >10";
+    encouragementElement.textContent = encouragement;
+    trophyDisplayElement.textContent = trophy;
+    
+    gameOverModal.style.display = 'flex';
+  });
 }
 
 function showLeaderboard(event) {
-  // COMPLETELY PREVENT GAME START FROM LEADERBOARD CLICK
   if (event) {
     event.stopImmediatePropagation();
     event.preventDefault();
   }
   
-  // Pause the game if it's running
   if (phase !== "waiting" && phase !== "falling") {
     phase = "waiting";
   }
@@ -518,16 +611,18 @@ function hideLeaderboard() {
   leaderboardModal.style.display = 'none';
 }
 
-// EVENT LISTENERS WITH PROPER PROPAGATION CONTROL
+function hideGameOver() {
+  gameOverModal.style.display = 'none';
+  resetGame();
+}
 
-// 1. First set up leaderboard button with strong prevention
+// EVENT LISTENERS
 showLeaderboardButton.addEventListener("click", function(event) {
   event.stopImmediatePropagation();
   event.preventDefault();
   showLeaderboard(event);
-}, true); // Use capturing phase
+}, true);
 
-// 2. Then set up game controls with careful targeting
 canvas.addEventListener("mousedown", startStretching);
 canvas.addEventListener("touchstart", function(event) {
   event.preventDefault();
@@ -542,22 +637,34 @@ window.addEventListener("touchend", function(event) {
   }
 }, { passive: false });
 
-// Other listeners
-submitScoreButton.addEventListener("click", function() {
+startGameButton.addEventListener("click", function() {
   const name = playerNameInput.value.trim();
   if (name) {
-    saveScore(name, score);
+    playerName = name;
+    nameForm.style.display = "none";
+    resetGame();
   } else {
     alert("Please enter your name");
   }
 });
 
+closeGameOverButton.addEventListener("click", hideGameOver);
 closeLeaderboardButton.addEventListener("click", hideLeaderboard);
 
 window.addEventListener("keydown", function (event) {
-  if (event.key == " ") {
-    event.preventDefault();
-    resetGame();
+  if (event.key == "Enter" && nameForm.style.display === "flex") {
+    const name = playerNameInput.value.trim();
+    if (name) {
+      playerName = name;
+      nameForm.style.display = "none";
+      resetGame();
+    } else {
+      alert("Please enter your name");
+    }
+  }
+  
+  if (event.key == " " && gameOverModal.style.display === "flex") {
+    hideGameOver();
   }
 });
 
@@ -662,7 +769,7 @@ function animate(timestamp) {
       heroY += (timestamp - lastTimestamp) / fallingSpeed;
       const maxHeroY = platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
       if (heroY > maxHeroY) {
-        showScoreForm();
+        saveScore(playerName, score);
         return;
       }
       break;
@@ -875,10 +982,16 @@ function getTreeY(x, baseHeight, amplitude) {
   return Math.sinus(x) * amplitude + sineBaseY;
 }
 
-// FINAL FIX: Add pointer-events style to prevent any touch issues
+// Add pointer-events style to prevent any touch issues
 const style = document.createElement('style');
 style.textContent = `
   #leaderboard-modal, #leaderboard-modal * {
+    pointer-events: auto;
+  }
+  #game-over-modal, #game-over-modal * {
+    pointer-events: auto;
+  }
+  #name-form, #name-form * {
     pointer-events: auto;
   }
   #show-leaderboard {
