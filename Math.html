@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="mathGame">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: #3f51b5;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 2rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 25px;
+            border: none;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+                       margin: 0.5rem 0;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .game-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .operation {
+            font-size: 3rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .option {
+            background: white;
+            color: #000;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option:hover {
+            background: #eee;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        .leaderboard {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .timer {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .level-selector {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .level-btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+width: 48%;
+        }
+
+        .level-btn.active {
+            background: #ffc107;
+            font-weight: bold;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            z-index: 10;
+            display: none;
+        }
+
+        .feedback.correct {
+            color: #4CAF50;
+        }
+
+        .feedback.wrong {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body ng-controller="GameController">
+    <!-- Name Input Screen -->
+    <div class="container" id="nameScreen">
+        <h1 class="title animated bounceIn">მათემატიკა</h1>
+<h1 class="title animated bounceIn">➕   ➖     🟰</h1>
+
+        <div class="input-container">
+            <input type="text" ng-model="playerName" placeholder="მითხარი შენი სახელი" id="nameInput">
+            
+            <div class="level-selector">
+                <button class="level-btn active" ng-click="setLevel('easy')">მარტივი</button>
+                <button class="level-btn" ng-click="setLevel('hard')">რთული</button>
+            </div>
+            
+            <button class="btn" ng-click="startGame()">დაწყება</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="container game-container" id="gameScreen">
+<div class="info-item">
+                <button class="btn" ng-click="showLeaderboard()">ვის რამდენი ქულა აქვს?</button>
+            </div>
+        <div class="info-bar">
+            <div class="info-item">
+                <span>მოთამაშე: {{playerName}}</span>
+                <span>ტური: {{currentLevel === 'easy' ? 'მარტივი' : 'რთული'}}</span>
+            </div>
+            <div class="info-item">
+                <span>ეხლა გაქვს: {{score}} ქულა</span>
+            </div>
+            
+        </div>
+
+        <div class="timer">დრო: {{timeLeft}}s</div>
+
+        <div class="operation">
+            {{currentProblem}} = ?
+        </div>
+
+        <div class="options">
+            <div class="option" ng-repeat="option in options" ng-click="checkAnswer(option)">
+                {{option}}
+            </div>
+        </div>
+
+        <div class="info-bar">
+            <div class="info-item">
+                <span>დაგრჩა  {{helpsLeft}} დახმარება </span>
+                <button class="btn" ng-click="useHelp()" ng-disabled="helpsLeft <= 0 || options.length <= 2">დახმარება</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Animation -->
+    <div class="feedback" id="feedbackCorrect">✓</div>
+    <div class="feedback" id="feedbackWrong">✗</div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal" id="leaderboardModal">
+        <div class="modal-content">
+            <h2>Leaderboard - {{currentLevel === 'easy' ? 'Easy' : 'Hard'}}</h2>
+            <div class="leaderboard">
+                <div class="leaderboard-item" ng-repeat="player in leaderboard">
+                    <span>{{$index + 1}}. {{player.name}}</span>
+                    <span>{{player.score}}</span>
+                </div>
+            </div>
+            <button class="close-modal" ng-click="hideLeaderboard()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+            authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+            databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+            projectId: "newspaperveravart",
+            storageBucket: "newspaperveravart.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:1234567890abcdef"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        angular.module('mathGame', [])
+        .controller('GameController', function($scope, $timeout) {
+            // Game variables
+            $scope.playerName = '';
+            $scope.score = 0;
+            $scope.timeLeft = 60;
+            $scope.helpsLeft = 10;
+            $scope.currentProblem = '';
+            $scope.options = [];
+            $scope.correctAnswer = 0;
+            $scope.leaderboard = [];
+            $scope.timer = null;
+            $scope.currentLevel = 'easy';
+            $scope.helpsUsed = 0;
+            $scope.gameActive = true;
+
+            // Set level
+            $scope.setLevel = function(level) {
+                $scope.currentLevel = level;
+                document.querySelectorAll('.level-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+            };
+
+            // Initialize game
+            $scope.startGame = function() {
+                if (!$scope.playerName.trim()) {
+                    alert('ჯერ სახელი უნდა მითხრა');
+                    return;
+                }
+
+                document.getElementById('nameScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'flex';
+                
+                $scope.generateProblem();
+                $scope.startTimer();
+            };
+
+            // Generate a math problem
+            $scope.generateProblem = function() {
+                // Reset helps used for this problem
+                $scope.helpsUsed = 0;
+                
+                if ($scope.currentLevel === 'easy') {
+                    // Easy level - 2 numbers
+                    const isAddition = Math.random() > 0.5;
+                    let num1, num2;
+                    
+                    if (isAddition) {
+                        // One number is 1-10, the other is 1-20 (but sum must be <=20)
+                        num1 = Math.floor(Math.random() * 10) + 1; // 1-10
+                        num2 = Math.floor(Math.random() * (20 - num1)) + 1; // 1 to (20-num1)
+                        $scope.currentProblem = `${num1} + ${num2}`;
+                        $scope.correctAnswer = num1 + num2;
+                    } else {
+                        // Subtraction
+                        num1 = Math.floor(Math.random() * 10) + 11; // 11-20
+                        num2 = Math.floor(Math.random() * (num1 - 1)) + 1; // 1 to num1-1
+                        $scope.currentProblem = `${num1} - ${num2}`;
+                        $scope.correctAnswer = num1 - num2;
+                    }
+                } else {
+                    // Hard level - 3 numbers
+                    const isAddition = Math.random() > 0.5;
+                    let num1, num2, num3;
+                    
+                    if (isAddition) {
+                        num1 = Math.floor(Math.random() * 10) + 1; // 1-10
+                        num2 = Math.floor(Math.random() * 10) + 1; // 1-10
+                        num3 = Math.floor(Math.random() * 10) + 1; // 1-10
+                        $scope.currentProblem = `${num1} + ${num2} + ${num3}`;
+                        $scope.correctAnswer = num1 + num2 + num3;
+                    } else {
+                        // For subtraction, we need to ensure positive results
+                        num1 = Math.floor(Math.random() * 10) + 11; // 11-20
+                        num2 = Math.floor(Math.random() * 10) + 1; // 1-10
+                        num3 = Math.floor(Math.random() * num2) + 1; // 1 to num2
+                        $scope.currentProblem = `${num1} - ${num2} - ${num3}`;
+                        $scope.correctAnswer = num1 - num2 - num3;
+                    }
+                }
+                
+                // Generate options
+                $scope.generateOptions();
+            };
+
+            // Generate answer options
+            $scope.generateOptions = function() {
+                const options = [$scope.correctAnswer];
+                
+                // Add 3 incorrect options
+                while (options.length < 4) {
+                    let wrongAnswer;
+                    const variation = Math.floor(Math.random() * 3) + 1;
+                    
+                    if (Math.random() > 0.5) {
+                        wrongAnswer = $scope.correctAnswer + variation;
+                    } else {
+                        wrongAnswer = $scope.correctAnswer - variation;
+                    }
+                    
+                    // Ensure wrong answer is positive and not already in options
+                    if (wrongAnswer > 0 && !options.includes(wrongAnswer)) {
+                        options.push(wrongAnswer);
+                    }
+                }
+                
+                // Shuffle options
+                $scope.options = options.sort(() => Math.random() - 0.5);
+            };
+
+            // Show feedback animation
+            $scope.showFeedback = function(isCorrect) {
+                $scope.gameActive = false;
+                const feedbackElement = isCorrect ? 
+                    document.getElementById('feedbackCorrect') : 
+                    document.getElementById('feedbackWrong');
+                
+                feedbackElement.style.display = 'block';
+                feedbackElement.classList.add('animated', 'bounceIn');
+                
+                $timeout(function() {
+                    feedbackElement.style.display = 'none';
+                    feedbackElement.classList.remove('animated', 'bounceIn');
+                    $scope.gameActive = true;
+                    $scope.generateProblem();
+                }, 1000);
+            };
+
+            // Check selected answer
+            $scope.checkAnswer = function(selectedAnswer) {
+                if (!$scope.gameActive) return;
+                
+                if (selectedAnswer == $scope.correctAnswer) {
+                    // Calculate points based on level and helps used
+                    let pointsEarned = 0;
+                    if ($scope.currentLevel === 'easy') {
+                        pointsEarned = 3 - $scope.helpsUsed; // 3 points minus 1 per help used
+                    } else {
+                        pointsEarned = 6 - ($scope.helpsUsed * 2); // 6 points minus 2 per help used
+                    }
+                    
+                    // Ensure we don't give negative points
+                    pointsEarned = Math.max(0, pointsEarned);
+                    $scope.score += pointsEarned;
+                    $scope.showFeedback(true);
+                } else {
+                    // Wrong answer - 0 points
+                    $scope.showFeedback(false);
+                }
+            };
+
+            // Use help
+            $scope.useHelp = function() {
+                if ($scope.helpsLeft > 0 && $scope.options.length > 2) {
+                    $scope.helpsLeft--;
+                    $scope.helpsUsed++;
+                    
+                    // Remove one incorrect option (leave at least 2 options including correct one)
+                    const incorrectOptions = $scope.options.filter(opt => opt !== $scope.correctAnswer);
+                    const toRemove = incorrectOptions[0];
+                    
+                    $scope.options = $scope.options.filter(opt => opt !== toRemove);
+                }
+            };
+
+            // Timer functions
+            $scope.startTimer = function() {
+                $scope.timer = $timeout(function tick() {
+                    if ($scope.gameActive) {
+                        $scope.timeLeft--;
+                        
+                        if ($scope.timeLeft <= 0) {
+                            $scope.endGame();
+                        } else {
+                            $scope.timer = $timeout(tick, 1000);
+                        }
+                    } else {
+                        // If game is paused (during feedback), restart the timer without decrementing
+                        $scope.timer = $timeout(tick, 1000);
+                    }
+                }, 1000);
+            };
+
+            // End game
+            $scope.endGame = function() {
+                $timeout.cancel($scope.timer);
+                
+                // Save score to Firebase
+                const levelPath = $scope.currentLevel === 'easy' ? 'math/easyScores' : 'math/hardScores';
+                const playerRef = database.ref(levelPath).push();
+                playerRef.set({
+                    name: $scope.playerName,
+                    score: $scope.score,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Show leaderboard
+                $scope.showLeaderboard();
+            };
+
+            // Leaderboard functions
+            $scope.showLeaderboard = function() {
+                // Get top 10 scores from Firebase for current level
+                const levelPath = $scope.currentLevel === 'easy' ? 'math/easyScores' : 'math/hardScores';
+                database.ref(levelPath).orderByChild('score').limitToLast(10).once('value', function(snapshot) {
+                    const scores = [];
+                    snapshot.forEach(function(childSnapshot) {
+                        scores.push(childSnapshot.val());
+                    });
+                    
+                    // Sort descending
+                    $scope.leaderboard = scores.sort((a, b) => b.score - a.score).slice(0, 10);
+                    $scope.$apply();
+                });
+                
+                document.getElementById('leaderboardModal').style.display = 'flex';
+            };
+
+            $scope.hideLeaderboard = function() {
+                document.getElementById('leaderboardModal').style.display = 'none';
+                
+                // If game is over, restart
+                if ($scope.timeLeft <= 0) {
+                    $scope.resetGame();
+                }
+            };
+
+            // Reset game
+            $scope.resetGame = function() {
+                $scope.score = 0;
+                $scope.timeLeft = 60;
+                $scope.helpsLeft = 5;
+                $scope.generateProblem();
+                $scope.startTimer();
+                
+                document.getElementById('gameScreen').style.display = 'flex';
+                document.getElementById('leaderboardModal').style.display = 'none';
+                document.getElementById('nameScreen').style.display = 'none';
+            };
+        });
+    </script>
+</body>
+</html>
