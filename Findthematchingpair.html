@@ -75,7 +75,6 @@
             user-select: none;
         }
 
-  
         /* Adjust timer position to prevent overlap */
         .timeTxt {
             left: 50%;
@@ -165,7 +164,7 @@
         }
 
         /* Name input form */
-        #nameForm {
+        #nameForm, #startForm {
             display: none;
             position: absolute;
             top: 50%;
@@ -180,7 +179,7 @@
             z-index: 100;
         }
 
-        #nameInput {
+        #nameInput, #playerName {
             width: 80%;
             padding: 10px;
             margin: 10px 0;
@@ -189,7 +188,7 @@
             border: none;
         }
 
-        #submitName {
+        #submitName, #startGame {
             background: #006da6;
             color: white;
             border: none;
@@ -213,7 +212,7 @@
             width: 80%;
             max-width: 400px;
             max-height: 60%;
-            overflow-y: hidden;
+            overflow-y: auto;
             text-align: center;
             z-index: 100;
         }
@@ -247,33 +246,61 @@
             display:none;
         }
         .nav-button {
-    position: absolute;
-    left: 15px;
-    top: 15px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    font-size: 30x;
-    text-align: center;
-    line-height: 60px;
-    cursor: pointer;
-    background: rgba(46, 204, 113, 0.7);
-    color: white;
-    text-decoration: none;
-    z-index: 10;
-}
-      /* Timer at bottom */
-         #dedication {
-           position: absolute;
-            bottom: 10px; /* Positioned above the timer */
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 30x;
             text-align: center;
-            z-index: 5; /* Below buttons but above game */
-            white-space: nowrap;
+            line-height: 60px;
+            cursor: pointer;
+            background: rgba(46, 204, 113, 0.7);
+            color: white;
+            text-decoration: none;
+            z-index: 10;
+        }
+        
+        /* Rank display */
+        .rank-display {
+   
+            margin-bottom: 15px;
+        }
+        
+        .top-rank {
+            color: gold;
+            font-size: 30px;
+        }
+        
+        /* Start screen */
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #gameTitle {
+            font-size: 40px;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        
+        #gameInstructions {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #aaa;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 400px;
         }
 
         @media (orientation: landscape) {
@@ -290,7 +317,6 @@
             }
             
             .timeTxt {
-                
                 bottom: 20px;
             }
             
@@ -305,19 +331,20 @@
                 font-size: 25px;
                 line-height: 50px;
             }
-            #dedication {
-                bottom: 60px;
-                font-size: 12px;
-            }
-            
         }
     </style>
 </head>
 <body>
+    <div id="startScreen">
+       
+        <div id="startForm">
+            <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+            <button id="startGame">Start Game</button>
+        </div>
+    </div>
     
     <div id="container" style="opacity:0;">
         <div id="game">
-        
             <div class="foundTxt"></div>
             <div class="timeTxt">30:00</div>
             <div class="timePlus">+3 sec</div>
@@ -337,9 +364,7 @@
             </div>
         </div>
         
-        <!-- Control buttons now properly positioned outside #game but inside #container -->
         <div id="hintBtn">💡</div>
-        <!-- <div id="dedication">სპეციალურად ალექსანდრე ღვედაშვილისთვის</div>-->
         <div id="leaderboardBtn">🏆</div>
     </div>
 
@@ -347,9 +372,8 @@
     <div id="nameForm">
         <h2>Game Over!</h2>
         <p>You found <span id="finalScore">0</span> pairs</p>
-        <input type="text" id="nameInput" placeholder="Enter your name" maxlength="20">
-        <button id="submitName">Submit</button>
-       <button id="viewLeaderboard">View</button>
+        <h5 id="rankDisplay" class="rank-display"></h5>
+        <button id="submitName">OK</button>
     </div>
 
     <!-- Leaderboard -->
@@ -359,7 +383,6 @@
         <button id="closeLeaderboard">Close</button>
     </div>
 
-   
     <script>
 // Firebase configuration
 const firebaseConfig = {
@@ -382,13 +405,15 @@ var game = document.getElementById('game'),
     leaderboardBtn = document.getElementById('leaderboardBtn'),
     replayBtn = document.getElementById('replayBtn'),
     nameForm = document.getElementById('nameForm'),
-    nameInput = document.getElementById('nameInput'),
-    submitName = document.getElementById('submitName'),
     finalScore = document.getElementById('finalScore'),
-    viewLeaderboard = document.getElementById('viewLeaderboard'),
+    rankDisplay = document.getElementById('rankDisplay'),
     leaderboard = document.getElementById('leaderboard'),
     leaderboardList = document.getElementById('leaderboardList'),
     closeLeaderboard = document.getElementById('closeLeaderboard'),
+    startScreen = document.getElementById('startScreen'),
+    startForm = document.getElementById('startForm'),
+    playerNameInput = document.getElementById('playerName'),
+    startGameBtn = document.getElementById('startGame'),
     timeLimit = 30 * 1000, // in millisec
     timeLeft,
     timeInt,
@@ -398,11 +423,12 @@ var game = document.getElementById('game'),
     matched = false,
     art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
     found = 0,
-    hintCount = 0, // Track hint usage
+    hintCount = 0,
     isTabActive = true,
     lastActiveTime = Date.now(),
     lastTabSwitchTime = Date.now(),
-    isInspecting = false;
+    isInspecting = false,
+    currentPlayerName = '';
 
 // Make 16 buttons
 for (var i = 1; i <= 16; i++) { 
@@ -416,53 +442,25 @@ for (var i = 1; i <= 16; i++) {
     b.onclick = b.ontouchend = btnClick;
 }
 
-// Initial states...
-new TimelineMax({onStart: populate})
-    .set(game, {userSelect: 'none', background: 'radial-gradient(#333, #000 120%)'})
-    .set('.foundTxt', {textContent: 'Find the matching pair...'})
-    .set('.end', {autoAlpha: 0})
-    .set('#replayBtn', {transformOrigin: 'center'})
-    .to('#container', 0.2, {opacity: 1, ease: Power2.easeIn}, 0);
+// Show start screen with name input
+startForm.style.display = 'block';
 
-// Visibility change handler that ignores quick switches (like inspect element)
-document.addEventListener('visibilitychange', handleVisibilityChange);
-
-function handleVisibilityChange() {
-    if (document.hidden) {
-        // Check if this is likely from inspecting element
-        var timeSinceLastInteraction = Date.now() - lastTabSwitchTime;
-        if (timeSinceLastInteraction < 500) { // Threshold for quick tab switch
-            isInspecting = true;
-            return; // Don't pause for quick inspection
-        }
-        isTabActive = false;
-        lastActiveTime = Date.now();
-    } else {
-        isTabActive = true;
-        lastTabSwitchTime = Date.now();
-        // Adjust timeLeft for the time the tab was inactive
-        if (timeInt !== undefined && !isInspecting) {
-            var inactiveTime = Date.now() - lastActiveTime;
-            timeLeft -= inactiveTime;
-            // Ensure time doesn't go negative
-            if (timeLeft < 0) timeLeft = 0;
-        }
-        isInspecting = false;
+// Start game when name is entered
+startGameBtn.addEventListener('click', function() {
+    const name = playerNameInput.value.trim();
+    if (name) {
+        currentPlayerName = name;
+        startScreen.style.display = 'none';
+        new TimelineMax({onStart: populate})
+            .set(game, {userSelect: 'none', background: 'radial-gradient(#333, #000 120%)'})
+            .set('.foundTxt', {textContent: 'Find the matching pair...'})
+            .set('.end', {autoAlpha: 0})
+            .set('#replayBtn', {transformOrigin: 'center'})
+            .to('#container', 0.2, {opacity: 1, ease: Power2.easeIn}, 0);
     }
-}
+});
 
-hintBtn.onclick = hintBtn.ontouchend = function(e) {
-    if (e.type == 'touchend') hintBtn.onclick = undefined;
-    TweenMax.set(hintBtn, {textContent: hint, fontSize: 30});
-    hintCount++; // Increment hint counter
-}
-
-leaderboardBtn.onclick = leaderboardBtn.ontouchend = function(e) {
-    if (e.type == 'touchend') leaderboardBtn.onclick = undefined;
-    loadLeaderboard();
-    leaderboard.style.display = 'block';
-}
-
+// Initial states...
 function populate() {
     lastBtn = undefined;
     matched = false;
@@ -557,7 +555,57 @@ function updateTime() {
 
 function showNameInput() {
     finalScore.textContent = found;
-    nameForm.style.display = 'block';
+    saveScore(currentPlayerName, found);
+    
+    // Check player's rank
+    database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        const scores = [];
+        snapshot.forEach((childSnapshot) => {
+            scores.push(childSnapshot.val());
+        });
+        
+        // Sort by score (descending) and then by hints used (ascending)
+        scores.sort((a, b) => {
+            if (b.score === a.score) {
+                return (a.hintsUsed || 0) - (b.hintsUsed || 0);
+            }
+            return b.score - a.score;
+        });
+        
+        // Find player's rank
+        let playerRank = -1;
+        for (let i = 0; i < scores.length; i++) {
+            if (scores[i].name === currentPlayerName && scores[i].score === found) {
+                playerRank = i + 1;
+                break;
+            }
+        }
+        
+        // Display appropriate message
+        if (playerRank !== -1 && playerRank <= 10) {
+            // Player is in top 10
+            let emoji = '';
+            if (playerRank === 1) emoji = '🥇';
+            else if (playerRank === 2) emoji = '🥈';
+            else if (playerRank === 3) emoji = '🥉';
+            else emoji = '🏆';
+            
+            rankDisplay.innerHTML = `<span class="top-rank">${emoji} #${playerRank} in Top 10! ${emoji}</span>`;
+        } else {
+            // Player is not in top 10
+            const encouragements = [
+                "Good job! Keep practicing!",
+                "Nice try! You'll do better next time!",
+                "Well played! Challenge yourself to beat your score!",
+                "Great effort! The more you play, the better you'll get!",
+                "You're getting better with each game!"
+            ];
+            const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+            rankDisplay.textContent = randomEncouragement;
+        }
+        
+        nameForm.style.display = 'block';
+    });
 }
 
 function saveScore(name, score) {
@@ -565,13 +613,11 @@ function saveScore(name, score) {
     database.ref('scores').push({
         name: name,
         score: score,
-        hintsUsed: hintCount, // Save hint count with the score
+        hintsUsed: hintCount,
         timestamp: timestamp
     });
     hintCount = 0; // Reset hint counter after saving
 }
-
-// ... (keep all previous code until the loadLeaderboard function) ...
 
 function loadLeaderboard() {
     database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
@@ -591,29 +637,34 @@ function loadLeaderboard() {
         // Clear previous leaderboard
         leaderboardList.innerHTML = '';
         
-        // Add entries to leaderboard with hint info
+        // Add entries to leaderboard with emojis for top 3
         scores.forEach((entry, index) => {
             const li = document.createElement('li');
-            li.textContent = `${index + 1}. ${entry.name}: ${entry.score} pairs (Hints: ${entry.hintsUsed || 0})`;
+            let emoji = '';
+            if (index === 0) emoji = '🥇 ';
+            else if (index === 1) emoji = '🥈 ';
+            else if (index === 2) emoji = '🥉 ';
+            
+            li.textContent = `${emoji}${index + 1}. ${entry.name}: ${entry.score} pairs`;
             leaderboardList.appendChild(li);
         });
     });
 }
 
-// ... (keep all remaining code the same) ...
-
 // Event listeners
-submitName.addEventListener('click', () => {
-    const name = nameInput.value.trim();
-    if (name) {
-        saveScore(name, found);
-        nameForm.style.display = 'none';
-        loadLeaderboard();
-        leaderboard.style.display = 'block';
-    }
-});
+hintBtn.onclick = hintBtn.ontouchend = function(e) {
+    if (e.type == 'touchend') hintBtn.onclick = undefined;
+    TweenMax.set(hintBtn, {textContent: hint, fontSize: 30});
+    hintCount++; // Increment hint counter
+}
 
-viewLeaderboard.addEventListener('click', () => {
+leaderboardBtn.onclick = leaderboardBtn.ontouchend = function(e) {
+    if (e.type == 'touchend') leaderboardBtn.onclick = undefined;
+    loadLeaderboard();
+    leaderboard.style.display = 'block';
+}
+
+submitName.addEventListener('click', () => {
     nameForm.style.display = 'none';
     loadLeaderboard();
     leaderboard.style.display = 'block';
