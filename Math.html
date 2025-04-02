@@ -2,7 +2,7 @@
 <html lang="en" ng-app="mathGame">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Game</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
@@ -12,7 +12,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -20,37 +19,35 @@
             color: white;
             height: 100vh;
             overflow: hidden;
-            touch-action: manipulation;
         }
 
         .container {
+            max-width: 100%;
             width: 100%;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 20px;
         }
 
         .title {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
             text-align: center;
-            padding: 0 10px;
         }
 
         .input-container {
             width: 100%;
             max-width: 300px;
-            margin-bottom: 1.5rem;
-            padding: 0 10px;
+            margin-bottom: 2rem;
         }
 
         input {
             width: 100%;
-            padding: 10px;
-            border-radius: 20px;
+            padding: 12px;
+            border-radius: 25px;
             border: none;
             margin-bottom: 1rem;
             font-size: 1rem;
@@ -60,14 +57,13 @@
             background: #ffc107;
             color: #000;
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
             width: 100%;
-            max-width: 200px;
-            margin: 0.5rem 0;
+                       margin: 0.5rem 0;
             transition: transform 0.2s;
         }
 
@@ -87,61 +83,49 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-around;
-            padding: 10px;
+            padding: 20px;
         }
 
         .operation {
-            font-size: 2rem;
-            margin: 1rem 0;
+            font-size: 3rem;
+            margin: 2rem 0;
             text-align: center;
-            padding: 0 10px;
-            word-break: break-all;
         }
 
         .options {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
             max-width: 300px;
-            padding: 0 10px;
         }
 
         .option {
             background: white;
             color: #000;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 1.2rem;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.5rem;
             text-align: center;
             cursor: pointer;
             transition: background 0.2s;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+
+        .option:hover {
+            background: #eee;
         }
 
         .info-bar {
             display: flex;
-            flex-direction: column;
-            width: 100%;
-            margin-top: 0.5rem;
-            padding: 0 10px;
-        }
-
-        .info-row {
-            display: flex;
             justify-content: space-between;
             width: 100%;
-            margin-bottom: 0.5rem;
+            margin-top: 1rem;
         }
 
         .info-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.9rem;
         }
 
         .modal {
@@ -151,21 +135,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.8);
             z-index: 100;
             justify-content: center;
             align-items: center;
-            padding: 10px;
         }
 
         .modal-content {
             background: white;
             color: #000;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
-            width: 100%;
-            max-width: 400px;
-            max-height: 80vh;
+            max-width: 90%;
+            max-height: 80%;
             overflow-y: auto;
         }
 
@@ -177,7 +159,6 @@
             border-radius: 5px;
             margin-top: 1rem;
             cursor: pointer;
-            width: 100%;
         }
 
         .leaderboard {
@@ -190,31 +171,25 @@
             justify-content: space-between;
             padding: 8px 0;
             border-bottom: 1px solid #ddd;
-            font-size: 0.9rem;
         }
 
         .timer {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
         }
 
         .level-selector {
             display: flex;
             margin-bottom: 1rem;
-            width: 100%;
-            justify-content: center;
         }
 
         .level-btn {
-            padding: 8px 12px;
+            padding: 8px 16px;
             margin: 0 5px;
             border-radius: 5px;
             border: none;
             cursor: pointer;
-            font-size: 0.8rem;
-            flex: 1;
-            max-width: 120px;
+width: 48%;
         }
 
         .level-btn.active {
@@ -227,7 +202,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3rem;
+            font-size: 4rem;
             z-index: 10;
             display: none;
         }
@@ -239,62 +214,43 @@
         .feedback.wrong {
             color: #f44336;
         }
-
-        @media (max-height: 600px) {
-            .title {
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
-            }
-            .operation {
-                font-size: 1.8rem;
-                margin: 0.5rem 0;
-            }
-            .option {
-                padding: 8px;
-                font-size: 1rem;
-                min-height: 50px;
-            }
-        }
     </style>
 </head>
 <body ng-controller="GameController">
     <!-- Name Input Screen -->
     <div class="container" id="nameScreen">
-        <h1 class="title animated bounceIn">Math Game</h1>
+        <h1 class="title animated bounceIn">მათემატიკა</h1>
+<h1 class="title animated bounceIn">➕   ➖     🟰</h1>
+
         <div class="input-container">
-            <input type="text" ng-model="playerName" placeholder="Enter your name" id="nameInput">
+            <input type="text" ng-model="playerName" placeholder="მითხარი შენი სახელი" id="nameInput">
             
             <div class="level-selector">
-                <button class="level-btn active" ng-click="setLevel('easy')">Easy</button>
-                <button class="level-btn" ng-click="setLevel('hard')">Hard</button>
+                <button class="level-btn active" ng-click="setLevel('easy')">მარტივი</button>
+                <button class="level-btn" ng-click="setLevel('hard')">რთული</button>
             </div>
             
-            <button class="btn" ng-click="startGame()">Start Game</button>
+            <button class="btn" ng-click="startGame()">დაწყება</button>
         </div>
     </div>
 
     <!-- Game Screen -->
     <div class="container game-container" id="gameScreen">
+<div class="info-item">
+                <button class="btn" ng-click="showLeaderboard()">ვის რამდენი ქულა აქვს?</button>
+            </div>
         <div class="info-bar">
-            <div class="info-row">
-                <div class="info-item">
-                    <span>{{playerName}}</span>
-                </div>
-                <div class="info-item">
-                    <span>{{currentLevel === 'easy' ? 'Easy' : 'Hard'}}</span>
-                </div>
+            <div class="info-item">
+                <span>მოთამაშე: {{playerName}}</span>
+                <span>ტური: {{currentLevel === 'easy' ? 'მარტივი' : 'რთული'}}</span>
             </div>
-            <div class="info-row">
-                <div class="info-item">
-                    <span>Score: {{score}}</span>
-                </div>
-                <div class="info-item">
-                    <button class="btn" ng-click="showLeaderboard()" style="padding: 5px 10px; font-size: 0.8rem;">Top</button>
-                </div>
+            <div class="info-item">
+                <span>ეხლა გაქვს: {{score}} ქულა</span>
             </div>
+            
         </div>
 
-        <div class="timer">Time: {{timeLeft}}s</div>
+        <div class="timer">დრო: {{timeLeft}}s</div>
 
         <div class="operation">
             {{currentProblem}} = ?
@@ -307,13 +263,9 @@
         </div>
 
         <div class="info-bar">
-            <div class="info-row">
-                <div class="info-item">
-                    <span>Helps: {{helpsLeft}}</span>
-                </div>
-                <div class="info-item">
-                    <button class="btn" ng-click="useHelp()" ng-disabled="helpsLeft <= 0 || options.length <= 2" style="padding: 5px 10px; font-size: 0.8rem;">Help</button>
-                </div>
+            <div class="info-item">
+                <span>დაგრჩა  {{helpsLeft}} დახმარება </span>
+                <button class="btn" ng-click="useHelp()" ng-disabled="helpsLeft <= 0 || options.length <= 2">დახმარება</button>
             </div>
         </div>
     </div>
@@ -325,7 +277,7 @@
     <!-- Leaderboard Modal -->
     <div class="modal" id="leaderboardModal">
         <div class="modal-content">
-            <h2 style="text-align: center;">Leaderboard - {{currentLevel === 'easy' ? 'Easy' : 'Hard'}}</h2>
+            <h2>Leaderboard - {{currentLevel === 'easy' ? 'Easy' : 'Hard'}}</h2>
             <div class="leaderboard">
                 <div class="leaderboard-item" ng-repeat="player in leaderboard">
                     <span>{{$index + 1}}. {{player.name}}</span>
@@ -361,7 +313,7 @@
             $scope.playerName = '';
             $scope.score = 0;
             $scope.timeLeft = 60;
-            $scope.helpsLeft = 5;
+            $scope.helpsLeft = 10;
             $scope.currentProblem = '';
             $scope.options = [];
             $scope.correctAnswer = 0;
@@ -383,7 +335,7 @@
             // Initialize game
             $scope.startGame = function() {
                 if (!$scope.playerName.trim()) {
-                    alert('Please enter your name');
+                    alert('ჯერ სახელი უნდა მითხრა');
                     return;
                 }
 
