@@ -91,9 +91,9 @@ body {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Score submission form */
-#score-form {
-  display: none;
+/* Name input form */
+#name-form {
+  display: flex;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -106,17 +106,13 @@ body {
   width: 80%;
   max-width: 400px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  flex-direction: column;
+  align-items: center;
 }
 
-#score-form h3 {
+#name-form h3 {
   margin-top: 0;
   color: #333;
-}
-
-#final-score {
-  font-weight: bold;
-  font-size: 1.2em;
-  color: #4CAF50;
 }
 
 #player-name {
@@ -128,7 +124,7 @@ body {
   font-size: 1em;
 }
 
-#submit-score {
+#start-game {
   padding: 12px 25px;
   background: #4CAF50;
   color: white;
@@ -139,8 +135,75 @@ body {
   transition: background 0.3s;
 }
 
-#submit-score:hover {
+#start-game:hover {
   background: #45a049;
+}
+
+/* Game over modal */
+#game-over-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-over-content {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+#game-over-content h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+#final-score-display {
+  font-size: 1.5em;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+#leaderboard-position {
+  font-size: 1.2em;
+  margin: 10px 0;
+  color: #2196F3;
+}
+
+#encouragement {
+  font-size: 1.3em;
+  margin: 15px 0;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.trophy {
+  font-size: 3em;
+  margin: 10px 0;
+  display: none;
+}
+
+#play-again {
+  padding: 12px 25px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 15px;
 }
 
 /* Leaderboard modal */
@@ -209,7 +272,6 @@ body {
   position: absolute;
   bottom: 20px;
   right: 20px;
-/*   padding: 10px 15px; */
   background: #2196F3;
   color: white;
   border: none;
@@ -252,13 +314,8 @@ body {
     padding: 10px;
   }
   
-  #submit-score {
+  #start-game, #play-again {
     padding: 10px 20px;
-  }
-  
-  #show-leaderboard {
-/*     padding: 8px 12px; */
-/*     font-size: 0.9em; */
   }
 }
 </style>
@@ -271,13 +328,24 @@ body {
   <div id="perfect">DOUBLE SCORE</div>
   <button id="restart">RESTART</button>
   <button id="show-leaderboard">🏆</button>
-  
-  <!-- Score submission form -->
-  <div id="score-form">
-    <h3>Game Over!</h3>
-    <p>Your score: <span id="final-score">0</span></p>
-    <input type="text" id="player-name" placeholder="Enter your name">
-    <button id="submit-score">Submit Score</button>
+</div>
+
+<!-- Name input form -->
+<div id="name-form">
+  <h3>Enter Your Name</h3>
+  <input type="text" id="player-name" placeholder="Your name" maxlength="15">
+  <button id="start-game">Start Game</button>
+</div>
+
+<!-- Game Over Modal -->
+<div id="game-over-modal">
+  <div id="game-over-content">
+    <h2>Game Over!</h2>
+    <div id="final-score-display">Score: 0</div>
+    <div id="leaderboard-position"></div>
+    <div class="trophy">🏆</div>
+    <div id="encouragement"></div>
+    <button id="play-again">Play Again</button>
   </div>
 </div>
 
@@ -325,6 +393,8 @@ let platforms = [];
 let sticks = [];
 let trees = [];
 let score = 0;
+let playerName = "";
+let currentPlayerId = "";
 
 // Configuration
 let canvasWidth = 375;
@@ -359,10 +429,15 @@ const introductionElement = document.getElementById("introduction");
 const perfectElement = document.getElementById("perfect");
 const restartButton = document.getElementById("restart");
 const scoreElement = document.getElementById("score");
-const scoreForm = document.getElementById("score-form");
-const finalScoreElement = document.getElementById("final-score");
+const nameForm = document.getElementById("name-form");
 const playerNameInput = document.getElementById("player-name");
-const submitScoreButton = document.getElementById("submit-score");
+const startGameButton = document.getElementById("start-game");
+const gameOverModal = document.getElementById("game-over-modal");
+const finalScoreDisplay = document.getElementById("final-score-display");
+const leaderboardPosition = document.getElementById("leaderboard-position");
+const encouragementElement = document.getElementById("encouragement");
+const trophyElement = document.querySelector(".trophy");
+const playAgainButton = document.getElementById("play-again");
 const leaderboardModal = document.getElementById("leaderboard-modal");
 const leaderboardList = document.getElementById("leaderboard-list");
 const showLeaderboardButton = document.getElementById("show-leaderboard");
@@ -390,7 +465,6 @@ function adjustForMobile() {
 
 // Initialize
 adjustForMobile();
-resetGame();
 
 // Game functions
 function resetGame() {
@@ -402,7 +476,6 @@ function resetGame() {
   introductionElement.style.opacity = 1;
   perfectElement.style.opacity = 0;
   restartButton.style.display = "none";
-  scoreForm.style.display = "none";
   scoreElement.innerText = score;
 
   platforms = [{ x: 50, w: 50 }];
@@ -454,13 +527,13 @@ function generatePlatform() {
 function saveScore(name, score) {
   const scoresRef = database.ref('hero');
   const newScoreRef = scoresRef.push();
+  currentPlayerId = newScoreRef.key;
   newScoreRef.set({
     name: name,
     score: score,
     timestamp: firebase.database.ServerValue.TIMESTAMP
   }).then(() => {
-    loadLeaderboard();
-    resetGame();
+    showGameOver();
   });
 }
 
@@ -469,11 +542,19 @@ function loadLeaderboard() {
   scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
     const scores = [];
     snapshot.forEach((childSnapshot) => {
-      scores.push(childSnapshot.val());
+      scores.push({
+        id: childSnapshot.key,
+        ...childSnapshot.val()
+      });
     });
     
     scores.sort((a, b) => b.score - a.score);
     updateLeaderboardUI(scores);
+    
+    // After loading leaderboard, check if we need to show player's position
+    if (gameOverModal.style.display === 'flex') {
+      showPlayerPosition(scores);
+    }
   });
 }
 
@@ -488,24 +569,62 @@ function updateLeaderboardUI(scores) {
   scores.forEach((score, index) => {
     const li = document.createElement('li');
     li.innerHTML = `<span>${index + 1}. ${score.name}</span><span>${score.score}</span>`;
+    if (score.id === currentPlayerId) {
+      li.style.backgroundColor = '#e3f2fd';
+      li.style.fontWeight = 'bold';
+    }
     leaderboardList.appendChild(li);
   });
 }
 
-function showScoreForm() {
-  finalScoreElement.textContent = score;
-  scoreForm.style.display = 'block';
-  playerNameInput.focus();
+function showPlayerPosition(scores) {
+  const playerIndex = scores.findIndex(score => score.id === currentPlayerId);
+  if (playerIndex !== -1) {
+    const position = playerIndex + 1;
+    leaderboardPosition.textContent = `You are #${position} on the leaderboard!`;
+    
+    // Show trophy if in top 3
+    trophyElement.style.display = 'none';
+    if (position === 1) {
+      trophyElement.textContent = '🥇';
+      trophyElement.style.display = 'block';
+      encouragementElement.textContent = 'AMAZING! You are the BEST!';
+    } else if (position === 2) {
+      trophyElement.textContent = '🥈';
+      trophyElement.style.display = 'block';
+      encouragementElement.textContent = 'Fantastic! Almost there!';
+    } else if (position === 3) {
+      trophyElement.textContent = '🥉';
+      trophyElement.style.display = 'block';
+      encouragementElement.textContent = 'Great job! Top 3!';
+    } else if (position <= 10) {
+      encouragementElement.textContent = 'Well done! You made it to the top 10!';
+    } else {
+      encouragementElement.textContent = 'Good try! Play again to improve your score!';
+    }
+  } else {
+    leaderboardPosition.textContent = 'You are not in the top 10 yet.';
+    encouragementElement.textContent = 'Keep trying to reach the top!';
+    trophyElement.style.display = 'none';
+  }
+}
+
+function showGameOver() {
+  finalScoreDisplay.textContent = `Score: ${score}`;
+  gameOverModal.style.display = 'flex';
+  loadLeaderboard(); // This will trigger showPlayerPosition when leaderboard loads
+}
+
+function hideGameOver() {
+  gameOverModal.style.display = 'none';
 }
 
 function showLeaderboard(event) {
-  // COMPLETELY PREVENT GAME START FROM LEADERBOARD CLICK
   if (event) {
     event.stopImmediatePropagation();
     event.preventDefault();
   }
   
-  // Pause the game if it's running
   if (phase !== "waiting" && phase !== "falling") {
     phase = "waiting";
   }
@@ -518,16 +637,13 @@ function hideLeaderboard() {
   leaderboardModal.style.display = 'none';
 }
 
-// EVENT LISTENERS WITH PROPER PROPAGATION CONTROL
-
-// 1. First set up leaderboard button with strong prevention
+// EVENT LISTENERS
 showLeaderboardButton.addEventListener("click", function(event) {
   event.stopImmediatePropagation();
   event.preventDefault();
   showLeaderboard(event);
-}, true); // Use capturing phase
+}, true);
 
-// 2. Then set up game controls with careful targeting
 canvas.addEventListener("mousedown", startStretching);
 canvas.addEventListener("touchstart", function(event) {
   event.preventDefault();
@@ -542,14 +658,20 @@ window.addEventListener("touchend", function(event) {
   }
 }, { passive: false });
 
-// Other listeners
-submitScoreButton.addEventListener("click", function() {
+startGameButton.addEventListener("click", function() {
   const name = playerNameInput.value.trim();
   if (name) {
-    saveScore(name, score);
+    playerName = name;
+    nameForm.style.display = 'none';
+    resetGame();
   } else {
     alert("Please enter your name");
   }
+});
+
+playAgainButton.addEventListener("click", function() {
+  hideGameOver();
+  resetGame();
 });
 
 closeLeaderboardButton.addEventListener("click", hideLeaderboard);
@@ -662,7 +784,7 @@ function animate(timestamp) {
       heroY += (timestamp - lastTimestamp) / fallingSpeed;
       const maxHeroY = platformHeight + 100 + (window.innerHeight - canvasHeight) / 2;
       if (heroY > maxHeroY) {
-        showScoreForm();
+        saveScore(playerName, score);
         return;
       }
       break;
@@ -875,10 +997,16 @@ function getTreeY(x, baseHeight, amplitude) {
   return Math.sinus(x) * amplitude + sineBaseY;
 }
 
-// FINAL FIX: Add pointer-events style to prevent any touch issues
+// Add pointer-events style to prevent any touch issues
 const style = document.createElement('style');
 style.textContent = `
   #leaderboard-modal, #leaderboard-modal * {
+    pointer-events: auto;
+  }
+  #game-over-modal, #game-over-modal * {
+    pointer-events: auto;
+  }
+  #name-form, #name-form * {
     pointer-events: auto;
   }
   #show-leaderboard {
@@ -889,5 +1017,8 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Show name form on load
+nameForm.style.display = 'flex';
 </script>
 </html>
