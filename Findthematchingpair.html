@@ -553,9 +553,33 @@ function btnClick(e) {
     lastBtn = e.currentTarget;
 }
 
+// დასაწყისში დავამატოთ
+var tabInactiveTime = 0;
+var lastTabSwitchTime = Date.now();
+
+// დავამატოთ visibility change event listener
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // ტაბი გახდა არააქტიური
+        lastTabSwitchTime = Date.now();
+        clearInterval(timeInt);
+        timeInt = undefined;
+    } else {
+        // ტაბი გახდა აქტიური
+        var inactiveDuration = Date.now() - lastTabSwitchTime;
+        timeLeft -= inactiveDuration;
+        
+        // თუ დრო არ ამოიწურა, განვაახლოთ თაიმერი
+        if (timeLeft > 0 && matched === false) {
+            timeInt = setInterval(updateTime, 10);
+        }
+    }
+}
+
+// შევცვალოთ updateTime ფუნქცია
 function updateTime() {
-    if (!isTabActive) return; // Don't update time if tab is inactive
-    
     if (timeLeft > 0) {
         timeLeft -= 10;
         var mil = Math.floor(timeLeft % 1000 / 10);
