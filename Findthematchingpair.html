@@ -560,6 +560,7 @@ var lastTabSwitchTime = Date.now();
 // დავამატოთ visibility change event listener
 document.addEventListener('visibilitychange', handleVisibilityChange);
 
+// შეცვლილი visibility change ფუნქცია
 function handleVisibilityChange() {
     if (document.hidden) {
         // ტაბი გახდა არააქტიური
@@ -571,14 +572,31 @@ function handleVisibilityChange() {
         var inactiveDuration = Date.now() - lastTabSwitchTime;
         timeLeft -= inactiveDuration;
         
-        // თუ დრო არ ამოიწურა, განვაახლოთ თაიმერი
-        if (timeLeft > 0 && matched === false) {
+        // თუ დრო ამოწურულია, გავუშვათ game over სცენარი
+        if (timeLeft <= 0) {
+            timeLeft = 0;
+            clearInterval(timeInt);
+            timeInt = undefined;
+            if (found == 0) TweenMax.set('.foundTxt', {textContent: 'Found: 0', fontWeight: 500});
+            TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
+            
+            new TimelineMax()
+                .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
+                .to(hintBtn, 0.3, {autoAlpha: 0}, 0)
+                .to(btnArea, 0.3, {autoAlpha: 0}, 0)
+                .to('.btn', 0.1, {border: '3px solid transparent'}, 0.3)
+                .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 2.5, y: 130, ease: Power2.easeInOut}, 0.2)
+                .to('.end', 0.6, {autoAlpha: 1, ease: Power2.easeInOut}, 0)
+                .fromTo(replayBtn, 1.0, {rotation: 360, scale: 0}, {scale: 0.6, rotation: 0, ease: Power1.easeInOut}, 0.5)
+                .call(showNameInput, [], "+=0.5");
+        } else if (matched === false) {
+            // თუ დრო არ ამოწურულია და არ არის მატჩის მოძებნის პროცესში, განვაახლოთ თაიმერი
             timeInt = setInterval(updateTime, 10);
         }
     }
 }
 
-// შევცვალოთ updateTime ფუნქცია
+// შეცვლილი updateTime ფუნქცია (იგივე რჩება, მაგრამ აქ ვამატებ მოკლე ვერსიას)
 function updateTime() {
     if (timeLeft > 0) {
         timeLeft -= 10;
@@ -590,21 +608,27 @@ function updateTime() {
         TweenMax.set('.timeTxt', {textContent: t});      
         (msTilHint < 1) ? TweenMax.to(hintBtn, 0.5, {autoAlpha: 1}) : msTilHint -= 10;
     } else {
+        // დრო ამოწურულია - გადავიდეთ game over სცენარზე
         clearInterval(timeInt);
         timeInt = undefined;
-        if (found == 0) TweenMax.set('.foundTxt', {textContent: 'Found: 0', fontWeight: 500});
-        TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
-        
-        new TimelineMax()
-            .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
-            .to(hintBtn, 0.3, {autoAlpha: 0}, 0)
-            .to(btnArea, 0.3, {autoAlpha: 0}, 0)
-            .to('.btn', 0.1, {border: '3px solid transparent'}, 0.3)
-            .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 2.5, y: 130, ease: Power2.easeInOut}, 0.2)
-            .to('.end', 0.6, {autoAlpha: 1, ease: Power2.easeInOut}, 0)
-            .fromTo(replayBtn, 1.0, {rotation: 360, scale: 0}, {scale: 0.6, rotation: 0, ease: Power1.easeInOut}, 0.5)
-            .call(showNameInput, [], "+=0.5");
+        gameOver();
     }
+}
+
+// ახალი ფუნქცია game over სცენარისთვის
+function gameOver() {
+    if (found == 0) TweenMax.set('.foundTxt', {textContent: 'Found: 0', fontWeight: 500});
+    TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
+    
+    new TimelineMax()
+        .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
+        .to(hintBtn, 0.3, {autoAlpha: 0}, 0)
+        .to(btnArea, 0.3, {autoAlpha: 0}, 0)
+        .to('.btn', 0.1, {border: '3px solid transparent'}, 0.3)
+        .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 2.5, y: 130, ease: Power2.easeInOut}, 0.2)
+        .to('.end', 0.6, {autoAlpha: 1, ease: Power2.easeInOut}, 0)
+        .fromTo(replayBtn, 1.0, {rotation: 360, scale: 0}, {scale: 0.6, rotation: 0, ease: Power1.easeInOut}, 0.5)
+        .call(showNameInput, [], "+=0.5");
 }
 
 function showNameInput() {
