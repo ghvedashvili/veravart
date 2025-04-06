@@ -42,26 +42,36 @@
       z-index: 1000;
     }
 
-    #left-controls {
+    #controls-container {
       position: fixed;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
+      bottom: 30px;
+      left: 0;
+      width: 100%;
       display: flex;
-      flex-direction: column;
-      gap: 20px;
+      justify-content: center;
       z-index: 100;
     }
 
-    #right-controls {
-      position: fixed;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      z-index: 100;
+    #controls {
+      display: grid;
+      grid-template-areas:
+        ". up ."
+        "left . right"
+        ". down .";
+      gap: 10px;
+    }
+
+    #forward {
+      grid-area: up;
+    }
+    #backward {
+      grid-area: down;
+    }
+    #left {
+      grid-area: left;
+    }
+    #right {
+      grid-area: right;
     }
 
     .control-btn {
@@ -146,12 +156,8 @@
         font-size: 20px;
       }
       
-      #left-controls {
-        left: 5px;
-      }
-      
-      #right-controls {
-        right: 5px;
+      #controls-container {
+        bottom: 20px;
       }
     }
 
@@ -165,6 +171,22 @@
       #score {
         font-size: 1.2em;
       }
+      
+      #controls-container {
+        bottom: 15px;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+      }
+      
+      #controls-container {
+        bottom: 10px;
+      }
     }
   </style>
 </head>
@@ -172,16 +194,14 @@
   <div id="loading">Loading game...</div>
   <canvas class="game"></canvas>
   
-  <!-- Left controls for left/right movement -->
-  <div id="left-controls">
-    <button id="left" class="control-btn">◀</button>
-    <button id="right" class="control-btn">▶</button>
-  </div>
-  
-  <!-- Right controls for forward/backward movement -->
-  <div id="right-controls">
-    <button id="forward" class="control-btn">▲</button>
-    <button id="backward" class="control-btn">▼</button>
+  <!-- Cross-shaped controls at the bottom center -->
+  <div id="controls-container">
+    <div id="controls">
+      <button id="forward" class="control-btn">▲</button>
+      <button id="left" class="control-btn">◀</button>
+      <button id="right" class="control-btn">▶</button>
+      <button id="backward" class="control-btn">▼</button>
+    </div>
   </div>
   
   <div id="score">0</div>
@@ -909,7 +929,23 @@
         renderer.render(scene, camera);
       });
 
+      // ეკრანზე დაჭერის მოვლენის გაუქმება
+      document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('control-btn')) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+      
+      document.addEventListener('touchstart', function(e) {
+        if (!e.target.classList.contains('control-btn')) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
       initializeGame();
+      setupButtonControls();
     }
 
     const scoreDOM = document.getElementById("score");
@@ -925,7 +961,7 @@
 
     document.querySelector("#retry")?.addEventListener("click", initializeGame);
 
-    // Control buttons event listeners - გადაკეთებული ვერსია
+    // ღილაკების კონტროლის დაყენება
     function setupButtonControls() {
       const forwardBtn = document.getElementById("forward");
       const backwardBtn = document.getElementById("backward");
@@ -933,45 +969,21 @@
       const rightBtn = document.getElementById("right");
 
       // Touch events for mobile
-      forwardBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        queueMove("forward");
-      }, {passive: false});
-
-      backwardBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        queueMove("backward");
-      }, {passive: false});
-
-      leftBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        queueMove("left");
-      }, {passive: false});
-
-      rightBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        queueMove("right");
-      }, {passive: false});
+      [forwardBtn, backwardBtn, leftBtn, rightBtn].forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const direction = btn.id;
+          queueMove(direction);
+        }, {passive: false});
+      });
 
       // Mouse events for desktop
-      forwardBtn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        queueMove("forward");
-      });
-
-      backwardBtn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        queueMove("backward");
-      });
-
-      leftBtn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        queueMove("left");
-      });
-
-      rightBtn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        queueMove("right");
+      [forwardBtn, backwardBtn, leftBtn, rightBtn].forEach(btn => {
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const direction = btn.id;
+          queueMove(direction);
+        });
       });
 
       // Prevent context menu on long press
@@ -1009,11 +1021,8 @@
       }
     });
 
-    // დავიწყოთ თამაშის ინიციალიზაცია როდესაც ყველა რესურსი ჩაიტვირთება
-    window.addEventListener('load', function() {
-      init();
-      setupButtonControls(); // დავამატეთ ღილაკების კონტროლის ინიციალიზაცია
-    });
+    // დავიწყოთ თამაშის ინიციალიზაცია
+    window.addEventListener('load', init);
   </script>
 </body>
 </html>
