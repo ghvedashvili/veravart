@@ -219,11 +219,11 @@
       <canvas></canvas>
       <div class="scoreboard">
         <div class="score">
-          <div>მოთამაშე:</div>
+          <div>მოთამაშეები:</div>
           <span id="playerWins">0</span>
         </div>
         <div class="score">
-          <div>კომპიუტერი:</div>
+          <div>Kidsmart:</div>
           <span id="computerWins">0</span>
         </div>
       </div>
@@ -453,7 +453,7 @@
         message.textContent = `${player1.id} მოიგო თამაში!`;
       } else {
         computerWins++;
-        message.textContent = "კომპიუტერმა მოიგო თამაში!";
+        message.textContent = "Kidsmart-მა მოიგო თამაში!";
       }
       
       updateScoreDisplay();
@@ -492,7 +492,7 @@
     function togglePlayer() {
       activePlayer = activePlayer === player1 ? player2 : player1;
       setPlayerID();
-      message.textContent = activePlayer === player1 ? "თქვენი სვლა" : "კომპიუტერის სვლა";
+      message.textContent = activePlayer === player1 ? "თქვენი სვლა" : "Kidsmart-ის სვლა";
 
       if (activePlayer === player2) {
         setTimeout(rollDice, 1000);
@@ -505,7 +505,7 @@
       if (locked) return;
       locked = true;
 
-      message.textContent = activePlayer === player1 ? "გაგორება..." : "კომპიუტერი გაგორებს...";
+      message.textContent = activePlayer === player1 ? "გაგორება..." : "Kidsmart აგორებს...";
 
       rollCount = 0;
       rollMax = Math.floor(Math.random() * 10) + 15;
