@@ -556,8 +556,8 @@ label {
 
  
   <div>
-   <h1>CSS Rock-Paper-Scissors</h1>
-  <div id="score-display">Score: You 0 - 0 Computer</div>
+   <h1>ჯეირანი</h1>
+  <div id="score-display">Score: შენ 0 - 0 Kidsmart</div>
    
     <div id="hands">
        <div class="hand" id="user-hand">
@@ -604,14 +604,14 @@ label {
   </div>
 
   <div id="game-over">
-    <h2>Game Over!</h2>
+    <h2>თამაში დასრულდა!</h2>
     <p id="final-result"></p>
-    <button id="play-again-btn">Play Again</button>
+    <button id="play-again-btn">ითამაშე</button>
   </div>
 
   <div id="overall-stats">
     <h3>Overall Statistics</h3>
-    <p>Players vs Computer: <span id="overall-score">0 - 0</span></p>
+    <p>შენ vs Kidsmart: <span id="overall-score">0 - 0</span></p>
   </div>
 
 </form>
@@ -699,7 +699,7 @@ function updateOverallScore() {
 
 // Update score display
 function updateScoreDisplay() {
-  scoreDisplay.textContent = `Score: You ${gameState.playerScore} - ${gameState.computerScore} Computer`;
+  scoreDisplay.textContent = `Score: შენ ${gameState.playerScore} - ${gameState.computerScore} Kidsmart`;
 }
 
 // Reset selections after 2 seconds
