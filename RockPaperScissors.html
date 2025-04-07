@@ -199,17 +199,17 @@ input[id^="paper"]:checked ~ div #computer-hand .finger-4 {
 #rock-rock:checked ~ div h2::before,
 #paper-paper:checked ~ div h2::before,
 #scissors-scissors:checked ~ div h2::before {
-  content: "You Tied!";
+  content: "ფრე!";
 }
 #rock-paper:checked ~ div h2::before,
 #paper-scissors:checked ~ div h2::before,
 #scissors-rock:checked ~ div h2::before {
-  content: "You Win!";
+  content: "შენ მოიგე!";
 }
 #rock-scissors:checked ~ div h2::before,
 #paper-rock:checked ~ div h2::before,
 #scissors-paper:checked ~ div h2::before {
-  content: "Computer Wins!";
+  content: "Kidsmart-მა მოიგო!";
 }
 
 #message {
@@ -699,7 +699,7 @@ function updateOverallScore() {
 
 // Update score display
 function updateScoreDisplay() {
-  scoreDisplay.textContent = `Score: შენ ${gameState.playerScore} - ${gameState.computerScore} Kidsmart`;
+  scoreDisplay.textContent = `ანგარიში: შენ ${gameState.playerScore} - ${gameState.computerScore} Kidsmart`;
 }
 
 // Reset selections after 2 seconds
@@ -742,10 +742,10 @@ function handleGameOver() {
   // Determine winner
   let resultMessage;
   if (gameState.playerScore > gameState.computerScore) {
-    resultMessage = `You won ${gameState.playerScore}-${gameState.computerScore}!`;
+    resultMessage = `შენ მოიგე ${gameState.playerScore}-${gameState.computerScore}!`;
     gameState.playerWins++;
   } else {
-    resultMessage = `Computer won ${gameState.computerScore}-${gameState.playerScore}!`;
+    resultMessage = `Kidsmart-მა მოიგო ${gameState.computerScore}-${gameState.playerScore}!`;
     gameState.computerWins++;
   }
   
