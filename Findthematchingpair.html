@@ -578,7 +578,7 @@ function handleVisibilityChange() {
             clearInterval(timeInt);
             timeInt = undefined;
             if (found == 0) TweenMax.set('.foundTxt', {textContent: 'ნაპოვნია: 0', fontWeight: 500});
-            TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
+            TweenMax.set('.endTxt', {textContent: hint + " კიდევ ვითამაშოთ? " + hint, fontSize: 30});
             
             new TimelineMax()
                 .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
