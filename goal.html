@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>მინი ფეხბურთი</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: #2a2a2a;
+    }
+
+    h1 {
+      font-size: 10vw;
+      margin: 0;
+      position: absolute;
+      font-weight: 900;
+      color: gold;
+      text-shadow: 3px 3px black;
+      left: 50%;
+      top: 25%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      pointer-events: none;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .show_result {
+      transition: 0.75s;
+      transition-delay: 1s;
+      opacity: 1;
+    }
+
+    #game_field {
+      width: 100vw;
+      height: 60vh;
+      background: url('https://contentservice.mc.reyrey.net/image_v1.0.0/?id=26107e19-02ae-5a04-bc21-88b57bc22ced&638600304193604811') center center / cover no-repeat;
+      position: relative;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    #goal {
+      width: 80vw;
+      max-width: 500px;
+      aspect-ratio: 2 / 1;
+      background: url('https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028') center center / cover no-repeat;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 5vh;
+      animation: shake 0.25s linear infinite;
+      transition: transform 0.3s ease-out, background-image 0.3s ease;
+    }
+
+    @keyframes shake {
+      25% { transform: translateX(-50%) rotate(1deg); }
+      75% { transform: translateX(-50%) rotate(-1deg); }
+    }
+
+    .hitbox {
+      position: absolute;
+    }
+
+    .hitbox[box="0"], .hitbox[box="4"] {
+      width: 30%;
+      height: 40%;
+      bottom: 0;
+    }
+
+    .hitbox[box="0"] { left: 0; }
+    .hitbox[box="1"] { left: 0; top: 0; width: 30%; height: 40%; }
+    .hitbox[box="2"] { left: 35%; top: 0; width: 30%; height: 60%; }
+    .hitbox[box="3"] { right: 0; top: 0; width: 30%; height: 40%; }
+    .hitbox[box="4"] { right: 0; }
+
+    #ball {
+      width: 8vw;
+      max-width: 40px;
+      aspect-ratio: 1 / 1;
+      background-size: cover;
+      position: absolute;
+      left: 50%;
+      top: 85%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      pointer-events: none;
+      transition: left 0.8s ease-out, top 0.8s ease-out;
+    }
+
+    #ball:after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: url('http://upload.wikimedia.org/wikipedia/en/e/ec/Soccer_ball.svg') center center / contain no-repeat;
+      border-radius: 50%;
+      animation: none;
+    }
+
+    .kicked:after { animation: roll 1s linear infinite; }
+
+    @keyframes roll {
+      100% { transform: rotate(1080deg); }
+    }
+
+    .goal { 
+      animation: score 0.5s linear 0.5s forwards;
+      transition: none !important;
+    }
+    .fall { 
+      animation: fall 0.5s linear 0.5s forwards;
+      transition: none !important;
+    }
+
+    @keyframes score { to { top: 25%; } }
+    @keyframes fall { to { top: 50%; } }
+
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* მეკარის პოზიციების სტილები */
+    .goalie-left {
+      transform: translateX(-50%) translateX(-30%);
+    }
+
+    .goalie-right {
+      transform: translateX(-50%) translateX(30%);
+    }
+
+    .goalie-center {
+      transform: translateX(-50%);
+    }
+  </style>
+</head>
+<body>
+
+<div id="game_field">
+  <div id="goal">
+    <div class="hitbox" box="0"></div>
+    <div class="hitbox" box="1"></div>
+    <div class="hitbox" box="2"></div>
+    <div class="hitbox" box="3"></div>
+    <div class="hitbox" box="4"></div>
+  </div>
+
+  <div id="ball"></div>
+
+  <svg id="svg" viewBox="0 0 100 100">
+    <path id="path" d="" stroke="transparent" fill="transparent" />
+    <circle id="circle" r="5" fill="rgba(255,0,0,0)">
+      <animateMotion id="bally" dur="1s" repeatCount="1" fill="freeze" />
+    </circle>
+  </svg>
+
+  <h1 id="success">GOAL!</h1>
+  <h1 id="failure" style="color: red;">FAIL</h1>
+</div>
+
+<script>
+  let offset,
+    gf,
+    b,
+    ooo,
+    yyy,
+    gfcx,
+    goalie = [
+      'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=4d2c276a-53d1-5d61-973a-43e438e4d242&638600308304985475',
+      'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=50c68e89-78aa-5583-b9fb-a6b7088a2795&638600308421269575',
+      'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=c82054e5-0c08-5936-8b3a-da9c3803a430&638600308520821680',
+      'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=72578b00-ecdb-5e3d-824e-cdd981720b04&638600308646914584',
+      'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=9effa62d-7e3d-5638-9ea2-a02ab3508dfc&638600308768788828'
+    ];
+
+  // წინასწარ ჩატვირთვა სურათების
+  function preloadImages(urls) {
+    urls.forEach(url => {
+      let img = new Image();
+      img.src = url;
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    offset = 20;
+    gf = game_field.getBoundingClientRect();
+    b = ball.getBoundingClientRect();
+    ooo = gf.x - offset;
+    yyy = gf.y - offset;
+    gfcx = gf.x + (gf.width * 0.5) - ooo;
+    svg.setAttribute('viewBox', '0 0 ' + gf.width + ' ' + gf.height);
+    
+    // ჩატვირთვა სურათების წინასწარ
+    preloadImages(goalie);
+  });
+
+  function grabClick(e) {
+    let el = e.target.closest('.hitbox');
+    if (!el) return;
+    
+    let el_num = Number(el.getAttribute('box'));
+    let g = Math.floor(Math.random() * goalie.length);
+    let x = e.clientX;
+    let y = e.clientY;
+
+    // მეკარის ანიმაცია
+    goal.style.backgroundImage = 'url(' + goalie[g] + ')';
+    goal.style.animation = 'none';
+    
+    // მეკარის პოზიციონირება
+    if (g === 0 || g === 1) {
+      goal.classList.add('goalie-left');
+      goal.classList.remove('goalie-right', 'goalie-center');
+    } else if (g === 3 || g === 4) {
+      goal.classList.add('goalie-right');
+      goal.classList.remove('goalie-left', 'goalie-center');
+    } else {
+      goal.classList.add('goalie-center');
+      goal.classList.remove('goalie-left', 'goalie-right');
+    }
+
+    let targetX = x - ooo - 20;
+    let targetY = y - yyy - 20;
+
+    ball.className = 'kicked';
+    ball.style.left = targetX + 'px';
+    ball.style.top = targetY + 'px';
+
+    setTimeout(() => {
+      if (g !== el_num) {
+        ball.className = 'goal';
+        success.className = 'show_result';
+      } else {
+        ball.className = 'fall';
+        failure.className = 'show_result';
+      }
+
+      setTimeout(() => {
+        goal.style.backgroundImage = 'url(https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028)';
+        goal.style.animation = 'shake .25s linear infinite';
+        goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
+        ball.style.left = '';
+        ball.style.top = '';
+        ball.className = '';
+        success.className = '';
+        failure.className = '';
+      }, 3000);
+    }, 800);
+  }
+
+  goal.addEventListener('click', grabClick);
+
+  goal.addEventListener('mousemove', function (e) {
+    let x = e.clientX - ooo - offset;
+    let y = e.clientY - yyy - offset;
+    path.setAttribute('d', 'M ' + (b.x - ooo) + ' ' + (b.y + offset) + ' C ' + gfcx + ' 250, ' + gfcx + ' 150, ' + x + ' ' + y);
+  });
+</script>
+
+</body>
+</html>
