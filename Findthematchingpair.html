@@ -537,7 +537,7 @@ function btnClick(e) {
             matched = true;
             timeLeft += 3000;
             new TimelineMax({onComplete: populate})
-                .set('.foundTxt', {textContent: 'Found: ' + found, fontWeight: 500}, 0)
+                .set('.foundTxt', {textContent: 'ნაპოვნია: ' + found, fontWeight: 500}, 0)
                 .to('.timePlus', 0.1, {autoAlpha: 1, yoyo: true, repeat: 1, repeatDelay: 0.4}, 0)
                 .fromTo('.timePlus', 0.3, {scale: 0, rotation: 0.1}, {scale: 1, rotation: 0}, 0)
                 .to([b, lastBtn], 0.1, {border: '3px solid #08c04d'}, 0)
@@ -577,7 +577,7 @@ function handleVisibilityChange() {
             timeLeft = 0;
             clearInterval(timeInt);
             timeInt = undefined;
-            if (found == 0) TweenMax.set('.foundTxt', {textContent: 'Found: 0', fontWeight: 500});
+            if (found == 0) TweenMax.set('.foundTxt', {textContent: 'ნაპოვნია: 0', fontWeight: 500});
             TweenMax.set('.endTxt', {textContent: hint + " Try again? " + hint, fontSize: 30});
             
             new TimelineMax()
