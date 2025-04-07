@@ -368,8 +368,8 @@ font-weight: bold;
     <div id="startScreen">
        
         <div id="startForm">
-            <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
-            <button id="startGame">Start Game</button>
+            <input type="text" id="playerName" placeholder="მითხარი შენი სახელი" maxlength="20">
+            <button id="startGame">თამაშის დაწყება</button>
         </div>
     </div>
     
@@ -377,7 +377,7 @@ font-weight: bold;
         <div id="game">
             <div class="foundTxt"></div>
             <div class="timeTxt">30:00</div>
-            <div class="timePlus">+3 sec</div>
+            <div class="timePlus">+3 წმ</div>
 
             <div id="btnArea">
                 <div id="b1" class="btn"></div>
@@ -400,8 +400,8 @@ font-weight: bold;
 
     <!-- Name Input Form -->
     <div id="nameForm">
-        <h2>Game Over!</h2>
-        <p>You found <span id="finalScore">0</span> pairs</p>
+        <h2>თამაში დასრულდა!</h2>
+        <p>შენ იპოვე  <span id="finalScore">0</span> ტყუპი</p>
         <h5 id="rankDisplay" class="rank-display"></h5>
         <button id="submitName">OK</button>
     </div>
@@ -483,7 +483,7 @@ startGameBtn.addEventListener('click', function() {
         startScreen.style.display = 'none';
         new TimelineMax({onStart: populate})
             .set(game, {userSelect: 'none', background: 'radial-gradient(#333, #000 120%)'})
-            .set('.foundTxt', {textContent: 'Find the matching pair...'})
+            .set('.foundTxt', {textContent: 'იპოვე ტყუპი სმაილები...'})
             .set('.end', {autoAlpha: 0})
             .set('#replayBtn', {transformOrigin: 'center'})
             .to('#container', 0.2, {opacity: 1, ease: Power2.easeIn}, 0);
