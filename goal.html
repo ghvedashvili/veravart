@@ -188,7 +188,7 @@
     
     .turn-indicator {
       position: absolute;
-      top: 350px;
+      top: 450px;
       
       text-align: center;
       color: white;
@@ -267,17 +267,18 @@ left: 0;
     
     .instructions {
       position: absolute;
-      top: 400px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 18px;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 5px 15px;
-      border-radius: 20px;
-      z-index: 10;
-      text-align: center;
-      max-width: 80%;
+    top: 400px;
+    /* left: 50%; */
+    /* transform: translateX(-50%); */
+    color: white;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px 15px;
+    border-radius: 20px;
+    z-index: 10;
+    text-align: center;
+    width: 100%;
+    left: 0;
     }
     
     .sudden-death {
@@ -324,7 +325,7 @@ left: 0;
         <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
         <div id="sudden-death" class="sudden-death" style="display: none;">დამატებითი პენალტები</div>
         <div id="penalty-count" class="penalty-count">პენალტი 1/5</div>
-        <div id="instructions" class="instructions">აირჩიე დარტყმის კუთხე</div>
+        <div id="instructions" class="instructions"></div>
         
         <div id="game_field">
           <div id="goal">
@@ -377,7 +378,7 @@ let playerPenalties = 0;
 let computerPenalties = 0;
 let isPlayerTurn = true;
 let gameActive = true;
-const maxPenalties = 1;
+const maxPenalties = 5;
 let selectedGoalkeeperPosition = null;
 let isSuddenDeath = false;
 
@@ -438,7 +439,7 @@ function updateUI() {
   document.getElementById('total-score').textContent = `საერთო ანგარიში: მოთამაშე ${totalPlayerWins} - ${totalComputerWins} Kidsmart`;
   
   const indicator = document.getElementById('turn-indicator');
-  indicator.textContent = isPlayerTurn ? 'თქვენი პენალტი' : 'Kidsmart-ის პენალტი';
+  indicator.textContent = isPlayerTurn ? 'შენი პენალტი' : 'Kidsmart-ის პენალტი';
   indicator.style.color = isPlayerTurn ? '#4CAF50' : '#F44336';
   
   const penaltyCount = document.getElementById('penalty-count');
@@ -451,10 +452,10 @@ function updateUI() {
     //document.getElementById('sudden-death').style.display = 'none';
   }
   
-  const instructions = document.getElementById('instructions');
-  instructions.textContent = isPlayerTurn 
-    ? 'აირჩიე დარტყმის კუთხე' 
-    : 'აირჩიე მოგერიების კუთხე';
+ // const instructions = document.getElementById('instructions');
+ // instructions.textContent = isPlayerTurn 
+   // ? 'აირჩიე დარტყმის კუთხე' 
+   // : 'აირჩიე მოგერიების კუთხე';
 }
 
 // Manage hitboxes visibility
