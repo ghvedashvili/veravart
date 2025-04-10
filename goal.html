@@ -281,20 +281,6 @@ left: 0;
     left: 0;
     }
     
-    .sudden-death {
-      position: absolute;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: gold;
-      font-size: 16px;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-      z-index: 10;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 5px 15px;
-      border-radius: 20px;
-    }
     
     .total-score {
       position: absolute;
@@ -323,7 +309,7 @@ left: 0;
           <div id="computer-score">0 Kidsmart</div>
         </div>
         <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
-        <div id="sudden-death" class="sudden-death" style="display: none;">დამატებითი პენალტები</div>
+        
         <div id="penalty-count" class="penalty-count">პენალტი 1/5</div>
         <div id="instructions" class="instructions"></div>
         
@@ -445,11 +431,11 @@ function updateUI() {
   const penaltyCount = document.getElementById('penalty-count');
   if (isSuddenDeath) {
     penaltyCount.textContent = 'დამატებითი პენალტები';
-    //document.getElementById('sudden-death').style.display = 'block';
+
   } else {
     const count = isPlayerTurn ? playerPenalties : computerPenalties;
     penaltyCount.textContent = `პენალტი ${count + 1}/${maxPenalties}`;
-    //document.getElementById('sudden-death').style.display = 'none';
+
   }
   
  // const instructions = document.getElementById('instructions');
