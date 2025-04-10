@@ -43,19 +43,19 @@
     .game-container {
       background: url('img/image01.jpeg');
       background-repeat: no-repeat;
-      background-size: 100% 80%;
-      background-position: TOP;
+      background-size: 100% calc(80% - 100px);
+      background-position: top 100px center;
       background-color: #000;
       min-height: 100vh;
     }
 
     #game_field {
       width: 100%;
-      height: 80vh;
-      margin-top: 80px;
+      height: calc(80vh - 100px);
       position: relative;
       margin: 0 auto;
       overflow: hidden;
+      top: 100px;
     }
 
     #goal {
@@ -174,11 +174,11 @@
     /* Scoreboard styles */
     .scoreboard {
       position: absolute;
-      top: 10px;
+      TOP: 20px;
       left: 0;
       width: 100%;
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       color: white;
       font-size: 24px;
       font-weight: bold;
@@ -188,9 +188,9 @@
     
     .turn-indicator {
       position: absolute;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 350px;
+      
+      text-align: center;
       color: white;
       font-size: 20px;
       font-weight: bold;
@@ -199,19 +199,24 @@
       background-color: rgba(0, 0, 0, 0.7);
       padding: 5px 15px;
       border-radius: 20px;
+      width: 100%;
+left: 0;
     }
     
     .penalty-count {
       position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 18px;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 5px 15px;
-      border-radius: 20px;
-      z-index: 10;
+    top: 60px;
+    /* left: 50%; */
+    /* transform: translateX(-50%); */
+    color: white;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* padding: 5px 15px; */
+    border-radius: 20px;
+    z-index: 10;
+    width: 100%;
+    text-align: center;
+    left: 0;
     }
     
     .game-over {
@@ -227,12 +232,12 @@
       align-items: center;
       z-index: 100;
       color: white;
-      font-size: 36px;
+      font-size: 18px;
       text-align: center;
     }
     
     .game-over h2 {
-      font-size: 48px;
+      
       color: gold;
       margin-bottom: 20px;
     }
@@ -262,7 +267,7 @@
     
     .instructions {
       position: absolute;
-      bottom: 50px;
+      top: 400px;
       left: 50%;
       transform: translateX(-50%);
       color: white;
@@ -292,16 +297,18 @@
     
     .total-score {
       position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 5px 15px;
-      border-radius: 20px;
-      z-index: 10;
+    bottom: 50px;
+    left: 0;
+    /* transform: translateX(-50%); */
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* padding: 5px 15px; */
+    border-radius: 20px;
+    z-index: 10;
+    width: 100%;
+    text-align: center;
     }
   </style>
 </head>
@@ -309,15 +316,15 @@
   <div class="container-fluid game-container">
     <div class="row">
       <div class="col-12">
-        <div id="total-score" class="total-score">საერთო ანგარიში: მოთამაშე 0 - 0 კომპიუტერი</div>
+        <div id="total-score" class="total-score">საერთო ანგარიში: მოთამაშე 0 - 0 Kidsmart</div>
         <div class="scoreboard">
-          <div id="player-score">მოთამაშე: 0</div>
-          <div id="computer-score">კომპიუტერი: 0</div>
+          <div id="player-score">მოთამაშე 0:</div>
+          <div id="computer-score">0 Kidsmart</div>
         </div>
         <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
-        <div id="sudden-death" class="sudden-death" style="display: none;">სიკვდილისწინა პენალტი</div>
+        <div id="sudden-death" class="sudden-death" style="display: none;">დამატებითი პენალტები</div>
         <div id="penalty-count" class="penalty-count">პენალტი 1/5</div>
-        <div id="instructions" class="instructions">აირჩიეთ სად გაიტანეთ პენალტი</div>
+        <div id="instructions" class="instructions">აირჩიე დარტყმის კუთხე</div>
         
         <div id="game_field">
           <div id="goal">
@@ -355,34 +362,27 @@
   
   <script>
     // Game elements
-    const game_field = document.getElementById('game_field');
-    const goal = document.getElementById('goal');
-    const ball = document.getElementById('ball');
-    const success = document.getElementById('success');
-    const failure = document.getElementById('failure');
-    const svg = document.getElementById('svg');
-    const path = document.getElementById('path');
+const game_field = document.getElementById('game_field');
+const goal = document.getElementById('goal');
+const ball = document.getElementById('ball');
+const success = document.getElementById('success');
+const failure = document.getElementById('failure');
+const svg = document.getElementById('svg');
+const path = document.getElementById('path');
 
-    // Game state variables
-    let playerScore = 0;
-    let computerScore = 0;
-    let playerPenalties = 0;
-    let computerPenalties = 0;
-    let isPlayerTurn = true;
-    let gameActive = true;
-    const maxPenalties = 5;
-    let selectedGoalkeeperPosition = null;
-    let isSuddenDeath = false;
+// Game state variables
+let playerScore = 0;
+let computerScore = 0;
+let playerPenalties = 0;
+let computerPenalties = 0;
+let isPlayerTurn = true;
+let gameActive = true;
+const maxPenalties = 1;
+let selectedGoalkeeperPosition = null;
+let isSuddenDeath = false;
 
-    // Goalkeeper images
-    // const goalie = [
-    //   'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=4d2c276a-53d1-5d61-973a-43e438e4d242&638600308304985475',
-    //   'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=50c68e89-78aa-5583-b9fb-a6b7088a2795&638600308421269575',
-    //   'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=c82054e5-0c08-5936-8b3a-da9c3803a430&638600308520821680',
-    //   'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=72578b00-ecdb-5e3d-824e-cdd981720b04&638600308646914584',
-    //   'https://contentservice.mc.reyrey.net/image_v1.0.0/?id=9effa62d-7e3d-5638-9ea2-a02ab3508dfc&638600308768788828'
-    // ];
-    const goalie = [
+// Goalkeeper images
+const goalie = [
   'img/leftdown.png',    // Position 0 - Left down
   'img/leftup.png',      // Position 1 - Left up
   'img/centerup.png',    // Position 2 - Center up
@@ -390,363 +390,374 @@
   'img/rightdown.png'    // Position 4 - Right down
 ];
 
-    // Firebase კონფიგურაცია
-    const firebaseConfig = {
-      apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
-      authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
-      databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
-      projectId: "newspaperveravart",
-      storageBucket: "newspaperveravart.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:1234567890abcdef"
-    };
+// Firebase კონფიგურაცია
+const firebaseConfig = {
+  apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+  authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+  databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+  projectId: "newspaperveravart",
+  storageBucket: "newspaperveravart.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:1234567890abcdef"
+};
 
-    // Firebase ინიციალიზაცია
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const penaltiesRef = database.ref('penalties');
+// Firebase ინიციალიზაცია
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const penaltiesRef = database.ref('penalties');
 
-    // ცვლადები საერთო ანგარიშისთვის
-    let totalPlayerWins = 0;
-    let totalComputerWins = 0;
+// ცვლადები საერთო ანგარიშისთვის
+let totalPlayerWins = 0;
+let totalComputerWins = 0;
 
-    // Initialize game measurements
-    let offset, gf, b, ooo, yyy, gfcx;
+// Initialize game measurements
+let offset, gf, b, ooo, yyy, gfcx;
 
-    function initGameMeasurements() {
-      offset = 20;
-      gf = game_field.getBoundingClientRect();
-      b = ball.getBoundingClientRect();
-      ooo = gf.x - offset;
-      yyy = gf.y - offset;
-      gfcx = gf.x + (gf.width * 0.5) - ooo;
-      svg.setAttribute('viewBox', `0 0 ${gf.width} ${gf.height}`);
+function initGameMeasurements() {
+  offset = 20;
+  gf = game_field.getBoundingClientRect();
+  b = ball.getBoundingClientRect();
+  ooo = gf.x - offset;
+  yyy = gf.y - offset;
+  gfcx = gf.x + (gf.width * 0.5) - ooo;
+  svg.setAttribute('viewBox', `0 0 ${gf.width} ${gf.height}`);
+}
+
+// Preload images for better performance
+function preloadImages(urls) {
+  urls.forEach(url => {
+    const img = new Image();
+    img.src = url;
+  });
+}
+
+// Update UI elements
+function updateUI() {
+  document.getElementById('player-score').textContent = `მოთამაშე ${playerScore}:`;
+  document.getElementById('computer-score').textContent = `${computerScore} Kidsmart`;
+  document.getElementById('total-score').textContent = `საერთო ანგარიში: მოთამაშე ${totalPlayerWins} - ${totalComputerWins} Kidsmart`;
+  
+  const indicator = document.getElementById('turn-indicator');
+  indicator.textContent = isPlayerTurn ? 'თქვენი პენალტი' : 'Kidsmart-ის პენალტი';
+  indicator.style.color = isPlayerTurn ? '#4CAF50' : '#F44336';
+  
+  const penaltyCount = document.getElementById('penalty-count');
+  if (isSuddenDeath) {
+    penaltyCount.textContent = 'დამატებითი პენალტები';
+    //document.getElementById('sudden-death').style.display = 'block';
+  } else {
+    const count = isPlayerTurn ? playerPenalties : computerPenalties;
+    penaltyCount.textContent = `პენალტი ${count + 1}/${maxPenalties}`;
+    //document.getElementById('sudden-death').style.display = 'none';
+  }
+  
+  const instructions = document.getElementById('instructions');
+  instructions.textContent = isPlayerTurn 
+    ? 'აირჩიე დარტყმის კუთხე' 
+    : 'აირჩიე მოგერიების კუთხე';
+}
+
+// Manage hitboxes visibility
+function setHitboxesVisibility(visible, isGreen = false) {
+  const hitboxes = document.querySelectorAll('.hitbox');
+  hitboxes.forEach(hitbox => {
+    hitbox.classList.toggle('hidden', !visible);
+    hitbox.classList.toggle('green', isGreen && visible);
+  });
+}
+
+// Computer's turn logic
+function computerShoot() {
+  if (!gameActive) return;
+  
+  if (selectedGoalkeeperPosition === null) {
+    setHitboxesVisibility(true, true);
+    game_field.classList.remove('computer-shot');
+    game_field.classList.add('goalkeeper-select');
+    updateUI();
+    return;
+  }
+  
+  const hitboxIndex = Math.floor(Math.random() * 5);
+  const hitbox = document.querySelector(`.hitbox[box="${hitboxIndex}"]`);
+  const targetX = hitbox.getBoundingClientRect().left + hitbox.offsetWidth / 2 - ooo - 20;
+  const targetY = hitbox.getBoundingClientRect().top + hitbox.offsetHeight / 2 - yyy - 20;
+  
+  setHitboxesVisibility(false);
+  animateShot(targetX, targetY, selectedGoalkeeperPosition, hitboxIndex, false);
+  selectedGoalkeeperPosition = null;
+}
+
+// Animate the penalty shot
+function animateShot(targetX, targetY, goalieIndex, hitboxIndex, isPlayerShot) {
+  game_field.classList.add('computer-shot');
+  game_field.classList.remove('goalkeeper-select');
+  setHitboxesVisibility(false);
+  
+  // Set goalkeeper position
+  goal.style.backgroundImage = `url(${goalie[goalieIndex]})`;
+  goal.style.animation = 'none';
+  
+  // Position goalkeeper
+  goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
+  if (goalieIndex === 0 || goalieIndex === 1) {
+    goal.classList.add('goalie-left');
+  } else if (goalieIndex === 3 || goalieIndex === 4) {
+    goal.classList.add('goalie-right');
+  } else {
+    goal.classList.add('goalie-center');
+  }
+
+  // Animate ball
+  ball.className = 'kicked';
+  ball.style.left = `${targetX}px`;
+  ball.style.top = `${targetY}px`;
+
+  setTimeout(() => {
+    const isGoal = goalieIndex !== hitboxIndex;
+    
+    if (isGoal) {
+      ball.className = 'goal';
+      success.className = 'show_result';
+      isPlayerShot ? playerScore++ : computerScore++;
+    } else {
+      ball.className = 'fall';
+      failure.className = 'show_result';
     }
+    
+    updateUI();
 
-    // Preload images for better performance
-    function preloadImages(urls) {
-      urls.forEach(url => {
-        const img = new Image();
-        img.src = url;
-      });
-    }
+    setTimeout(() => {
+      resetAfterShot(isGoal, isPlayerShot);
+    }, 2000);
+  }, 800);
+}
 
-    // Update UI elements
-    function updateUI() {
-      document.getElementById('player-score').textContent = `მოთამაშე: ${playerScore}`;
-      document.getElementById('computer-score').textContent = `კომპიუტერი: ${computerScore}`;
-      
-      const indicator = document.getElementById('turn-indicator');
-      indicator.textContent = isPlayerTurn ? 'თქვენი პენალტი' : 'კომპიუტერის პენალტი';
-      indicator.style.color = isPlayerTurn ? '#4CAF50' : '#F44336';
-      
-      const penaltyCount = document.getElementById('penalty-count');
-      if (isSuddenDeath) {
-        penaltyCount.textContent = 'სიკვდილისწინა პენალტი';
-        document.getElementById('sudden-death').style.display = 'block';
-      } else {
-        const count = isPlayerTurn ? playerPenalties : computerPenalties;
-        penaltyCount.textContent = `პენალტი ${count + 1}/${maxPenalties}`;
-        document.getElementById('sudden-death').style.display = 'none';
+// ფუნქცია საერთო ანგარიშის გამოსათვლელად
+function updateTotalScore() {
+  penaltiesRef.once('value').then((snapshot) => {
+    totalPlayerWins = 0;
+    totalComputerWins = 0;
+    
+    snapshot.forEach((childSnapshot) => {
+      const match = childSnapshot.val();
+      if (match.winner === 'player') {
+        totalPlayerWins++;
+      } else if (match.winner === 'computer') {
+        totalComputerWins++;
       }
-      
-      const instructions = document.getElementById('instructions');
-      instructions.textContent = isPlayerTurn 
-        ? 'აირჩიეთ სად გაიტანეთ პენალტი' 
-        : 'აირჩიეთ სად გადახტებით (მწვანე ზონები)';
+    });
+    
+    document.getElementById('total-score').textContent = 
+      `საერთო ანგარიში: მოთამაშე ${totalPlayerWins} - ${totalComputerWins} Kidsmart`;
+  });
+}
+
+// ფუნქცია თამაშის შედეგის შესანახად
+function saveMatchResult(winner) {
+  const newMatchRef = penaltiesRef.push();
+  newMatchRef.set({
+    winner: winner,
+    playerScore: playerScore,
+    computerScore: computerScore,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  }).then(() => {
+    updateTotalScore();
+  });
+}
+
+// Check for winner conditions
+function checkForWinner() {
+  // In sudden death, check after each pair of kicks
+  if (isSuddenDeath && playerPenalties === computerPenalties) {
+    if (playerScore > computerScore) {
+      return {gameOver: true, winner: 'player'};
     }
-
-    // Manage hitboxes visibility
-    function setHitboxesVisibility(visible, isGreen = false) {
-      const hitboxes = document.querySelectorAll('.hitbox');
-      hitboxes.forEach(hitbox => {
-        hitbox.classList.toggle('hidden', !visible);
-        hitbox.classList.toggle('green', isGreen && visible);
-      });
+    if (computerScore > playerScore) {
+      return {gameOver: true, winner: 'computer'};
     }
-
-    // Computer's turn logic
-    function computerShoot() {
-      if (!gameActive) return;
-      
-      if (selectedGoalkeeperPosition === null) {
-        setHitboxesVisibility(true, true);
-        game_field.classList.remove('computer-shot');
-        game_field.classList.add('goalkeeper-select');
-        updateUI();
-        return;
-      }
-      
-      const hitboxIndex = Math.floor(Math.random() * 5);
-      const hitbox = document.querySelector(`.hitbox[box="${hitboxIndex}"]`);
-      const targetX = hitbox.getBoundingClientRect().left + hitbox.offsetWidth / 2 - ooo - 20;
-      const targetY = hitbox.getBoundingClientRect().top + hitbox.offsetHeight / 2 - yyy - 20;
-      
-      setHitboxesVisibility(false);
-      animateShot(targetX, targetY, selectedGoalkeeperPosition, hitboxIndex, false);
-      selectedGoalkeeperPosition = null;
+    // If still tied, continue sudden death
+    return {gameOver: false};
+  }
+  
+  // Check if one team can't be caught in regular time
+  if (!isSuddenDeath) {
+    const remainingPlayerKicks = maxPenalties - playerPenalties;
+    const remainingComputerKicks = maxPenalties - computerPenalties;
+    
+    if (playerScore > computerScore + remainingComputerKicks) {
+      return {gameOver: true, winner: 'player'};
     }
-
-    // Animate the penalty shot
-    function animateShot(targetX, targetY, goalieIndex, hitboxIndex, isPlayerShot) {
-      game_field.classList.add('computer-shot');
-      game_field.classList.remove('goalkeeper-select');
-      setHitboxesVisibility(false);
-      
-      // Set goalkeeper position
-      goal.style.backgroundImage = `url(${goalie[goalieIndex]})`;
-      goal.style.animation = 'none';
-      
-      // Position goalkeeper
-      goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
-      if (goalieIndex === 0 || goalieIndex === 1) {
-        goal.classList.add('goalie-left');
-      } else if (goalieIndex === 3 || goalieIndex === 4) {
-        goal.classList.add('goalie-right');
-      } else {
-        goal.classList.add('goalie-center');
-      }
-
-      // Animate ball
-      ball.className = 'kicked';
-      ball.style.left = `${targetX}px`;
-      ball.style.top = `${targetY}px`;
-
-      setTimeout(() => {
-        const isGoal = goalieIndex !== hitboxIndex;
-        
-        if (isGoal) {
-          ball.className = 'goal';
-          success.className = 'show_result';
-          isPlayerShot ? playerScore++ : computerScore++;
-        } else {
-          ball.className = 'fall';
-          failure.className = 'show_result';
-        }
-        
-        updateUI();
-
-        setTimeout(() => {
-          resetAfterShot(isGoal, isPlayerShot);
-        }, 2000);
-      }, 800);
+    if (computerScore > playerScore + remainingPlayerKicks) {
+      return {gameOver: true, winner: 'computer'};
     }
-
-    // ფუნქცია საერთო ანგარიშის გამოსათვლელად
-    function updateTotalScore() {
-      penaltiesRef.once('value').then((snapshot) => {
-        totalPlayerWins = 0;
-        totalComputerWins = 0;
-        
-        snapshot.forEach((childSnapshot) => {
-          const match = childSnapshot.val();
-          if (match.winner === 'player') {
-            totalPlayerWins++;
-          } else if (match.winner === 'computer') {
-            totalComputerWins++;
-          }
-        });
-        
-        document.getElementById('total-score').textContent = 
-          `საერთო ანგარიში: მოთამაშე ${totalPlayerWins} - ${totalComputerWins} კომპიუტერი`;
-      });
-    }
-
-    // ფუნქცია თამაშის შედეგის შესანახად
-    function saveMatchResult(winner) {
-      const newMatchRef = penaltiesRef.push();
-      newMatchRef.set({
-        winner: winner,
-        playerScore: playerScore,
-        computerScore: computerScore,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      }).then(() => {
-        updateTotalScore();
-      });
-    }
-
-    // Check for winner conditions
-    function checkForWinner() {
-      // Check if one team can't be caught
-      const remainingPlayerKicks = maxPenalties - playerPenalties;
-      const remainingComputerKicks = maxPenalties - computerPenalties;
-      
-      if (playerScore > computerScore + remainingComputerKicks) {
-        return {gameOver: true, winner: 'player'};
-      }
-      if (computerScore > playerScore + remainingPlayerKicks) {
-        return {gameOver: true, winner: 'computer'};
-      }
-      
-      // In sudden death, check after equal kicks
-      if (isSuddenDeath && playerPenalties === computerPenalties) {
-        if (playerScore > computerScore) {
-          return {gameOver: true, winner: 'player'};
-        }
-        if (computerScore > playerScore) {
-          return {gameOver: true, winner: 'computer'};
-        }
-      }
-      
-      // After regular penalties, check if we need sudden death
-      if (!isSuddenDeath && playerPenalties >= maxPenalties && computerPenalties >= maxPenalties) {
-        if (playerScore !== computerScore) {
-          return {
-            gameOver: true,
-            winner: playerScore > computerScore ? 'player' : 'computer'
-          };
-        } else {
-          isSuddenDeath = true;
-          updateUI();
-        }
-      }
-      
+  }
+  
+  // After regular penalties, check if we need sudden death
+  if (!isSuddenDeath && playerPenalties >= maxPenalties && computerPenalties >= maxPenalties) {
+    if (playerScore !== computerScore) {
+      return {
+        gameOver: true,
+        winner: playerScore > computerScore ? 'player' : 'computer'
+      };
+    } else {
+      isSuddenDeath = true;
+      updateUI();
       return {gameOver: false};
     }
+  }
+  
+  return {gameOver: false};
+}
 
-    // Reset after each shot
-    function resetAfterShot(isGoal, isPlayerShot) {
-      // Reset game elements
-      goal.style.backgroundImage = 'url(https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028)';
-      goal.style.animation = 'shake .25s linear infinite';
-      goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
-      ball.style.left = '';
-      ball.style.top = '';
-      ball.className = '';
-      success.className = '';
-      failure.className = '';
-      
-      // Update penalties count
-      if (isPlayerShot) {
-        playerPenalties++;
-      } else {
-        computerPenalties++;
-      }
-      
-      // Check for winner
-      const {gameOver, winner} = checkForWinner();
-      if (gameOver) {
-        endGame(winner);
-        return;
-      }
-      
-      // Switch turns if game continues
-      isPlayerTurn = !isPlayerTurn;
-      setHitboxesVisibility(true);
-      updateUI();
-      
-      // Computer's turn logic
-      if (!isPlayerTurn && (!isSuddenDeath || computerPenalties <= playerPenalties)) {
-        setTimeout(computerShoot, 1000);
-      }
-    }
+// Reset after each shot
+function resetAfterShot(isGoal, isPlayerShot) {
+  // Reset game elements
+  goal.style.backgroundImage = 'url(https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028)';
+  goal.style.animation = 'shake .25s linear infinite';
+  goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
+  ball.style.left = '';
+  ball.style.top = '';
+  ball.className = '';
+  success.className = '';
+  failure.className = '';
+  
+  // Update penalties count
+  if (isPlayerShot) {
+    playerPenalties++;
+  } else {
+    computerPenalties++;
+  }
+  
+  // Check for winner
+  const {gameOver, winner} = checkForWinner();
+  if (gameOver) {
+    endGame(winner);
+    return;
+  }
+  
+  // Switch turns if game continues
+  isPlayerTurn = !isPlayerTurn;
+  
+  // In sudden death, only show hitboxes when it's player's turn to shoot
+  if (!isSuddenDeath || isPlayerTurn) {
+    setHitboxesVisibility(true);
+  }
+  
+  updateUI();
+  
+  // Computer's turn logic
+  if (!isPlayerTurn && (!isSuddenDeath || computerPenalties <= playerPenalties)) {
+    setTimeout(computerShoot, 1000);
+  }
+}
 
-    // End game with results
-    function endGame(winner) {
-      gameActive = false;
-      const resultMessage = document.getElementById('result-message');
-      const finalScore = document.getElementById('final-score');
-      
-      if (winner === 'player') {
-        resultMessage.textContent = 'გილოცავთ, თქვენ გაიმარჯვეთ!';
-      } else if (winner === 'computer') {
-        resultMessage.textContent = 'თქვენ დამარცხდით!';
-      } else {
-        resultMessage.textContent = 'ფრე!';
-      }
-      
-      finalScore.textContent = `ფინალური ანგარიში: ${playerScore} - ${computerScore}`;
-      document.getElementById('game-over').style.display = 'flex';
-      
-      // შევინახოთ შედეგი Firebase-ში მხოლოდ თუ არის გამარჯვებული
-      if (winner === 'player' || winner === 'computer') {
-        saveMatchResult(winner);
-      }
-    }
+// End game with results
+function endGame(winner) {
+  gameActive = false;
+  const resultMessage = document.getElementById('result-message');
+  const finalScore = document.getElementById('final-score');
+  
+  if (winner === 'player') {
+    resultMessage.textContent = 'გილოცავთ, თქვენ გაიმარჯვეთ!';
+  } else if (winner === 'computer') {
+    resultMessage.textContent = 'თქვენ დამარცხდით!';
+  } else {
+    resultMessage.textContent = 'ფრე!';
+  }
+  
+  finalScore.textContent = `ფინალური ანგარიში: ${playerScore} - ${computerScore}`;
+  document.getElementById('game-over').style.display = 'flex';
+  
+  // შევინახოთ შედეგი Firebase-ში მხოლოდ თუ არის გამარჯვებული
+  if (winner === 'player' || winner === 'computer') {
+    saveMatchResult(winner);
+  }
+}
 
-    // Restart game
-    function restartGame() {
-      playerScore = 0;
-      computerScore = 0;
-      playerPenalties = 0;
-      computerPenalties = 0;
-      isPlayerTurn = true;
-      gameActive = true;
-      selectedGoalkeeperPosition = null;
-      isSuddenDeath = false;
-      
-      setHitboxesVisibility(true);
-      updateUI();
-      document.getElementById('game-over').style.display = 'none';
-    }
+// Restart game
+function restartGame() {
+  playerScore = 0;
+  computerScore = 0;
+  playerPenalties = 0;
+  computerPenalties = 0;
+  isPlayerTurn = true;
+  gameActive = true;
+  selectedGoalkeeperPosition = null;
+  isSuddenDeath = false;
+  
+  setHitboxesVisibility(true);
+  updateUI();
+  document.getElementById('game-over').style.display = 'none';
+}
 
-    // Handle penalty shot clicks
-    function grabClick(e) {
-      if (!gameActive) return;
-      
-      const el = e.target.closest('.hitbox');
-      if (!el) return;
-      
-      setHitboxesVisibility(false);
-      
-      // Goalkeeper selection mode
-      if (!isPlayerTurn) {
-        selectedGoalkeeperPosition = Number(el.getAttribute('box'));
-        setHitboxesVisibility(false);
-        setTimeout(computerShoot, 500);
-        return;
-      }
-      
-      // Player's shot
-      const hitboxIndex = Number(el.getAttribute('box'));
-      const x = e.clientX - ooo - 20;
-      const y = e.clientY - yyy - 20;
-      const g = Math.floor(Math.random() * goalie.length);
-      
-      // Set goalkeeper position immediately
-      goal.style.backgroundImage = `url(${goalie[g]})`;
-      goal.style.animation = 'none';
-      goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
-      
-      if (g === 0 || g === 1) {
-        goal.classList.add('goalie-left');
-      } else if (g === 3 || g === 4) {
-        goal.classList.add('goalie-right');
-      } else {
-        goal.classList.add('goalie-center');
-      }
-      
-      animateShot(x, y, g, hitboxIndex, true);
-    }
+// Handle penalty shot clicks
+function grabClick(e) {
+  if (!gameActive || (!isPlayerTurn && selectedGoalkeeperPosition !== null)) return;
+  
+  const el = e.target.closest('.hitbox');
+  if (!el) return;
+  
+  setHitboxesVisibility(false);
+  
+  // Goalkeeper selection mode
+  if (!isPlayerTurn) {
+    selectedGoalkeeperPosition = Number(el.getAttribute('box'));
+    setHitboxesVisibility(false);
+    setTimeout(computerShoot, 500);
+    return;
+  }
+  
+  // Player's shot
+  const hitboxIndex = Number(el.getAttribute('box'));
+  const x = e.clientX - ooo - 20;
+  const y = e.clientY - yyy - 20;
+  const g = Math.floor(Math.random() * goalie.length);
+  
+  // Set goalkeeper position immediately
+  goal.style.backgroundImage = `url(${goalie[g]})`;
+  goal.style.animation = 'none';
+  goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
+  
+  if (g === 0 || g === 1) {
+    goal.classList.add('goalie-left');
+  } else if (g === 3 || g === 4) {
+    goal.classList.add('goalie-right');
+  } else {
+    goal.classList.add('goalie-center');
+  }
+  
+  animateShot(x, y, g, hitboxIndex, true);
+}
 
-    // Initialize mouse move for ball trajectory
-    function handleMouseMove(e) {
-      if (!isPlayerTurn || !gameActive) return;
-      
-      const x = e.clientX - ooo - offset;
-      const y = e.clientY - yyy - offset;
-      path.setAttribute('d', `M ${b.x - ooo} ${b.y + offset} C ${gfcx} 250, ${gfcx} 150, ${x} ${y}`);
-    }
+// Initialize mouse move for ball trajectory
+function handleMouseMove(e) {
+  if (!isPlayerTurn || !gameActive) return;
+  
+  const x = e.clientX - ooo - offset;
+  const y = e.clientY - yyy - offset;
+  path.setAttribute('d', `M ${b.x - ooo} ${b.y + offset} C ${gfcx} 250, ${gfcx} 150, ${x} ${y}`);
+}
 
-    // Initialize game
-    function initGame() {
-      initGameMeasurements();
-      preloadImages(goalie);
-      
-      // Set up event listeners
-      goal.addEventListener('click', grabClick);
-      goal.addEventListener('mousemove', handleMouseMove);
-      
-      // Initialize UI
-      updateUI();
-      setHitboxesVisibility(true);
-      
-      // ჩავტვირთოთ საერთო ანგარიში
-      updateTotalScore();
-    }
+// Initialize game
+function initGame() {
+  initGameMeasurements();
+  preloadImages(goalie);
+  
+  // Set up event listeners
+  goal.addEventListener('click', grabClick);
+  goal.addEventListener('mousemove', handleMouseMove);
+  
+  // Initialize UI
+  updateUI();
+  setHitboxesVisibility(true);
+  
+  // ჩავტვირთოთ საერთო ანგარიში
+  updateTotalScore();
+}
 
-    // Start the game when DOM is loaded
-    document.addEventListener('DOMContentLoaded', initGame);
+// Start the game when DOM is loaded
+document.addEventListener('DOMContentLoaded', initGame);
   </script>
 </body>
 </html>
