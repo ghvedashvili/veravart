@@ -64,6 +64,13 @@
             border-radius: 5px;
             margin-top: 20px;
             cursor: pointer;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        #view-leaderboard-btn {
+            background-color: #2196F3;
         }
 
         #score {
@@ -208,15 +215,16 @@
     <!-- Welcome Screen -->
     <div id="welcome-screen">
         <h1>RACING GAME</h1>
-        <input type="text" id="player-name" placeholder="Enter your name" maxlength="15">
+        <input type="text" id="player-name" placeholder="Enter your name (optional)" maxlength="15">
         <button id="start-game-btn">START GAME</button>
+        <button id="view-leaderboard-btn">LEADERBOARD</button>
     </div>
 
     <!-- Leaderboard Screen (initially hidden) -->
     <div id="leaderboard-screen" style="display: none;">
         <h1>LEADERBOARD</h1>
         <div id="leaderboard-container"></div>
-        <button id="play-again-btn">PLAY AGAIN</button>
+        <button id="play-again-btn">BACK TO MENU</button>
     </div>
 
     <!-- Game Elements -->
@@ -261,7 +269,7 @@
         const scoresRef = database.ref('carsdriver/scores');
 
         // Game variables
-        let playerName = '';
+        let playerName = 'Anonymous';
         let playerAngleMoved = 0;
         let score = 0;
         let gameStartTime = 0;
@@ -272,6 +280,7 @@
         const leaderboardScreen = document.getElementById('leaderboard-screen');
         const playerNameInput = document.getElementById('player-name');
         const startGameBtn = document.getElementById('start-game-btn');
+        const viewLeaderboardBtn = document.getElementById('view-leaderboard-btn');
         const playAgainBtn = document.getElementById('play-again-btn');
         const leaderboardContainer = document.getElementById('leaderboard-container');
         const finalScoreElement = document.getElementById('final-score');
@@ -279,13 +288,13 @@
 
         // Game initialization
         startGameBtn.addEventListener('click', startGameWithName);
+        viewLeaderboardBtn.addEventListener('click', showLeaderboard);
         playAgainBtn.addEventListener('click', resetGame);
 
         function startGameWithName() {
             playerName = playerNameInput.value.trim();
             if (playerName === '') {
-                alert('Please enter your name');
-                return;
+                playerName = "Anonymous";
             }
             
             welcomeScreen.style.display = 'none';
@@ -293,13 +302,31 @@
             startGame();
         }
 
-        function resetGame() {
-            leaderboardScreen.style.display = 'none';
-            welcomeScreen.style.display = 'flex';
-            reset();
+        function showLeaderboard() {
+            welcomeScreen.style.display = 'none';
+            leaderboardScreen.style.display = 'flex';
+            loadLeaderboard();
         }
 
-        // The rest of your game code remains the same, just paste it here
+        function resetGame() {
+            leaderboardScreen.style.display = 'none';
+            //welcomeScreen.style.display = 'flex';
+            
+            // აღარ ვასუფთავებთ სახელის ველს და ვაყენებთ ბოლო გამოყენებულ სახელს
+            if (lastPlayerName && lastPlayerName !== "Anonymous") {
+                playerNameInput.value = lastPlayerName;
+            } else {
+                playerNameInput.value = '';
+            }
+            
+            reset();
+            
+            if (resultsElement.style.display === "flex") {
+                resultsElement.style.display = "none";
+            }
+        }
+
+
         // Pick a random value from an array
         function pickRandom(array) {
             return array[Math.floor(Math.random() * array.length)];
@@ -1146,24 +1173,15 @@
 
         // Display leaderboard
         function displayLeaderboard(scores) {
-            const content = resultsElement.querySelector('.content');
-            content.innerHTML = `
-                <h1>Game Over</h1>
-                <p>Your score: <strong>${score}</strong></p>
-            `;
+            leaderboardContainer.innerHTML = '';
             
-            // Check if player is in top 10
-            const playerInTop10 = scores.some(entry => entry.name === playerName && entry.score === score);
-            
-            if (playerInTop10) {
-                const position = scores.findIndex(entry => entry.name === playerName && entry.score === score) + 1;
-                content.innerHTML += `<p>Congratulations! You made it to <strong>position #${position}</strong> in the leaderboard!</p>`;
-            } else {
-                content.innerHTML += `<p>Nice try! Keep practicing to reach the top 10!</p>`;
+            if (scores.length === 0) {
+                leaderboardContainer.innerHTML = '<p>No scores yet. Be the first!</p>';
+                return;
             }
             
             // Create leaderboard table
-            let leaderboardHTML = '<h2>Leaderboard</h2><table id="leaderboard"><tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>';
+            let leaderboardHTML = '<table id="leaderboard"><tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>';
             
             scores.forEach((entry, index) => {
                 const isCurrentPlayer = entry.name === playerName && entry.score === score;
@@ -1178,13 +1196,32 @@
             });
             
             leaderboardHTML += '</table>';
-            content.innerHTML += leaderboardHTML;
+            leaderboardContainer.innerHTML = leaderboardHTML;
             
-            // Add play again button
-            content.innerHTML += '<button id="play-again-button" style="margin-top: 20px; padding: 10px 20px; font-size: 16px;">PLAY AGAIN</button>';
-            
-            // Add event listener to play again button
-            document.getElementById('play-again-button').addEventListener('click', resetGame);
+            // For results screen (game over)
+            if (resultsElement.style.display === "flex") {
+                const content = resultsElement.querySelector('.content');
+                content.innerHTML = `
+                    <h1>Game Over</h1>
+                    <p>Your score: <strong>${score}</strong></p>
+                `;
+                
+                // Check if player is in top 10
+                const playerInTop10 = scores.some(entry => entry.name === playerName && entry.score === score);
+                
+                if (playerInTop10) {
+                    const position = scores.findIndex(entry => entry.name === playerName && entry.score === score) + 1;
+                    content.innerHTML += `<p>Congratulations! You made it to <strong>position #${position}</strong> in the leaderboard!</p>`;
+                } else {
+                    content.innerHTML += `<p>Nice try! Keep practicing to reach the top 10!</p>`;
+                }
+                
+                content.innerHTML += leaderboardHTML;
+                content.innerHTML += '<button id="play-again-button" style="margin-top: 20px; padding: 10px 20px; font-size: 16px;">PLAY AGAIN</button>';
+                
+                // Add event listener to play again button
+                document.getElementById('play-again-button').addEventListener('click', resetGame);
+            }
         }
 
         accelerateButton.addEventListener("mousedown", function () {
