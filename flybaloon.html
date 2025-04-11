@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balloon Flight Game</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #name-input-screen, #leaderboard-screen, #result-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #AADBEA, #FEF1E1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #D62828;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #A51C1C;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
+        }
+
+        #introduction {
+            width: 200px;
+            height: 90px;
+            position: absolute;
+            font-weight: 600;
+            font-size: 0.8em;
+            text-align: center;
+            transition: opacity 2s;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+bottom:20px;
+        }
+
+        #restart, #leaderboard-btn {
+            position: absolute;
+            color: white;
+            background-color: red;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        #restart {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            display: none;
+        }
+
+        #leaderboard-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 15px;
+            left: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1em;
+        }
+
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        #leaderboard-table th, #leaderboard-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        #leaderboard-table th {
+            background-color: #f2f2f2;
+        }
+
+        #leaderboard-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .highlight {
+            background-color: #ffeb3b !important;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            #introduction {
+                width: 80%;
+                font-size: 0.7em;
+            }
+            
+            #restart {
+                width: 100px;
+                height: 100px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="name-input-screen">
+        <div class="modal-container">
+            <h2>Balloon Flight Game</h2>
+            <p>Enter your name to start playing:</p>
+            <input type="text" id="name-input" placeholder="Your name" maxlength="20">
+            <button id="start-game-btn">Start Game</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-screen" style="display: none;">
+        <div class="modal-container">
+            <h2>Leaderboard</h2>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Leaderboard data will be inserted here -->
+                </tbody>
+            </table>
+            <button id="close-leaderboard-btn">Close</button>
+        </div>
+    </div>
+
+    <div id="result-screen" style="display: none;">
+        <div class="modal-container">
+            <h2>Game Over</h2>
+            <p id="result-message"></p>
+            <button id="play-again-btn">Play Again</button>
+            <button id="view-leaderboard-btn">View Leaderboard</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <canvas id="game"></canvas>
+        <div id="introduction">
+            <p>Touch and hold to raise the balloon</p>
+            <p>Fly low to save fuel</p>
+            <p>Don't hit the trees!</p>
+        </div>
+        <button id="restart">RESTART</button>
+        <button id="leaderboard-btn">🏆</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+            authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+            databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+            projectId: "newspaperveravart",
+            storageBucket: "newspaperveravart.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:1234567890abcdef"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Game variables
+        let gameStarted = false;
+        let playerName = "";
+        let playerId = "";
+        let balloonX = 0;
+        let balloonY = 0;
+        let verticalVelocity = 5;
+        let horizontalVelocity = 5;
+        let fuel = 100;
+        let heating = false;
+        let trees = [];
+        let backgroundTrees = [];
+        let currentScore = 0;
+        let playerRank = 0;
+
+        // Configuration
+        const mainAreaWidth = 400;
+        const mainAreaHeight = 375;
+        let horizontalPadding = (window.innerWidth - mainAreaWidth) / 2;
+        let verticalPadding = (window.innerHeight - mainAreaHeight) / 2;
+
+        const hill1BaseHeight = 80;
+        const hill1Speed = 0.2;
+        const hill1Amplitude = 10;
+        const hill1Stretch = 1;
+        const hill2BaseHeight = 50;
+        const hill2Speed = 0.2;
+        const hill2Amplitude = 15;
+        const hill2Stretch = 0.5;
+        const hill3BaseHeight = 15;
+        const hill3Speed = 1;
+        const hill3Amplitude = 10;
+        const hill3Stretch = 0.2;
+
+        // Canvas setup
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // UI elements
+        const introductionElement = document.getElementById("introduction");
+        const restartButton = document.getElementById("restart");
+        const leaderboardBtn = document.getElementById("leaderboard-btn");
+        const nameInputScreen = document.getElementById("name-input-screen");
+        const nameInput = document.getElementById("name-input");
+        const startGameBtn = document.getElementById("start-game-btn");
+        const leaderboardScreen = document.getElementById("leaderboard-screen");
+        const leaderboardBody = document.getElementById("leaderboard-body");
+        const closeLeaderboardBtn = document.getElementById("close-leaderboard-btn");
+        const resultScreen = document.getElementById("result-screen");
+        const resultMessage = document.getElementById("result-message");
+        const playAgainBtn = document.getElementById("play-again-btn");
+        const viewLeaderboardBtn = document.getElementById("view-leaderboard-btn");
+
+        // Custom sin function that takes degrees
+        Math.sinus = function (degree) {
+            return Math.sin((degree / 180) * Math.PI);
+        };
+
+        // Initialize the game
+        function init() {
+            resizeCanvas();
+            nameInputScreen.style.display = "flex";
+            introductionElement.style.opacity = 0;
+            restartButton.style.display = "none";
+            leaderboardBtn.style.display = "none";
+        }
+
+        // Start the game when button is clicked
+        function startGame() {
+            playerName = nameInput.value.trim();
+            if (playerName === "") {
+                alert("Please enter your name");
+                return;
+            }
+            nameInputScreen.style.display = "none";
+            resetGame();
+            gameStarted = true;
+            leaderboardBtn.style.display = "flex";
+            window.requestAnimationFrame(animate);
+        }
+
+        // Reset game variables
+        function resetGame() {
+            heating = false;
+            verticalVelocity = 5;
+            horizontalVelocity = 5;
+            balloonX = 0;
+            balloonY = 0;
+            fuel = 100;
+            currentScore = 0;
+
+            introductionElement.style.opacity = 1;
+
+            trees = [];
+            for (let i = 1; i < window.innerWidth / 50; i++) generateTree();
+
+            backgroundTrees = [];
+            for (let i = 1; i < window.innerWidth / 30; i++) generateBackgroundTree();
+
+            draw();
+        }
+
+        function restartGame() {
+            resetGame();
+            gameStarted = true;
+            window.requestAnimationFrame(animate);
+            restartButton.style.display = "none";
+            resultScreen.style.display = "none";
+        }
+
+        function generateBackgroundTree() {
+            const minimumGap = 30;
+            const maximumGap = 150;
+
+            const lastTree = backgroundTrees[backgroundTrees.length - 1];
+            let furthestX = lastTree ? lastTree.x : 0;
+
+            const x = furthestX + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap));
+            const treeColors = ["#6D8821", "#8FAC34", "#98B333"];
+            const color = treeColors[Math.floor(Math.random() * 3)];
+
+            backgroundTrees.push({ x, color });
+        }
+
+        function generateTree() {
+            const minimumGap = 50;
+            const maximumGap = 600;
+
+            const x = trees.length
+                ? trees[trees.length - 1].x + minimumGap + Math.floor(Math.random() * (maximumGap - minimumGap))
+                : 400;
+
+            const h = 60 + Math.random() * 80;
+            const r1 = 32 + Math.random() * 16;
+            const r2 = 32 + Math.random() * 16;
+            const r3 = 32 + Math.random() * 16;
+            const r4 = 32 + Math.random() * 16;
+            const r5 = 32 + Math.random() * 16;
+            const r6 = 32 + Math.random() * 16;
+            const r7 = 32 + Math.random() * 16;
+
+            const treeColors = ["#6D8821", "#8FAC34", "#98B333"];
+            const color = treeColors[Math.floor(Math.random() * 3)];
+
+            trees.push({ x, h, r1, r2, r3, r4, r5, r6, r7, color });
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            horizontalPadding = (window.innerWidth - mainAreaWidth) / 2;
+            verticalPadding = (window.innerHeight - mainAreaHeight) / 2;
+            if (gameStarted) draw();
+        }
+
+        // Event listeners
+        startGameBtn.addEventListener("click", startGame);
+        restartButton.addEventListener("click", restartGame);
+        playAgainBtn.addEventListener("click", restartGame);
+        viewLeaderboardBtn.addEventListener("click", showLeaderboard);
+        leaderboardBtn.addEventListener("click", showLeaderboard);
+        closeLeaderboardBtn.addEventListener("click", hideLeaderboard);
+        window.addEventListener("resize", resizeCanvas);
+        
+        // Touch/mouse controls
+        canvas.addEventListener("mousedown", startHeating);
+        canvas.addEventListener("mouseup", stopHeating);
+        canvas.addEventListener("touchstart", function(e) {
+            e.preventDefault();
+            startHeating(e);
+        });
+        canvas.addEventListener("touchend", function(e) {
+            e.preventDefault();
+            stopHeating(e);
+        });
+
+        function startHeating(e) {
+        e.preventDefault();
+        heating = true;
+        if (!gameStarted) {
+            // აქრობს ინსტრუქციებს როცა თამაში იწყება
+            introductionElement.style.display = "none";
+            gameStarted = true;
+            leaderboardBtn.style.display = "flex";
+            window.requestAnimationFrame(animate);
+        }
+    }
+
+        function stopHeating(e) {
+            if (e) e.preventDefault();
+            heating = false;
+        }
+
+        // The main game loop
+        function animate() {
+            if (!gameStarted) return;
+
+            const velocityChangeWhileHeating = 0.4;
+            const velocityChangeWhileCooling = 0.2;
+
+            if (heating && fuel > 0) {
+                if (verticalVelocity > -8) {
+                    verticalVelocity -= velocityChangeWhileHeating;
+                }
+                fuel -= 0.002 * -balloonY;
+            } else if (verticalVelocity < 5) {
+                verticalVelocity += velocityChangeWhileCooling;
+            }
+
+            balloonY += verticalVelocity;
+            if (balloonY > 0) balloonY = 0;
+            if (balloonY < 0) balloonX += horizontalVelocity;
+
+            if (trees[0].x - (balloonX - horizontalPadding) < -100) {
+                trees.shift();
+                generateTree();
+            }
+
+            if (backgroundTrees[0].x - (balloonX * hill1Speed - horizontalPadding) < -40) {
+                backgroundTrees.shift();
+                generateBackgroundTree();
+            }
+
+            currentScore = Math.floor(balloonX / 30);
+            draw();
+
+            const hit = hitDetection();
+            if (hit || (fuel <= 0 && balloonY >= 0)) {
+                saveScore();
+                return;
+            }
+
+            window.requestAnimationFrame(animate);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            drawSky();
+
+            ctx.save();
+            ctx.translate(0, verticalPadding + mainAreaHeight);
+            drawBackgroundHills();
+            ctx.translate(horizontalPadding, 0);
+            ctx.translate(-balloonX, 0);
+            drawTrees();
+            drawBalloon();
+            ctx.restore();
+
+            drawHeader();
+        }
+
+        async function saveScore() {
+            const timestamp = new Date().toISOString();
+            const scoreData = {
+                name: playerName,
+                score: currentScore,
+                timestamp: timestamp
+            };
+
+            try {
+                // Save the score
+                const newScoreRef = database.ref('flybaloon/scores').push();
+                playerId = newScoreRef.key;
+                await newScoreRef.set(scoreData);
+                
+                // Get player's rank
+                const scoresSnapshot = await database.ref('flybaloon/scores').orderByChild('score').once('value');
+                const scores = [];
+                
+                scoresSnapshot.forEach(childSnapshot => {
+                    scores.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+
+                // Sort in descending order
+                scores.sort((a, b) => b.score - a.score);
+                
+                // Find player's rank
+                playerRank = scores.findIndex(score => score.id === playerId) + 1;
+                
+                // Show result
+                showResult();
+                
+            } catch (error) {
+                console.error("Error saving score: ", error);
+                showResult();
+            }
+        }
+
+        function showResult() {
+            gameStarted = false;
+            restartButton.style.display = "none";
+            leaderboardBtn.style.display = "none";
+            
+            if (playerRank <= 10) {
+                resultMessage.textContent = `Congratulations! You ranked #${playerRank} with ${currentScore} meters!`;
+                resultScreen.style.display = "flex";
+                setTimeout(showLeaderboard, 1500);
+            } else {
+                resultMessage.textContent = `You scored ${currentScore} meters but didn't make the top 10. Try again!`;
+                resultScreen.style.display = "flex";
+            }
+        }
+
+        async function showLeaderboard() {
+            try {
+                const scoresSnapshot = await database.ref('flybaloon/scores').orderByChild('score').limitToLast(10).once('value');
+                const scores = [];
+                
+                scoresSnapshot.forEach(childSnapshot => {
+                    scores.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+
+                // Sort in descending order
+                scores.sort((a, b) => b.score - a.score);
+                
+                // Clear previous leaderboard
+                leaderboardBody.innerHTML = '';
+                
+                // Populate leaderboard
+                scores.forEach((score, index) => {
+                    const row = document.createElement('tr');
+                    if (score.id === playerId) {
+                        row.classList.add('highlight');
+                    }
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${score.name}</td>
+                        <td>${score.score}</td>
+                    `;
+                    leaderboardBody.appendChild(row);
+                });
+                
+                resultScreen.style.display = "none";
+                leaderboardScreen.style.display = "flex";
+                
+            } catch (error) {
+                console.error("Error loading leaderboard: ", error);
+                alert("Could not load leaderboard. Please try again later.");
+            }
+        }
+
+        function hideLeaderboard() {
+            leaderboardScreen.style.display = "none";
+            if (!gameStarted) {
+                resultScreen.style.display = "flex";
+            }
+        }
+
+        function drawCircle(cx, cy, radius) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function drawTrees() {
+            trees.forEach(({ x, h, r1, r2, r3, r4, r5, r6, r7, color }) => {
+                ctx.save();
+                ctx.translate(x, 0);
+
+                // Trunk
+                const trunkWidth = 40;
+                ctx.fillStyle = "#885F37";
+                ctx.beginPath();
+                ctx.moveTo(-trunkWidth / 2, 0);
+                ctx.quadraticCurveTo(-trunkWidth / 4, -h / 2, -trunkWidth / 2, -h);
+                ctx.lineTo(trunkWidth / 2, -h);
+                ctx.quadraticCurveTo(trunkWidth / 4, -h / 2, trunkWidth / 2, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                // Crown
+                ctx.fillStyle = color;
+                drawCircle(-20, -h - 15, r1);
+                drawCircle(-30, -h - 25, r2);
+                drawCircle(-20, -h - 35, r3);
+                drawCircle(0, -h - 45, r4);
+                drawCircle(20, -h - 35, r5);
+                drawCircle(30, -h - 25, r6);
+                drawCircle(20, -h - 15, r7);
+
+                ctx.restore();
+            });
+        }
+
+        function drawBalloon() {
+            ctx.save();
+            ctx.translate(balloonX, balloonY);
+
+            // Cart
+            ctx.fillStyle = "#DB504A";
+            ctx.fillRect(-30, -40, 60, 10);
+            ctx.fillStyle = "#EA9E8D";
+            ctx.fillRect(-30, -30, 60, 30);
+
+            // Cables
+            ctx.strokeStyle = "#D62828";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-24, -40);
+            ctx.lineTo(-24, -60);
+            ctx.moveTo(24, -40);
+            ctx.lineTo(24, -60);
+            ctx.stroke();
+
+            // Balloon
+            ctx.fillStyle = "#D62828";
+            ctx.beginPath();
+            ctx.moveTo(-30, -60);
+            ctx.quadraticCurveTo(-80, -120, -80, -160);
+            ctx.arc(0, -160, 80, Math.PI, 0, false);
+            ctx.quadraticCurveTo(80, -120, 30, -60);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawHeader() {
+            // Fuel meter
+            ctx.strokeStyle = fuel <= 30 ? "red" : "white";
+            ctx.strokeRect(30, 30, 150, 30);
+            ctx.fillStyle = fuel <= 30 ? "rgba(255,0,0,0.5)" : "rgba(150,150,200,0.5)";
+            ctx.fillRect(30, 30, (150 * fuel) / 100, 30);
+
+            // Score
+            ctx.fillStyle = "black";
+            ctx.font = "bold 32px Tahoma";
+            ctx.textAlign = "end";
+            ctx.textBaseline = "top";
+            ctx.fillText(`${currentScore} m`, window.innerWidth - 30, 30);
+        }
+
+        function drawSky() {
+            var gradient = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+            gradient.addColorStop(0, "#AADBEA");
+            gradient.addColorStop(1, "#FEF1E1");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+
+        function drawBackgroundHills() {
+            drawHill(hill1BaseHeight, hill1Speed, hill1Amplitude, hill1Stretch, "#AAD155");
+            drawHill(hill2BaseHeight, hill2Speed, hill2Amplitude, hill2Stretch, "#84B249");
+            drawHill(hill3BaseHeight, hill3Speed, hill3Amplitude, hill3Stretch, "#26532B");
+
+            backgroundTrees.forEach((tree) => drawBackgroundTree(tree.x, tree.color));
+        }
+
+        function drawHill(baseHeight, speedMultiplier, amplitude, stretch, color) {
+            ctx.beginPath();
+            ctx.moveTo(0, window.innerHeight);
+            ctx.lineTo(0, getHillY(0, baseHeight, amplitude, stretch));
+            for (let i = 0; i <= window.innerWidth; i++) {
+                ctx.lineTo(i, getHillY(i, baseHeight, speedMultiplier, amplitude, stretch));
+            }
+            ctx.lineTo(window.innerWidth, window.innerHeight);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawBackgroundTree(x, color) {
+            ctx.save();
+            ctx.translate(
+                (-balloonX * hill1Speed + x) * hill1Stretch,
+                getTreeY(x, hill1BaseHeight, hill1Amplitude)
+            );
+
+            const treeTrunkHeight = 5;
+            const treeTrunkWidth = 2;
+            const treeCrownHeight = 25;
+            const treeCrownWidth = 10;
+
+            ctx.fillStyle = "#7D833C";
+            ctx.fillRect(-treeTrunkWidth / 2, -treeTrunkHeight, treeTrunkWidth, treeTrunkHeight);
+
+            ctx.beginPath();
+            ctx.moveTo(-treeCrownWidth / 2, -treeTrunkHeight);
+            ctx.lineTo(0, -(treeTrunkHeight + treeCrownHeight));
+            ctx.lineTo(treeCrownWidth / 2, -treeTrunkHeight);
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function getHillY(x, baseHeight, speedMultiplier, amplitude, stretch) {
+            const sineBaseY = -baseHeight;
+            return Math.sinus((balloonX * speedMultiplier + x) * stretch) * amplitude + sineBaseY;
+        }
+
+        function getTreeY(x, baseHeight, amplitude) {
+            const sineBaseY = -baseHeight;
+            return Math.sinus(x) * amplitude + sineBaseY;
+        }
+
+        function hitDetection() {
+            const cartBottomLeft = { x: balloonX - 30, y: balloonY };
+            const cartBottomRight = { x: balloonX + 30, y: balloonY };
+            const cartTopRight = { x: balloonX + 30, y: balloonY - 40 };
+
+            for (const { x, h, r1, r2, r3, r4, r5 } of trees) {
+                const treeBottomLeft = { x: x - 20, y: -h - 15 };
+                const treeLeft = { x: x - 30, y: -h - 25 };
+                const treeTopLeft = { x: x - 20, y: -h - 35 };
+                const treeTop = { x: x, y: -h - 45 };
+                const treeTopRight = { x: x + 20, y: -h - 35 };
+
+                if (getDistance(cartBottomLeft, treeBottomLeft) < r1) return true;
+                if (getDistance(cartBottomRight, treeBottomLeft) < r1) return true;
+                if (getDistance(cartTopRight, treeBottomLeft) < r1) return true;
+
+                if (getDistance(cartBottomLeft, treeLeft) < r2) return true;
+                if (getDistance(cartBottomRight, treeLeft) < r2) return true;
+                if (getDistance(cartTopRight, treeLeft) < r2) return true;
+
+                if (getDistance(cartBottomLeft, treeTopLeft) < r3) return true;
+                if (getDistance(cartBottomRight, treeTopLeft) < r3) return true;
+                if (getDistance(cartTopRight, treeTopLeft) < r3) return true;
+
+                if (getDistance(cartBottomLeft, treeTop) < r4) return true;
+                if (getDistance(cartBottomRight, treeTop) < r4) return true;
+                if (getDistance(cartTopRight, treeTop) < r4) return true;
+
+                if (getDistance(cartBottomLeft, treeTopRight) < r5) return true;
+                if (getDistance(cartBottomRight, treeTopRight) < r5) return true;
+                if (getDistance(cartTopRight, treeTopRight) < r5) return true;
+            }
+            return false;
+        }
+
+        function getDistance(point1, point2) {
+            return Math.sqrt((point2.x - point1.x) ** 2 + (point2.y - point1.y) ** 2);
+        }
+
+        // Initialize the game when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
