@@ -191,6 +191,21 @@
                 width: 70px;
                 height: 70px;
             }
+            
+            #leaderboard-screen .content {
+                width: 90%;
+                max-width: 350px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            
+            #leaderboard {
+                font-size: 0.9em;
+            }
+            
+            #leaderboard th, #leaderboard td {
+                padding: 8px 5px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -208,6 +223,14 @@
             #welcome-screen h1, #leaderboard-screen h1 {
                 font-size: 1.5em;
             }
+            
+            #leaderboard {
+                font-size: 0.8em;
+            }
+            
+            #leaderboard th, #leaderboard td {
+                padding: 5px 3px;
+            }
         }
     </style>
 </head>
@@ -223,8 +246,8 @@
     <!-- Leaderboard Screen (initially hidden) -->
     <div id="leaderboard-screen" style="display: none;">
         <h1>LEADERBOARD</h1>
-        <div id="leaderboard-container"></div>
-        <button id="play-again-btn">BACK TO MENU</button>
+        <div class="content" id="leaderboard-container"></div>
+        <button id="play-again-btn">PLAY AGAIN</button>
     </div>
 
     <!-- Game Elements -->
@@ -270,10 +293,13 @@
 
         // Game variables
         let playerName = 'Anonymous';
+        let lastPlayerName = localStorage.getItem('playerName') || '';
         let playerAngleMoved = 0;
         let score = 0;
         let gameStartTime = 0;
         let playerPosition = 0;
+        let animationLoopId = null;
+        let isTabActive = true;
 
         // DOM elements
         const welcomeScreen = document.getElementById('welcome-screen');
@@ -286,15 +312,35 @@
         const finalScoreElement = document.getElementById('final-score');
         const resultsElement = document.getElementById('results');
 
+        // Set initial player name if available
+        if (lastPlayerName) {
+            playerNameInput.value = lastPlayerName;
+        }
+
         // Game initialization
         startGameBtn.addEventListener('click', startGameWithName);
         viewLeaderboardBtn.addEventListener('click', showLeaderboard);
-        playAgainBtn.addEventListener('click', resetGame);
+        playAgainBtn.addEventListener('click', playAgain);
+
+        // Tab visibility change handler
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        function handleVisibilityChange() {
+            isTabActive = !document.hidden;
+            if (!isTabActive && animationLoopId) {
+                renderer.setAnimationLoop(null);
+            } else if (isTabActive && !ready && animationLoopId) {
+                renderer.setAnimationLoop(animation);
+            }
+        }
 
         function startGameWithName() {
             playerName = playerNameInput.value.trim();
             if (playerName === '') {
                 playerName = "Anonymous";
+            } else {
+                lastPlayerName = playerName;
+                localStorage.setItem('playerName', playerName);
             }
             
             welcomeScreen.style.display = 'none';
@@ -308,24 +354,57 @@
             loadLeaderboard();
         }
 
-        function resetGame() {
+        function playAgain() {
             leaderboardScreen.style.display = 'none';
-            //welcomeScreen.style.display = 'flex';
-            
-            // აღარ ვასუფთავებთ სახელის ველს და ვაყენებთ ბოლო გამოყენებულ სახელს
-            if (lastPlayerName && lastPlayerName !== "Anonymous") {
-                playerNameInput.value = lastPlayerName;
-            } else {
-                playerNameInput.value = '';
-            }
-            
             reset();
             
             if (resultsElement.style.display === "flex") {
                 resultsElement.style.display = "none";
             }
+            
+            // Start game immediately with remembered name
+            playerName = lastPlayerName || "Anonymous";
+            gameStartTime = Date.now();
+            startGame();
         }
 
+        function reset() {
+            // Reset position and score
+            playerAngleMoved = 0;
+            score = 0;
+            scoreElement.innerText = "Press UP";
+
+            // Remove other vehicles
+            otherVehicles.forEach((vehicle) => {
+                // Remove the vehicle from the scene
+                scene.remove(vehicle.mesh);
+
+                // If it has hit-zone helpers then remove them as well
+                if (vehicle.mesh.userData.hitZone1)
+                    scene.remove(vehicle.mesh.userData.hitZone1);
+                if (vehicle.mesh.userData.hitZone2)
+                    scene.remove(vehicle.mesh.userData.hitZone2);
+                if (vehicle.mesh.userData.hitZone3)
+                    scene.remove(vehicle.mesh.userData.hitZone3);
+            });
+            otherVehicles = [];
+
+            resultsElement.style.display = "none";
+
+            lastTimestamp = undefined;
+
+            // Place the player's car to the starting position
+            movePlayerCar(0);
+
+            // Render the scene
+            renderer.render(scene, camera);
+
+            ready = true;
+        }
+
+        // [Rest of the code remains exactly the same as in the previous version...]
+        // All the other functions (Car(), Truck(), Wheel(), etc.) remain unchanged
+        // Only the initialization and game flow logic has been modified
 
         // Pick a random value from an array
         function pickRandom(array) {
@@ -464,47 +543,13 @@
 
         reset();
 
-        function reset() {
-            // Reset position and score
-            playerAngleMoved = 0;
-            score = 0;
-            scoreElement.innerText = "Press UP";
-
-            // Remove other vehicles
-            otherVehicles.forEach((vehicle) => {
-                // Remove the vehicle from the scene
-                scene.remove(vehicle.mesh);
-
-                // If it has hit-zone helpers then remove them as well
-                if (vehicle.mesh.userData.hitZone1)
-                    scene.remove(vehicle.mesh.userData.hitZone1);
-                if (vehicle.mesh.userData.hitZone2)
-                    scene.remove(vehicle.mesh.userData.hitZone2);
-                if (vehicle.mesh.userData.hitZone3)
-                    scene.remove(vehicle.mesh.userData.hitZone3);
-            });
-            otherVehicles = [];
-
-            resultsElement.style.display = "none";
-
-            lastTimestamp = undefined;
-
-            // Place the player's car to the starting position
-            movePlayerCar(0);
-
-            // Render the scene
-            renderer.render(scene, camera);
-
-            ready = true;
-        }
-
         function startGame() {
             if (ready) {
                 ready = false;
                 scoreElement.innerText = 0;
                 buttonsElement.style.opacity = 1;
                 instructionsElement.style.opacity = 0;
-                renderer.setAnimationLoop(animation);
+                animationLoopId = renderer.setAnimationLoop(animation);
             }
         }
 
@@ -1220,7 +1265,7 @@
                 content.innerHTML += '<button id="play-again-button" style="margin-top: 20px; padding: 10px 20px; font-size: 16px;">PLAY AGAIN</button>';
                 
                 // Add event listener to play again button
-                document.getElementById('play-again-button').addEventListener('click', resetGame);
+                document.getElementById('play-again-button').addEventListener('click', playAgain);
             }
         }
 
@@ -1291,6 +1336,8 @@
         });
 
         function animation(timestamp) {
+            if (!isTabActive) return;
+            
             if (!lastTimestamp) {
                 lastTimestamp = timestamp;
                 return;
