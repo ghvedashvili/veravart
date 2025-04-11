@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Racing Game</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Press+Start+2P");
+
+        body {
+            margin: 0;
+            padding: 0;
+            color: white;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+            overflow: hidden;
+            background-color: #222;
+        }
+
+        button {
+            outline: none;
+            cursor: pointer;
+            border: none;
+            box-shadow: 3px 5px 0px 0px rgba(0, 0, 0, 0.75);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            margin: 10px 0;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        #welcome-screen, #leaderboard-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        #welcome-screen h1, #leaderboard-screen h1 {
+            color: #fff;
+            font-family: "Press Start 2P", cursive;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #welcome-screen button, #leaderboard-screen button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        #game-header {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        #leaderboard-btn {
+            padding: 10px 15px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #score {
+            position: absolute;
+            font-family: "Press Start 2P", cursive;
+            font-size: 1.2em;
+            color: white;
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            max-width: 150px;
+            text-align: center;
+            line-height: 1.6em;
+            z-index: 100;
+            left: 50%;
+            top: 30px;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #controls #buttons {
+            display: flex;
+            gap: 30px;
+            opacity: 0;
+            transition: opacity 2s;
+        }
+
+        #controls #instructions {
+            display: none;
+        }
+
+        #controls button {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #results {
+            position: absolute;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(20, 20, 20, 0.75);
+            display: none;
+            z-index: 101;
+            flex-direction: column;
+        }
+
+        #results .content {
+            max-width: 90%;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        #leaderboard {
+            width: 90%;
+            max-width: 500px;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        #leaderboard th, #leaderboard td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+
+        #leaderboard th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        #leaderboard tr:nth-child(even) {
+            background-color: #2a2a2a;
+        }
+
+        #leaderboard tr:nth-child(odd) {
+            background-color: #222;
+        }
+
+        .highlight {
+            background-color: #4CAF50 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            #score {
+                font-size: 1em;
+                top: 30px;
+            }
+            
+            #controls {
+                bottom: 30px;
+            }
+            
+            #controls button {
+                width: 70px;
+                height: 70px;
+            }
+            
+            #leaderboard-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #score {
+                font-size: 0.8em;
+                top: 20px;
+            }
+            
+            #controls button {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            #welcome-screen h1, #leaderboard-screen h1 {
+                font-size: 1.5em;
+            }
+            
+            #game-header {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcome-screen">
+        <h1>RACING GAME</h1>
+        <input type="text" id="player-name" placeholder="Enter your name" maxlength="15">
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button id="start-game-btn">START GAME</button>
+            <button id="view-leaderboard-btn" style="background-color: #2196F3;">LEADERBOARD</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen (initially hidden) -->
+    <div id="leaderboard-screen" style="display: none;">
+        <h1>LEADERBOARD</h1>
+        <div id="leaderboard-container"></div>
+        <button id="play-again-btn">PLAY AGAIN</button>
+    </div>
+
+    <!-- Game Elements -->
+    <div id="game-header">
+        <button id="leaderboard-btn">LEADERBOARD</button>
+        <div id="score">Press UP</div>
+        <div style="width: 100px;"> <!-- Spacer for alignment --> </div>
+    </div>
+
+    <div id="controls">
+        <div id="buttons">
+            <button id="accelerate">▲</button>
+            <button id="decelerate">▼</button>
+        </div>
+        <div id="instructions"></div>
+    </div>
+
+    <div id="results">
+        <div class="content">
+            <h1>You hit another vehicle</h1>
+            <p>Your score: <span id="final-score">0</span></p>
+            <p>Loading leaderboard...</p>
+        </div>
+    </div>
+
+    <!-- Firebase and Three.js -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Firebase configuration - REPLACE WITH YOUR ACTUAL FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+            authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
+            databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
+            projectId: "newspaperveravart",
+            storageBucket: "newspaperveravart.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:1234567890abcdef"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const scoresRef = database.ref('carsdriver/scores');
+
+        // Game variables
+        let playerName = '';
+        let playerAngleMoved = 0;
+        let score = 0;
+        let gameStartTime = 0;
+        let playerPosition = 0;
+        let ready = false;
+        let lastTimestamp;
+        let accelerate = false;
+        let decelerate = false;
+        let otherVehicles = [];
+
+        // DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const playerNameInput = document.getElementById('player-name');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const viewLeaderboardBtn = document.getElementById('view-leaderboard-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const finalScoreElement = document.getElementById('final-score');
+        const resultsElement = document.getElementById('results');
+        const scoreElement = document.getElementById('score');
+        const buttonsElement = document.getElementById('buttons');
+        const instructionsElement = document.getElementById('instructions');
+        const accelerateButton = document.getElementById('accelerate');
+        const decelerateButton = document.getElementById('decelerate');
+
+        // Game initialization
+        startGameBtn.addEventListener('click', startGameWithName);
+        viewLeaderboardBtn.addEventListener('click', showLeaderboard);
+        leaderboardBtn.addEventListener('click', showLeaderboard);
+        playAgainBtn.addEventListener('click', resetGame);
+
+        function showLeaderboard() {
+            welcomeScreen.style.display = 'none';
+            leaderboardScreen.style.display = 'flex';
+            loadLeaderboard();
+        }
+
+        function startGameWithName() {
+            playerName = playerNameInput.value.trim();
+            if (playerName === '') {
+                alert('Please enter your name');
+                return;
+            }
+            
+            welcomeScreen.style.display = 'none';
+            gameStartTime = Date.now();
+            startGame();
+        }
+
+        function resetGame() {
+            leaderboardScreen.style.display = 'none';
+            welcomeScreen.style.display = 'flex';
+            reset();
+        }
+
+        // Game constants
+        const vehicleColors = [0xa52523, 0xef2d56, 0x0ad3ff, 0xff9f1c];
+        const lawnGreen = "#67C240";
+        const trackColor = "#546E90";
+        const edgeColor = "#725F48";
+        const treeCrownColor = 0x498c2c;
+        const treeTrunkColor = 0x4b3f2f;
+        const speed = 0.0017;
+        const playerAngleInitial = Math.PI;
+        const trackRadius = 225;
+        const trackWidth = 45;
+        const innerTrackRadius = trackRadius - trackWidth;
+        const outerTrackRadius = trackRadius + trackWidth;
+        const arcAngle1 = (1 / 3) * Math.PI;
+        
+        // Initialize Three.js scene
+        const aspectRatio = window.innerWidth / window.innerHeight;
+        const cameraWidth = 960;
+        const cameraHeight = cameraWidth / aspectRatio;
+
+        const camera = new THREE.OrthographicCamera(
+            cameraWidth / -2, cameraWidth / 2,
+            cameraHeight / 2, cameraHeight / -2,
+            50, 700
+        );
+        camera.position.set(0, -210, 300);
+        camera.lookAt(0, 0, 0);
+
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Set up lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(100, -300, 300);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Initialize game
+        const wheelGeometry = new THREE.BoxBufferGeometry(12, 33, 12);
+        const wheelMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
+        const treeTrunkGeometry = new THREE.BoxBufferGeometry(15, 15, 30);
+        const treeTrunkMaterial = new THREE.MeshLambertMaterial({ color: treeTrunkColor });
+        const treeCrownMaterial = new THREE.MeshLambertMaterial({ color: treeCrownColor });
+
+        // Create player car
+        const playerCar = createCar();
+        scene.add(playerCar);
+
+        // Render initial map
+        renderMap();
+
+        // Start with reset state
+        reset();
+
+        function createCar() {
+            const car = new THREE.Group();
+            const color = pickRandom(vehicleColors);
+
+            const main = new THREE.Mesh(
+                new THREE.BoxBufferGeometry(60, 30, 15),
+                new THREE.MeshLambertMaterial({ color })
+            );
+            main.position.z = 12;
+            main.castShadow = true;
+            main.receiveShadow = true;
+            car.add(main);
+
+            const cabin = new THREE.Mesh(
+                new THREE.BoxBufferGeometry(33, 24, 12),
+                new THREE.MeshLambertMaterial({ color: 0xffffff })
+            );
+            cabin.position.x = -6;
+            cabin.position.z = 25.5;
+            cabin.castShadow = true;
+            cabin.receiveShadow = true;
+            car.add(cabin);
+
+            const backWheel = createWheel();
+            backWheel.position.x = -18;
+            car.add(backWheel);
+
+            const frontWheel = createWheel();
+            frontWheel.position.x = 18;
+            car.add(frontWheel);
+
+            return car;
+        }
+
+        function createWheel() {
+            const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+            wheel.position.z = 6;
+            return wheel;
+        }
+
+        function renderMap() {
+            // Create a simple track for now
+            const trackGeometry = new THREE.RingGeometry(
+                innerTrackRadius,
+                outerTrackRadius,
+                32,
+                1,
+                0,
+                Math.PI * 2
+            );
+            const trackMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x546E90,
+                side: THREE.DoubleSide
+            });
+            const track = new THREE.Mesh(trackGeometry, trackMaterial);
+            track.position.x = -arcCenterX;
+            track.rotation.x = Math.PI / 2;
+            scene.add(track);
+
+            // Add a second track on the right
+            const track2 = track.clone();
+            track2.position.x = arcCenterX;
+            scene.add(track2);
+
+            // Add ground plane
+            const planeGeometry = new THREE.PlaneGeometry(2000, 2000);
+            const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x67C240 });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -Math.PI / 2;
+            scene.add(plane);
+        }
+
+        function reset() {
+            playerAngleMoved = 0;
+            score = 0;
+            scoreElement.innerText = "Press UP";
+            
+            // Clear existing vehicles
+            otherVehicles.forEach(vehicle => {
+                scene.remove(vehicle.mesh);
+            });
+            otherVehicles = [];
+            
+            // Reset player position
+            movePlayerCar(0);
+            
+            // Render initial state
+            renderer.render(scene, camera);
+            
+            ready = true;
+        }
+
+        function startGame() {
+            if (ready) {
+                ready = false;
+                scoreElement.innerText = "0";
+                buttonsElement.style.opacity = 1;
+                renderer.setAnimationLoop(animation);
+            }
+        }
+
+        function animation(timestamp) {
+            if (!lastTimestamp) {
+                lastTimestamp = timestamp;
+                return;
+            }
+
+            const timeDelta = timestamp - lastTimestamp;
+            movePlayerCar(timeDelta);
+
+            const laps = Math.floor(Math.abs(playerAngleMoved) / (Math.PI * 2));
+            if (laps != score) {
+                score = laps;
+                scoreElement.innerText = score;
+            }
+
+            if (otherVehicles.length < (laps + 1) / 5) {
+                addVehicle();
+            }
+
+            moveOtherVehicles(timeDelta);
+            hitDetection();
+            renderer.render(scene, camera);
+            lastTimestamp = timestamp;
+        }
+
+        function movePlayerCar(timeDelta) {
+            const playerSpeed = getPlayerSpeed();
+            playerAngleMoved -= playerSpeed * timeDelta;
+
+            const totalPlayerAngle = playerAngleInitial + playerAngleMoved;
+            const playerX = Math.cos(totalPlayerAngle) * trackRadius - arcCenterX;
+            const playerY = Math.sin(totalPlayerAngle) * trackRadius;
+
+            playerCar.position.x = playerX;
+            playerCar.position.y = playerY;
+            playerCar.rotation.z = totalPlayerAngle - Math.PI / 2;
+        }
+
+        function moveOtherVehicles(timeDelta) {
+            otherVehicles.forEach(vehicle => {
+                if (vehicle.clockwise) {
+                    vehicle.angle -= speed * timeDelta * vehicle.speed;
+                } else {
+                    vehicle.angle += speed * timeDelta * vehicle.speed;
+                }
+
+                const vehicleX = Math.cos(vehicle.angle) * trackRadius + arcCenterX;
+                const vehicleY = Math.sin(vehicle.angle) * trackRadius;
+                const rotation = vehicle.angle + (vehicle.clockwise ? -Math.PI / 2 : Math.PI / 2);
+                
+                vehicle.mesh.position.x = vehicleX;
+                vehicle.mesh.position.y = vehicleY;
+                vehicle.mesh.rotation.z = rotation;
+            });
+        }
+
+        function addVehicle() {
+            const type = Math.random() > 0.5 ? "car" : "truck";
+            const speed = type === "car" ? (1 + Math.random()) : (0.6 + Math.random() * 0.9);
+            const clockwise = Math.random() >= 0.5;
+            const angle = clockwise ? Math.PI / 2 : -Math.PI / 2;
+
+            const mesh = type === "car" ? createCar() : createTruck();
+            scene.add(mesh);
+            otherVehicles.push({ mesh, type, speed, clockwise, angle });
+        }
+
+        function createTruck() {
+            const truck = new THREE.Group();
+            const color = pickRandom(vehicleColors);
+
+            const base = new THREE.Mesh(
+                new THREE.BoxBufferGeometry(100, 25, 5),
+                new THREE.MeshLambertMaterial({ color: 0xb4c6fc })
+            );
+            base.position.z = 10;
+            truck.add(base);
+
+            const cargo = new THREE.Mesh(
+                new THREE.BoxBufferGeometry(75, 35, 40),
+                new THREE.MeshLambertMaterial({ color: 0xffffff })
+            );
+            cargo.position.x = -15;
+            cargo.position.z = 30;
+            cargo.castShadow = true;
+            truck.add(cargo);
+
+            const cabin = new THREE.Mesh(
+                new THREE.BoxBufferGeometry(25, 30, 30),
+                new THREE.MeshLambertMaterial({ color })
+            );
+            cabin.position.x = 40;
+            cabin.position.z = 20;
+            truck.add(cabin);
+
+            const backWheel = createWheel();
+            backWheel.position.x = -30;
+            truck.add(backWheel);
+
+            const middleWheel = createWheel();
+            middleWheel.position.x = 10;
+            truck.add(middleWheel);
+
+            const frontWheel = createWheel();
+            frontWheel.position.x = 38;
+            truck.add(frontWheel);
+
+            return truck;
+        }
+
+        function hitDetection() {
+            const hit = otherVehicles.some(vehicle => {
+                const dx = playerCar.position.x - vehicle.mesh.position.x;
+                const dy = playerCar.position.y - vehicle.mesh.position.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance < 40;
+            });
+
+            if (hit) {
+                resultsElement.style.display = "flex";
+                finalScoreElement.textContent = score;
+                renderer.setAnimationLoop(null);
+                saveScore();
+            }
+        }
+
+        function getPlayerSpeed() {
+            if (accelerate) return speed * 2;
+            if (decelerate) return speed * 0.5;
+            return speed;
+        }
+
+        function pickRandom(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Firebase functions
+        function saveScore() {
+            const gameTime = Math.floor((Date.now() - gameStartTime) / 1000);
+            scoresRef.push({
+                name: playerName,
+                score: score,
+                time: gameTime,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }, error => {
+                if (error) {
+                    console.error("Error saving score:", error);
+                    showLeaderboardContent([]);
+                } else {
+                    loadLeaderboard();
+                }
+            });
+        }
+
+        function loadLeaderboard() {
+            scoresRef.orderByChild('score').limitToLast(10).once('value', snapshot => {
+                const scores = [];
+                snapshot.forEach(child => {
+                    scores.push(child.val());
+                });
+                scores.sort((a, b) => b.score - a.score);
+                showLeaderboardContent(scores);
+            }, error => {
+                console.error("Error loading leaderboard:", error);
+                showLeaderboardContent([]);
+            });
+        }
+
+        function showLeaderboardContent(scores) {
+            const content = resultsElement.querySelector('.content');
+            content.innerHTML = `
+                <h1>Game Over</h1>
+                <p>Your score: <strong>${score}</strong></p>
+            `;
+
+            const playerInTop10 = scores.some(entry => entry.name === playerName && entry.score === score);
+            if (playerInTop10) {
+                const position = scores.findIndex(entry => entry.name === playerName && entry.score === score) + 1;
+                content.innerHTML += `<p>Congratulations! You're #${position} on the leaderboard!</p>`;
+            } else {
+                content.innerHTML += `<p>Nice try! The top score is ${scores[0]?.score || 0}.</p>`;
+            }
+
+            if (scores.length > 0) {
+                let leaderboardHTML = `
+                    <h2>Top Scores</h2>
+                    <table id="leaderboard">
+                        <tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>
+                `;
+                
+                scores.slice(0, 10).forEach((entry, index) => {
+                    const isCurrent = entry.name === playerName && entry.score === score;
+                    leaderboardHTML += `
+                        <tr ${isCurrent ? 'class="highlight"' : ''}>
+                            <td>${index + 1}</td>
+                            <td>${entry.name}</td>
+                            <td>${entry.score}</td>
+                            <td>${entry.time}s</td>
+                        </tr>
+                    `;
+                });
+                
+                leaderboardHTML += '</table>';
+                content.innerHTML += leaderboardHTML;
+            }
+
+            content.innerHTML += '<button id="play-again-button" style="margin-top:20px;padding:10px 20px;">PLAY AGAIN</button>';
+            document.getElementById('play-again-button').addEventListener('click', resetGame);
+        }
+
+        // Event listeners
+        accelerateButton.addEventListener("mousedown", () => { accelerate = true; });
+        decelerateButton.addEventListener("mousedown", () => { decelerate = true; });
+        accelerateButton.addEventListener("mouseup", () => { accelerate = false; });
+        decelerateButton.addEventListener("mouseup", () => { decelerate = false; });
+        
+        accelerateButton.addEventListener("touchstart", (e) => { e.preventDefault(); accelerate = true; });
+        decelerateButton.addEventListener("touchstart", (e) => { e.preventDefault(); decelerate = true; });
+        accelerateButton.addEventListener("touchend", (e) => { e.preventDefault(); accelerate = false; });
+        decelerateButton.addEventListener("touchend", (e) => { e.preventDefault(); decelerate = false; });
+
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowUp") accelerate = true;
+            if (event.key === "ArrowDown") decelerate = true;
+            if (event.key === "r" || event.key === "R") reset();
+        });
+
+        window.addEventListener("keyup", (event) => {
+            if (event.key === "ArrowUp") accelerate = false;
+            if (event.key === "ArrowDown") decelerate = false;
+        });
+
+        window.addEventListener("resize", () => {
+            const newAspectRatio = window.innerWidth / window.innerHeight;
+            const adjustedHeight = cameraWidth / newAspectRatio;
+            
+            camera.top = adjustedHeight / 2;
+            camera.bottom = -adjustedHeight / 2;
+            camera.updateProjectionMatrix();
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.render(scene, camera);
+        });
+
+        // Initialize with welcome screen
+        welcomeScreen.style.display = 'flex';
+    </script>
+</body>
+</html>
