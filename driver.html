@@ -80,8 +80,7 @@
             color: white;
             transform: translate(-50%, -50%);
             opacity: 0.9;
-            max-width: 150px;
-            text-align: center;
+                       text-align: center;
             line-height: 1.6em;
             z-index: 100;
         }
@@ -210,8 +209,11 @@
 
         @media (max-width: 480px) {
             #score {
-                font-size: 0.8em;
+                font-size: 3.8em;
                 top: 20px;
+margin-left: 70px;
+width: 100%;
+
             }
             
             #controls button {
@@ -251,7 +253,7 @@
     </div>
 
     <!-- Game Elements -->
-    <div id="score">Press UP</div>
+    <div id="score">0 - წრე</div>
 
     <div id="controls">
         <div id="buttons">
@@ -1352,7 +1354,7 @@
             // Update score if it changed
             if (laps != score) {
                 score = laps;
-                scoreElement.innerText = score;
+                scoreElement.innerText =score +' '+ 'წრე';
             }
 
             // Add a new vehicle at the beginning and with every 5th lap
