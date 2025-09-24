@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ka">
 <head>
@@ -344,11 +345,14 @@ function refreshBoardView(){
     for(let c=0;c<COLS;c++){
       const idx = r*COLS + c;
       const el = cells[idx];
-      el.classList.remove('player1','player2','highlight');
+      el.classList.remove('player1','player2','highlight','piece-part');
+      el.style.background = ''; // Reset any custom background
+      
       if(board[r][c]===1) el.classList.add('player1');
       if(board[r][c]===2) el.classList.add('player2');
     }
   }
+  
   // if a piece selected, show highlights for current transformed orientation
   if(turn===1 && selected){
     highlightValidMoves();
@@ -571,14 +575,31 @@ function updateSelectedPreview(){
 // highlight all valid anchor positions for current transformed orientation
 function highlightValidMoves(){
   // clear existing
-  cells.forEach(c => c.classList.remove('highlight'));
+  cells.forEach(c => {
+    c.classList.remove('highlight', 'piece-part');
+    c.style.background = ''; // Reset any custom background
+  });
+  
   if(!selected) return;
   const shape = getTransformedShape();
+  
   for(let r=0;r<ROWS;r++){
     for(let c=0;c<COLS;c++){
       if(canPlaceAt(1, shape, r, c)){
-        const idx = r*COLS + c;
-        cells[idx].classList.add('highlight');
+        // Highlight the anchor cell (base position)
+        const anchorIdx = r*COLS + c;
+        cells[anchorIdx].classList.add('highlight');
+        
+        // Highlight all cells that will be occupied by the piece
+        for(const [x,y] of shape){
+          const pieceR = r + y;
+          const pieceC = c + x;
+          if(pieceR >= 0 && pieceR < ROWS && pieceC >= 0 && pieceC < COLS){
+            const idx = pieceR*COLS + pieceC;
+            cells[idx].classList.add('piece-part');
+            cells[idx].style.background = 'var(--highlight)';
+          }
+        }
       }
     }
   }
