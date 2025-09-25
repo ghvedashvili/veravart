@@ -769,17 +769,29 @@ function aiMove(){
   
   // ჯერ ვცადოთ ყველა ფიგურა და ვიპოვოთ საუკეთესო სვლა
   const available = aiPieces.filter(p=>!p.used);
+  
+  // შემთხვევითად ავურიოთ ფიგურები, რომ AI ყოველთვის სხვადასხვა ფიგურებით დაიწყოს
+  const shuffledPieces = [...available].sort(() => Math.random() - 0.5);
+  
   let bestMove = null;
   let bestScore = -Infinity;
+  let allValidMoves = [];
   
-  for(const p of available){
+  for(const p of shuffledPieces){
     const variants = canonicalVariants(p.shape);
-    for(const v of variants){
+    // შემთხვევითად ავურიოთ ვარიანტებიც
+    const shuffledVariants = [...variants].sort(() => Math.random() - 0.5);
+    
+    for(const v of shuffledVariants){
       for(let r=0;r<ROWS;r++){
         for(let c=0;c<COLS;c++){
           if(canPlaceAt(2, v, r, c)){
             // გამოვთვალოთ სვლის ხარისხი
             const score = evaluateMove(2, v, r, c);
+            
+            // შევინახოთ ყველა ვალიდური სვლა
+            allValidMoves.push({piece: p, shape: v, r, c, score});
+            
             if(score > bestScore){
               bestScore = score;
               bestMove = {piece: p, shape: v, r, c};
@@ -787,6 +799,29 @@ function aiMove(){
           }
         }
       }
+    }
+  }
+  
+  // თუ არ არის სვლები -> pass
+  if(allValidMoves.length === 0){
+    passed[2] = true;
+    nextTurn();
+    return;
+  }
+  
+  // პირველი სვლისთვის გამოვიყენოთ შემთხვევითობა
+  const isFirstMove = !aiPieces.some(p => p.used);
+  
+  if(isFirstMove && allValidMoves.length > 1){
+    // პირველი სვლისთვის აირჩიე შემთხვევით ერთ-ერთი საუკეთესო სვლა
+    const topMoves = allValidMoves.filter(move => move.score >= bestScore - 10);
+    const randomMove = topMoves[Math.floor(Math.random() * topMoves.length)];
+    bestMove = randomMove;
+  } else if(!isFirstMove && allValidMoves.length > 3){
+    // შემდგომი სვლებისთვის ზოგჯერ აირჩიე შემთხვევითი სვლა (20% შანსი)
+    if(Math.random() < 0.2){
+      const randomMove = allValidMoves[Math.floor(Math.random() * allValidMoves.length)];
+      bestMove = randomMove;
     }
   }
   
