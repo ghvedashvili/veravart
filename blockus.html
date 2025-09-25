@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ka">
 <head>
@@ -13,7 +12,7 @@
     --player1: #ffe9d6;
     --player2: #dff0ff;
     --highlight: #c9f7d0;
-    --anchor-highlight: #4ade80; /* უფრო ღრმა მწვანე საფუძვლისთვის */
+    --anchor-highlight: #4ade80;
     --muted: #6b7280;
   }
   *{box-sizing:border-box}
@@ -29,7 +28,7 @@
   .grid-wrap{display:flex;justify-content:center}
   .grid{
     display:grid;
-    grid-template-columns: repeat(7, 1fr); /* 7x7 დაფა */
+    grid-template-columns: repeat(7, 1fr);
     grid-auto-rows: 1fr;
     gap:6px;
     width: min(540px, 86vw);
@@ -97,81 +96,110 @@
     border: 1px solid #e5e7eb;
     font-size: 12px;
   }
-  /* ახალი სტილები შეტყობინებებისთვის */
-  .message {
-    margin-top: 10px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 13px;
+  /* მოდალის სტილები */
+  .modal {
     display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
   }
-  .message.player-turn {
-    background: #d1fae5;
-    color: #065f46;
-    display: block;
-  }
-  .message.no-moves {
-    background: #fee2e2;
-    color: #991b1b;
-    display: block;
-  }
-  .message.game-over {
-    background: #fef3c7;
-    color: #92400e;
-    display: block;
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
     text-align: center;
-    font-weight: bold;
+    max-width: 300px;
+    width: 90%;
   }
-  .restart-btn {
-    margin-top: 10px;
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+  }
+  .modal-btn {
     padding: 8px 16px;
-    background: #3b82f6;
-    color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    display: none;
   }
-  .restart-btn:hover {
-    background: #2563eb;
+  .modal-btn.primary {
+    background: #3b82f6;
+    color: white;
   }
-  /* საერთო ანგარიშის სტილები */
+  /* საერთო ანგარიშის კომპაქტური სტილები */
   .score-panel {
     background: #f8fafc;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
     margin-bottom: 10px;
     border: 1px solid #e5e7eb;
   }
-  .score-title {
-    font-weight: bold;
-    margin-bottom: 8px;
-    font-size: 14px;
-  }
-  .score-item {
+  .score-total {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 4px;
     font-size: 13px;
   }
-  .score-total {
-    text-align:center;
+  .score-total span:first-child {
+    color: var(--muted);
+    font-weight: normal;
+  }
+  #totalResult {
     font-weight: bold;
+    color: #111;
+  }
+  /* Your Pieces სტილები */
+  .pieces-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .pieces-header strong {
+    font-size: 14px;
+  }
+  .pieces-header .muted {
+    font-size: 12px;
   }
 </style>
 </head>
 <body>
+  <!-- მოდალი თამაშის დასრულებისთვის -->
+  <div id="gameOverModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">თამაში დასრულდა!</h2>
+      <div id="modalMessage"></div>
+      <div class="score-total" style="margin: 15px 0;">
+        საერთო ანგარიში: <span id="modalTotalScore">0 - 0</span>
+      </div>
+      <div class="modal-buttons">
+        <button id="modalRestartBtn" class="modal-btn primary">ხელახლა დაწყება</button>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="left">
       <div class="panel">
         <!-- საერთო ანგარიში -->
         <div class="score-panel">
-         
-          
           <div class="score-total">
             <span>საერთო ანგარიში:</span><hr>
             <span id="totalResult">0 - 0</span>
           </div>
+        </div>
+
+        <!-- Kidsmart-ის ფიგურები დაფის ზევით -->
+        <div class="ai-pieces-info">
+          <div><strong>Kidsmart-ის დარჩენილი ფიგურები:</strong></div>
+          <div id="aiPiecesList" class="ai-pieces-list"></div>
         </div>
 
         <div class="board-head">
@@ -187,18 +215,7 @@
           Player pieces left: <span id="pCount">0</span> — kidsmart pieces left: <span id="aiCount">0</span>
         </div>
 
-        <!-- შეტყობინებები -->
-        <div id="playerTurnMessage" class="message player-turn">თქვენი სვლაა - აირჩიეთ ფიგურა</div>
-        <div id="noMovesMessage" class="message no-moves">სვლა არ გაქვთ - kidsmart თამაშობს</div>
-        <div id="gameOverMessage" class="message game-over"></div>
-        
         <button id="restartBtn" class="restart-btn">თამაშის ხელახლა დაწყება</button>
-
-        <!-- ახალი სექცია kidsmart-ის ფიგურებისთვის -->
-        <div class="ai-pieces-info">
-          <div><strong>Kidsmart-ის დარჩენილი ფიგურები:</strong></div>
-          <div id="aiPiecesList" class="ai-pieces-list"></div>
-        </div>
       </div>
     </div>
 
@@ -216,7 +233,11 @@
 
         <hr style="margin:10px 0">
 
-        <div><strong>Your Pieces</strong> <span class="muted">(tap to select)</span></div>
+        <!-- Your Pieces ერთ ხაზზე -->
+        <div class="pieces-header">
+          <strong>Your Pieces</strong>
+          <span class="muted">(tap to select)</span>
+        </div>
         <div id="pieces" class="pieces"></div>
 
         <hr style="margin:10px 0">
@@ -251,16 +272,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-/*
-  Single-file Blokus-like game (2 players: human vs kidsmart).
-  - Click piece to select
-  - After selection, all valid anchor positions for the *current transformed orientation* are highlighted
-  - Click a highlighted cell to place
-  - Rotate / Flip update preview & highlighted positions
-  - AI moves automatically (improved strategy)
-*/
-
-// board size - 7x7 დაფა (პატარა, რომ ყველა ფიგურა ვერ ჩაეტენოს)
+// board size - 7x7 დაფა
 const ROWS = 7, COLS = 7;
 const gridEl = document.getElementById('grid');
 const piecesEl = document.getElementById('pieces');
@@ -269,17 +281,17 @@ const turnLabel = document.getElementById('turnLabel');
 const pCountEl = document.getElementById('pCount');
 const aiCountEl = document.getElementById('aiCount');
 const aiPiecesListEl = document.getElementById('aiPiecesList');
-const playerTurnMessage = document.getElementById('playerTurnMessage');
-const noMovesMessage = document.getElementById('noMovesMessage');
-const gameOverMessage = document.getElementById('gameOverMessage');
 const restartBtn = document.getElementById('restartBtn');
-
 const totalResultEl = document.getElementById('totalResult');
-
-let board = Array.from({length: ROWS}, ()=>Array(COLS).fill(0)); // 0 empty, 1 player, 2 ai
+const gameOverModal = document.getElementById('gameOverModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalMessage = document.getElementById('modalMessage');
+const modalTotalScore = document.getElementById('modalTotalScore');
+const modalRestartBtn = document.getElementById('modalRestartBtn');
+restartBtn.style.display = 'none';
+let board = Array.from({length: ROWS}, ()=>Array(COLS).fill(0));
 let cells = [];
 
-// Basic piece set (10 ფიგურა, მაგრამ დაფა პატარაა რომ ყველა ვერ ჩაეტენოს)
 const BASE_PIECES = [
   {id:'1', name:'Dot', shape:[[0,0]]},
   {id:'2', name:'Domino', shape:[[0,0],[1,0]]},
@@ -292,7 +304,6 @@ const BASE_PIECES = [
   {id:'10', name:'Plus', shape:[[1,0],[0,1],[1,1],[2,1],[1,2]]}
 ];
 
-// give each player one copy set
 function clonePiecesForPlayer(player){
   return BASE_PIECES.map(p=>({
     id: p.id+'-'+player,
@@ -304,24 +315,15 @@ function clonePiecesForPlayer(player){
 }
 
 let playerPieces, aiPieces;
-
-// selection / transform state
-let selected = null; // {pieceId, originalShape, owner}
-let rotation = 0; // 0..3 (90deg steps)
-let flipped = false; // horizontal mirror
-
-// turn and pass flags
-let turn = 1; // 1 player, 2 ai
+let selected = null;
+let rotation = 0;
+let flipped = false;
+let turn = 1;
 let passed = {1:false, 2:false};
 let gameOver = false;
-
-// საერთო ანგარიში
 let totalScores = { player: 0, ai: 0 };
-
-// starting corners: player top-left, ai bottom-right (col,row)
 const startCorners = {1: [0,0], 2: [COLS-1, ROWS-1]};
 
-// draw grid (responsive squares)
 function drawGrid(){
   gridEl.innerHTML = '';
   cells = [];
@@ -329,7 +331,6 @@ function drawGrid(){
     for(let c=0;c<COLS;c++){
       const d = document.createElement('div');
       d.className = 'cell';
-      // subtle edge marker
       if(r===0||c===0||r===ROWS-1||c===COLS-1) d.classList.add('edge');
       d.dataset.r = r; d.dataset.c = c;
       d.addEventListener('click', ()=>onCellClick(r,c));
@@ -340,41 +341,58 @@ function drawGrid(){
   refreshBoardView();
 }
 
-// render board colors
+function updateMessages() {
+  if (gameOver) return;
+  
+  if (turn === 1) {
+    if (!playerHasValidMoves()) {
+      // თუ მოთამაშეს არ აქვს სვლა, ავტომატურად გადავიდეთ AI-ზე
+      setTimeout(() => {
+        if (!gameOver && turn === 1) {
+          nextTurn();
+        }
+      }, 1000);
+    }
+  }
+}
+
+// და გამოიძახე updateMessages() refreshBoardView()-ში
 function refreshBoardView(){
   for(let r=0;r<ROWS;r++){
     for(let c=0;c<COLS;c++){
       const idx = r*COLS + c;
       const el = cells[idx];
       el.classList.remove('player1','player2','highlight','piece-part','anchor-part');
-      el.style.background = ''; // Reset any custom background
+      el.style.background = '';
       
       if(board[r][c]===1) el.classList.add('player1');
       if(board[r][c]===2) el.classList.add('player2');
     }
   }
   
-  // if a piece selected, show highlights for current transformed orientation
   if(turn===1 && selected){
     highlightValidMoves();
   }
+  
+  // შეამოწმე სვლის შესაძლებლობა
+  updateMessages();
 }
 
-
-// transforms for shapes
-function rotateShape(shape){ // 90deg clockwise
+function rotateShape(shape){
   return shape.map(([x,y])=>[y, -x]);
 }
-function flipShape(shape){ // mirror horizontally
+
+function flipShape(shape){
   return shape.map(([x,y])=>[-x, y]);
 }
+
 function normalize(shape){
   const xs = shape.map(s=>s[0]), ys = shape.map(s=>s[1]);
   const minx = Math.min(...xs), miny = Math.min(...ys);
   return shape.map(([x,y])=>[x-minx, y-miny]);
 }
+
 function canonicalVariants(shape){
-  // all rotations+flips (deduped)
   const variants = [];
   let s = shape.map(a=>[a[0],a[1]]);
   for(let i=0;i<4;i++){
@@ -382,7 +400,6 @@ function canonicalVariants(shape){
     variants.push(normalize(s.map(a=>[a[0],a[1]])));
     variants.push(normalize(flipShape(s.map(a=>[a[0],a[1]]))));
   }
-  // dedupe
   const set = new Set();
   const out = [];
   for(const v of variants){
@@ -392,31 +409,23 @@ function canonicalVariants(shape){
   return out;
 }
 
-// check placement validity by Blokus-like rules:
-// - shape in bounds
-// - no overlap
-// - cannot touch same-owner along edge
-// - must touch same-owner at corner at least once (except first move must cover start corner)
 function canPlaceAt(owner, shape, baseR, baseC){
-  // owner pieces used?
   const ownerArr = owner===1 ? playerPieces : aiPieces;
   const madeAny = ownerArr.some(p=>p.used);
-  const isFirstMove = !madeAny; // true if player hasn't placed any piece yet
+  const isFirstMove = !madeAny;
 
   let touchesCorner = false;
   for(const [x,y] of shape){
     const r = baseR + y, c = baseC + x;
-    if(r < 0 || r >= ROWS || c < 0 || c >= COLS) return false; // out of bounds
-    if(board[r][c] !== 0) return false; // overlap
-    // edge adjacency
+    if(r < 0 || r >= ROWS || c < 0 || c >= COLS) return false;
+    if(board[r][c] !== 0) return false;
     const edges = [[1,0],[-1,0],[0,1],[0,-1]];
     for(const [ex,ey] of edges){
       const nr = r + ey, nc = c + ex;
       if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS){
-        if(board[nr][nc] === owner) return false; // touches same owner by edge -> invalid
+        if(board[nr][nc] === owner) return false;
       }
     }
-    // corner adjacency
     const corners = [[1,1],[1,-1],[-1,1],[-1,-1]];
     for(const [cx,cy] of corners){
       const nr = r + cy, nc = c + cx;
@@ -427,8 +436,7 @@ function canPlaceAt(owner, shape, baseR, baseC){
   }
 
   if(isFirstMove){
-    // require shape to include owner's start corner cell
-    const [sc, sr] = startCorners[owner]; // [col, row]
+    const [sc, sr] = startCorners[owner];
     let coversStart = false;
     for(const [x,y] of shape){
       if(baseR + y === sr && baseC + x === sc) coversStart = true;
@@ -438,7 +446,6 @@ function canPlaceAt(owner, shape, baseR, baseC){
   return touchesCorner;
 }
 
-// place piece onto board and mark used
 function placePiece(owner, pieceId, shape, baseR, baseC){
   for(const [x,y] of shape){
     board[baseR + y][baseC + x] = owner;
@@ -447,20 +454,16 @@ function placePiece(owner, pieceId, shape, baseR, baseC){
   const p = arr.find(pp => pp.id === pieceId);
   if(p) p.used = true;
   
-  // განახლება kidsmart-ის ფიგურების ჩვენების
   updateAiPiecesDisplay();
-  // განახლება მოთამაშის ფიგურების ჩვენების
   renderPieces();
 }
 
-// render player's pieces (right panel)
 function renderPieces(){
   piecesEl.innerHTML = '';
   playerPieces.forEach(p=>{
     const b = document.createElement('div');
     b.className = 'piece' + (p.used ? ' used' : '');
     b.dataset.pieceId = p.id;
-    // preview mini-grid
     const norm = normalize(p.shape);
     const w = Math.max(...norm.map(s=>s[0]))+1, h = Math.max(...norm.map(s=>s[1]))+1;
     const mini = document.createElement('div'); mini.className='mini';
@@ -473,11 +476,9 @@ function renderPieces(){
       }
     }
     b.appendChild(mini);
-    // click handler
     b.addEventListener('click', ()=>{
       if(p.used || turn !== 1 || gameOver) return;
       selectPiece(p);
-      // update selected class visuals
       Array.from(piecesEl.children).forEach(ch => ch.classList.remove('selected'));
       b.classList.add('selected');
     });
@@ -485,7 +486,6 @@ function renderPieces(){
   });
 }
 
-// ახალი ფუნქცია kidsmart-ის ფიგურების ჩვენებისთვის
 function updateAiPiecesDisplay(){
   aiPiecesListEl.innerHTML = '';
   const unusedAiPieces = aiPieces.filter(p => !p.used);
@@ -499,7 +499,6 @@ function updateAiPiecesDisplay(){
     const pieceEl = document.createElement('div');
     pieceEl.className = 'ai-piece';
     
-    // მინი პრევიუ
     const norm = normalize(p.shape);
     const preview = document.createElement('div');
     preview.style.display = 'flex';
@@ -536,15 +535,13 @@ function updateAiPiecesDisplay(){
   });
 }
 
-// select piece (store original shape but do not mutate)
 function selectPiece(p){
   selected = { pieceId: p.id, originalShape: p.shape.map(s=>[s[0], s[1]]), owner: 1 };
   rotation = 0; flipped = false;
   updateSelectedPreview();
-  refreshBoardView(); // will trigger highlight
+  refreshBoardView();
 }
 
-// produce transformed (rotated & flipped) normalized shape for current selection
 function getTransformedShape(){
   if(!selected) return null;
   let s = selected.originalShape.map(a=>[a[0], a[1]]);
@@ -554,7 +551,6 @@ function getTransformedShape(){
   return s;
 }
 
-// update the little preview box
 function updateSelectedPreview(){
   selectedPreview.innerHTML = '';
   if(!selected){ selectedPreview.textContent = '(no piece)'; return; }
@@ -574,19 +570,15 @@ function updateSelectedPreview(){
   selectedPreview.appendChild(wrap);
 }
 
-// highlight all valid anchor positions for current transformed orientation
 function highlightValidMoves(){
-  // clear existing
   cells.forEach(c => {
-    c.classList.remove('highlight', 'piece-part', 'anchor-part');
-    c.style.background = ''; // Reset any custom background
+    c.classList.remove('piece-part', 'anchor-part');
+    c.style.background = '';
   });
   
   if(!selected) return;
   const shape = getTransformedShape();
   
-  // Find the actual anchor point that is part of the piece
-  // (the leftmost-topmost cell that is part of the piece)
   let anchorX = Infinity, anchorY = Infinity;
   for(const [x,y] of shape){
     if(y < anchorY || (y === anchorY && x < anchorX)) {
@@ -595,21 +587,17 @@ function highlightValidMoves(){
     }
   }
   
-  // For each valid placement, mark ALL cells that the piece would occupy
   for(let r=0;r<ROWS;r++){
     for(let c=0;c<COLS;c++){
       if(canPlaceAt(1, shape, r, c)){
-        // Calculate where the actual anchor would be placed on the board
         const anchorR = r + anchorY;
         const anchorC = c + anchorX;
         
-        // Mark all cells that will be occupied by this piece
         for(const [x,y] of shape){
           const pieceR = r + y;
           const pieceC = c + x;
           if(pieceR >= 0 && pieceR < ROWS && pieceC >= 0 && pieceC < COLS){
             const idx = pieceR*COLS + pieceC;
-            // The anchor cell (leftmost-topmost part of the piece) gets special color
             if(pieceR === anchorR && pieceC === anchorC) {
               cells[idx].classList.add('anchor-part');
               cells[idx].style.background = 'var(--anchor-highlight)';
@@ -624,15 +612,12 @@ function highlightValidMoves(){
   }
 }
 
-// clicking a cell (attempt to place if valid for current orientation)
 function onCellClick(r,c){
   if (gameOver) return;
   
-  // if player's turn & piece selected -> attempt to place
   if(turn === 1 && selected){
     const shape = getTransformedShape();
     
-    // Find the actual anchor point that is part of the piece
     let anchorX = Infinity, anchorY = Infinity;
     for(const [x,y] of shape){
       if(y < anchorY || (y === anchorY && x < anchorX)) {
@@ -641,31 +626,25 @@ function onCellClick(r,c){
       }
     }
     
-    // Calculate the base position from the clicked anchor position
     const baseR = r - anchorY;
     const baseC = c - anchorX;
     
-    // Check if placement is valid at the calculated base position
     if(baseR >= 0 && baseR < ROWS && baseC >= 0 && baseC < COLS && 
        canPlaceAt(1, shape, baseR, baseC)) {
       
       placePiece(1, selected.pieceId, shape, baseR, baseC);
-      // clear selection visually & logically
       selected = null;
       Array.from(piecesEl.children).forEach(ch=>ch.classList.remove('selected'));
       updateSelectedPreview();
       updateCounts();
       refreshBoardView();
       passed[1] = false;
-      // next
       nextTurn();
       return;
     }
   }
-  // if it's AI turn or no selection, nothing to do on click
 }
 
-// check if player has any valid moves
 function playerHasValidMoves() {
   const available = playerPieces.filter(p => !p.used);
   for(const p of available){
@@ -683,7 +662,6 @@ function playerHasValidMoves() {
   return false;
 }
 
-// check if AI has any valid moves
 function aiHasValidMoves() {
   const available = aiPieces.filter(p => !p.used);
   for(const p of available){
@@ -701,41 +679,18 @@ function aiHasValidMoves() {
   return false;
 }
 
-// update messages based on game state
-function updateMessages() {
-  if (gameOver) {
-    playerTurnMessage.style.display = 'none';
-    noMovesMessage.style.display = 'none';
-    return;
-  }
-  
-  if (turn === 1) {
-    if (playerHasValidMoves()) {
-      playerTurnMessage.style.display = 'block';
-      noMovesMessage.style.display = 'none';
-    } else {
-      playerTurnMessage.style.display = 'none';
-      noMovesMessage.style.display = 'block';
-      // ავტომატურად გადავიდეთ AI-ის სვლაზე
-      setTimeout(() => {
-        if (!gameOver) {
-          nextTurn();
-        }
-      }, 1500);
-    }
-  } else {
-    playerTurnMessage.style.display = 'none';
-    noMovesMessage.style.display = 'none';
-  }
-}
-
-// nextTurn handler
 function nextTurn(){
   if (gameOver) return;
   
   // შეამოწმეთ თუ მოთამაშეს არ აქვს სვლა
   if (turn === 1 && !playerHasValidMoves()) {
     passed[1] = true;
+    // ავტომატურად გადავიდეთ AI-ის სვლაზე
+    turn = 2;
+    turnLabel.textContent = 'kidsmart (AI)';
+    setTimeout(()=> aiMove(), 300);
+    checkEnd();
+    return;
   }
   
   // შეამოწმეთ თუ AI-ს არ აქვს სვლა
@@ -746,31 +701,23 @@ function nextTurn(){
   turn = (turn === 1) ? 2 : 1;
   turnLabel.textContent = (turn === 1) ? 'Player' : 'kidsmart (AI)';
   
-  updateMessages();
-  
-  // small delay so UI updates feel natural
   if(turn === 2){
     setTimeout(()=> aiMove(), 300);
   } else {
-    refreshBoardView(); // ensure highlights appear for new selection if any
+    refreshBoardView();
   }
   checkEnd();
 }
 
-// update pieces counts on UI
 function updateCounts(){
   pCountEl.textContent = playerPieces.filter(p=>!p.used).length;
   aiCountEl.textContent = aiPieces.filter(p=>!p.used).length;
 }
 
-// გაუმჯობესებული AI ლოგიკა
 function aiMove(){
   if (gameOver) return;
   
-  // ჯერ ვცადოთ ყველა ფიგურა და ვიპოვოთ საუკეთესო სვლა
   const available = aiPieces.filter(p=>!p.used);
-  
-  // შემთხვევითად ავურიოთ ფიგურები, რომ AI ყოველთვის სხვადასხვა ფიგურებით დაიწყოს
   const shuffledPieces = [...available].sort(() => Math.random() - 0.5);
   
   let bestMove = null;
@@ -779,17 +726,13 @@ function aiMove(){
   
   for(const p of shuffledPieces){
     const variants = canonicalVariants(p.shape);
-    // შემთხვევითად ავურიოთ ვარიანტებიც
     const shuffledVariants = [...variants].sort(() => Math.random() - 0.5);
     
     for(const v of shuffledVariants){
       for(let r=0;r<ROWS;r++){
         for(let c=0;c<COLS;c++){
           if(canPlaceAt(2, v, r, c)){
-            // გამოვთვალოთ სვლის ხარისხი
             const score = evaluateMove(2, v, r, c);
-            
-            // შევინახოთ ყველა ვალიდური სვლა
             allValidMoves.push({piece: p, shape: v, r, c, score});
             
             if(score > bestScore){
@@ -802,23 +745,19 @@ function aiMove(){
     }
   }
   
-  // თუ არ არის სვლები -> pass
   if(allValidMoves.length === 0){
     passed[2] = true;
     nextTurn();
     return;
   }
   
-  // პირველი სვლისთვის გამოვიყენოთ შემთხვევითობა
   const isFirstMove = !aiPieces.some(p => p.used);
   
   if(isFirstMove && allValidMoves.length > 1){
-    // პირველი სვლისთვის აირჩიე შემთხვევით ერთ-ერთი საუკეთესო სვლა
     const topMoves = allValidMoves.filter(move => move.score >= bestScore - 10);
     const randomMove = topMoves[Math.floor(Math.random() * topMoves.length)];
     bestMove = randomMove;
   } else if(!isFirstMove && allValidMoves.length > 3){
-    // შემდგომი სვლებისთვის ზოგჯერ აირჩიე შემთხვევითი სვლა (20% შანსი)
     if(Math.random() < 0.2){
       const randomMove = allValidMoves[Math.floor(Math.random() * allValidMoves.length)];
       bestMove = randomMove;
@@ -832,20 +771,15 @@ function aiMove(){
     passed[2] = false;
     nextTurn();
   } else {
-    // no move found -> pass
     passed[2] = true;
     nextTurn();
   }
 }
 
-// სვლის შეფასების ფუნქცია
 function evaluateMove(owner, shape, baseR, baseC) {
   let score = 0;
-  
-  // 1. ფიგურის ზომა (უპირატესობა დიდ ფიგურებს)
   score += shape.length * 10;
   
-  // 2. დაფის ცენტრში უფრო ახლოს მდებარეობა
   const centerR = Math.floor(ROWS / 2);
   const centerC = Math.floor(COLS / 2);
   let avgR = 0, avgC = 0;
@@ -862,13 +796,11 @@ function evaluateMove(owner, shape, baseR, baseC) {
   );
   score -= distFromCenter * 2;
   
-  // 3. მოწინააღმდეგის ტერიტორიის ახლოს მდებარეობა
   let opponentProximity = 0;
   const opponent = owner === 1 ? 2 : 1;
   
   for(const [x,y] of shape){
     const r = baseR + y, c = baseC + x;
-    // შევამოწმოთ მეზობელი უჯრები
     for(let dr = -2; dr <= 2; dr++){
       for(let dc = -2; dc <= 2; dc++){
         const nr = r + dr, nc = c + dc;
@@ -882,7 +814,6 @@ function evaluateMove(owner, shape, baseR, baseC) {
   }
   score += opponentProximity * 5;
   
-  // 4. კუთხეების დაკავება
   let cornerScore = 0;
   const corners = [[0,0], [0,ROWS-1], [COLS-1,0], [COLS-1,ROWS-1]];
   for(const [cx,cy] of corners){
@@ -897,7 +828,6 @@ function evaluateMove(owner, shape, baseR, baseC) {
   return score;
 }
 
-// Firebase-ში ქულების შენახვა
 async function saveScoreToFirebase(playerScore, aiScore) {
   try {
     const gameResult = {
@@ -907,11 +837,9 @@ async function saveScoreToFirebase(playerScore, aiScore) {
       winner: playerScore > aiScore ? 'player' : playerScore < aiScore ? 'ai' : 'tie'
     };
     
-    // შევინახოთ ახალი თამაში
     const newGameRef = database.ref('blokus/games').push();
     await newGameRef.set(gameResult);
     
-    // განვაახლოთ საერთო ანგარიში
     const totalRef = database.ref('blokus/totals');
     const snapshot = await totalRef.once('value');
     const currentTotals = snapshot.val() || { player: 0, ai: 0 };
@@ -924,7 +852,6 @@ async function saveScoreToFirebase(playerScore, aiScore) {
     
     await totalRef.set(currentTotals);
     
-    // განვაახლოთ UI
     totalScores = currentTotals;
     updateTotalScoresDisplay();
     
@@ -935,7 +862,6 @@ async function saveScoreToFirebase(playerScore, aiScore) {
   }
 }
 
-// Firebase-დან ქულების წაკითხვა
 async function loadScoresFromFirebase() {
   try {
     const totalRef = database.ref('blokus/totals');
@@ -952,13 +878,28 @@ async function loadScoresFromFirebase() {
   }
 }
 
-// საერთო ანგარიშის განახლება
 function updateTotalScoresDisplay() {
-
   totalResultEl.textContent = `მოთამაშე ${totalScores.player} - ${totalScores.ai} kidsmart`;
 }
 
-// check end condition
+function showGameOverModal(s1, s2) {
+  let winnerText = '';
+  if (s1 > s2) {
+    winnerText = 'გილოცავთ! თქვენ გაიმარჯვეთ ' + s1 + ' - ' + s2 + '!';
+    modalTitle.textContent = 'გამარჯვება!';
+  } else if (s2 > s1) {
+    winnerText = 'Kidsmart გაიმარჯვა ' + s2 + ' - ' + s1 + '!';
+    modalTitle.textContent = 'წაგება';
+  } else {
+    winnerText = 'ფრე! ' + s1 + ' - ' + s2;
+    modalTitle.textContent = 'ფრე!';
+  }
+  
+  modalMessage.textContent = winnerText;
+  modalTotalScore.textContent = `მოთამაშე ${totalScores.player} - ${totalScores.ai} kidsmart`;
+  gameOverModal.style.display = 'flex';
+}
+
 async function checkEnd(){
   const bothPassed = passed[1] && passed[2];
   const noPieces = playerPieces.every(p=>p.used) && aiPieces.every(p=>p.used);
@@ -973,37 +914,15 @@ async function checkEnd(){
       }
     }
     
-    let winnerText = '';
-    if (s1 > s2) {
-      winnerText = 'გილოცავთ! თქვენ გაიმარჯვეთ ' + s1 + ' - ' + s2 + '!';
-    } else if (s2 > s1) {
-      winnerText = 'Kidsmart გაიმარჯვა ' + s2 + ' - ' + s1 + '!';
-    } else {
-      winnerText = 'ფრე! ' + s1 + ' - ' + s2;
-    }
-    
-    gameOverMessage.textContent = winnerText;
-    gameOverMessage.style.display = 'block';
-    restartBtn.style.display = 'block';
-    
-    playerTurnMessage.style.display = 'none';
-    noMovesMessage.style.display = 'none';
-    
-    // შევინახოთ ქულები Firebase-ში
     await saveScoreToFirebase(s1 > s2 ? 1 : 0, s2 > s1 ? 1 : 0);
+    setTimeout(() => showGameOverModal(s1, s2), 500);
   }
 }
 
-// restart game
 function restartGame() {
-  // Reset board
   board = Array.from({length: ROWS}, ()=>Array(COLS).fill(0));
-  
-  // Reset pieces
   playerPieces = clonePiecesForPlayer(1);
   aiPieces = clonePiecesForPlayer(2);
-  
-  // Reset game state
   selected = null;
   rotation = 0;
   flipped = false;
@@ -1011,7 +930,6 @@ function restartGame() {
   passed = {1:false, 2:false};
   gameOver = false;
   
-  // Update UI
   turnLabel.textContent = 'Player';
   updateCounts();
   renderPieces();
@@ -1019,13 +937,10 @@ function restartGame() {
   refreshBoardView();
   updateAiPiecesDisplay();
   
-  // Hide messages and restart button
-  gameOverMessage.style.display = 'none';
+  gameOverModal.style.display = 'none';
   restartBtn.style.display = 'none';
-  updateMessages();
 }
 
-// controls: rotate / flip / pass
 document.getElementById('rotateBtn').addEventListener('click', ()=>{
   if(!selected || gameOver) return;
   rotation = (rotation + 1) % 4;
@@ -1048,10 +963,9 @@ document.getElementById('passBtn').addEventListener('click', ()=>{
   nextTurn();
 });
 
-// restart button
 restartBtn.addEventListener('click', restartGame);
+modalRestartBtn.addEventListener('click', restartGame);
 
-// initialization
 async function init(){
   playerPieces = clonePiecesForPlayer(1);
   aiPieces = clonePiecesForPlayer(2);
@@ -1061,13 +975,10 @@ async function init(){
   updateSelectedPreview();
   updateCounts();
   updateAiPiecesDisplay();
-  updateMessages();
   
-  // ჩავტვირთოთ ქულები Firebase-დან
   await loadScoresFromFirebase();
 }
 init();
-
 </script>
 </body>
 </html>
