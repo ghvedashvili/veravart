@@ -4,17 +4,10 @@
   <meta charset="UTF-8">
   <title>პენალტების სერია</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  
-  <!-- PWA Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="პენალტები">
-  
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
   <style>
-    /* RESET AND BASE STYLES */
+    /* BASE STYLES */
     html, body {
       margin: 0;
       padding: 0;
@@ -30,173 +23,76 @@
       position: fixed;
     }
 
-    /* SAFE AREA SUPPORT */
     .container-fluid {
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100vh;
+      height: -webkit-fill-available;
       background: #000;
     }
 
     .game-container {
-      background: url('img/image5.png') no-repeat center top;
-      background-size: cover;
-      background-color: #000;
-      width: 100%;
-      height: 100vh;
-      height: -webkit-fill-available;
-      position: relative;
-    }
-
-    /* GAME FIELD */
-    #game_field {
+      background: #000;
       width: 100%;
       height: 100%;
       position: relative;
       overflow: hidden;
     }
 
-    /* GOAL STYLES - FIXED */
+    /* GOAL - VISIBLE TEST */
     #goal {
       width: 80vw;
       max-width: 500px;
       height: 200px;
-      background: url('https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028') center center / cover no-repeat;
+      background: red; /* TEST COLOR - უნდა ჩანდეს წითელი */
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
       top: 10%;
-      animation: shake 0.25s linear infinite;
+      border: 3px solid yellow; /* TEST BORDER */
     }
 
-    @keyframes shake {
-      25% { transform: translateX(-50%) rotate(1deg); }
-      75% { transform: translateX(-50%) rotate(-1deg); }
-    }
-
-    /* HITBOXES - FIXED POSITIONS */
+    /* HITBOXES - VISIBLE */
     .hitbox {
       position: absolute;
-      background-color: rgba(255, 0, 0, 0.3);
+      background-color: rgba(255, 255, 0, 0.7); /* ყვითელი - უნდა ჩანდეს */
       border-radius: 50%;
-      opacity: 0.5;
+      border: 3px solid red;
       pointer-events: auto;
       -webkit-tap-highlight-color: transparent;
-      border: 2px solid white;
     }
 
     .hitbox.hidden {
-      opacity: 0;
-      pointer-events: none;
+      display: none;
     }
 
-    .hitbox.green {
-      background-color: rgba(76, 175, 80, 0.5);
-    }
+    /* Hitbox positions */
+    .hitbox[box="0"] { width: 60px; height: 60px; bottom: 50px; left: 50px; }
+    .hitbox[box="1"] { width: 60px; height: 60px; top: 50px; left: 50px; }
+    .hitbox[box="2"] { width: 60px; height: 60px; top: 50px; left: 50%; transform: translateX(-50%); }
+    .hitbox[box="3"] { width: 60px; height: 60px; top: 50px; right: 50px; }
+    .hitbox[box="4"] { width: 60px; height: 60px; bottom: 50px; right: 50px; }
 
-    /* Hitbox positions - FIXED */
-    .hitbox[box="0"] { /* bottom left */
-      width: 20%; height: 25%;
-      bottom: 5%; left: 10%;
-    }
-    .hitbox[box="1"] { /* top left */
-      width: 20%; height: 25%;
-      top: 10%; left: 10%;
-    }
-    .hitbox[box="2"] { /* top center */
-      width: 20%; height: 25%;
-      top: 10%; left: 40%;
-    }
-    .hitbox[box="3"] { /* top right */
-      width: 20%; height: 25%;
-      top: 10%; right: 10%;
-    }
-    .hitbox[box="4"] { /* bottom right */
-      width: 20%; height: 25%;
-      bottom: 5%; right: 10%;
-    }
-
-    /* BALL STYLES */
+    /* BALL - VISIBLE */
     #ball {
       width: 60px;
       height: 60px;
       position: absolute;
       left: 50%;
-      bottom: 10%;
-      transform: translate(-50%, 0);
-      z-index: 10;
-      pointer-events: none;
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    #ball:after {
-      content: '';
-      display: block;
-      width: 100%;
-      height: 100%;
-      background: url('http://upload.wikimedia.org/wikipedia/en/e/ec/Soccer_ball.svg') center center / contain no-repeat;
-      border-radius: 50%;
-    }
-
-    #ball.kicked:after {
-      animation: roll 1s linear infinite;
-    }
-
-    @keyframes roll {
-      100% { transform: rotate(360deg); }
-    }
-
-    #ball.goal {
-      animation: score 1s ease-in-out forwards;
-    }
-
-    #ball.fall {
-      animation: fall 1s ease-in-out forwards;
-    }
-
-    @keyframes score {
-      0% { transform: translate(-50%, 0); }
-      100% { transform: translate(-50%, -80vh) scale(0.5); }
-    }
-
-    @keyframes fall {
-      0% { transform: translate(-50%, 0); }
-      100% { transform: translate(-50%, -40vh) scale(0.8); }
-    }
-
-    /* RESULT MESSAGES */
-    h1 {
-      font-size: 4rem;
-      margin: 0;
-      position: absolute;
-      font-weight: 900;
-      color: gold;
-      text-shadow: 3px 3px black;
-      left: 50%;
-      top: 40%;
-      transform: translate(-50%, -50%);
-      opacity: 0;
-      pointer-events: none;
+      bottom: 100px;
+      transform: translateX(-50%);
       z-index: 100;
-    }
-
-    .show_result {
-      animation: showText 2s ease-in-out;
-    }
-
-    @keyframes showText {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      pointer-events: none;
+      background: blue; /* TEST COLOR - უნდა ჩანდეს ლურჯი */
+      border-radius: 50%;
+      border: 3px solid white;
     }
 
     /* UI ELEMENTS */
     .scoreboard {
       position: absolute;
-      top: env(safe-area-inset-top);
+      top: 20px;
       left: 0;
       width: 100%;
       display: flex;
@@ -204,75 +100,19 @@
       color: white;
       font-size: 1.5rem;
       font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-      z-index: 20;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.5);
-    }
-
-    .turn-indicator {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 1.2rem;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 10px 20px;
-      border-radius: 20px;
-      z-index: 20;
-    }
-
-    .penalty-count {
-      position: absolute;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 1rem;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 8px 16px;
-      border-radius: 15px;
-      z-index: 20;
-    }
-
-    .total-score {
-      position: absolute;
-      bottom: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 0.9rem;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 5px 10px;
-      border-radius: 10px;
-      z-index: 20;
-    }
-
-    .game-over {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
       z-index: 1000;
-      color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
     }
 
-    .restart-btn {
-      margin-top: 20px;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      background: #4CAF50;
+    .debug-info {
+      position: absolute;
+      top: 100px;
+      left: 10px;
       color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      z-index: 1000;
     }
   </style>
 </head>
@@ -284,9 +124,7 @@
         <div id="computer-score">0 Kidsmart</div>
       </div>
       
-      <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
-      <div id="penalty-count" class="penalty-count">პენალტი 1/5</div>
-      <div id="total-score" class="total-score">საერთო ანგარიში: მოთამაშე 0 - 0 Kidsmart</div>
+      <div class="debug-info" id="debug-info">დებაგი: თამაში იწყება...</div>
 
       <div id="game_field">
         <div id="goal">
@@ -298,211 +136,52 @@
         </div>
 
         <div id="ball"></div>
-
-        <h1 id="success" style="display: none;">GOAL!</h1>
-        <h1 id="failure" style="display: none; color: red;">FAIL</h1>
       </div>
     </div>
   </div>
 
-  <div id="game-over" class="game-over">
-    <h2 id="result-message">გამარჯვებული!</h2>
-    <div id="final-score">ფინალური ანგარიში: 0 - 0</div>
-    <button class="restart-btn" onclick="restartGame()">თავიდან დაწყება</button>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  
   <script>
-    // SIMPLIFIED GAME LOGIC - WORKING VERSION
-    console.log('Game starting...');
+    // DEBUG VERSION - ყველაფერი უნდა ჩანდეს
+    console.log('🚀 თამაში იწყება...');
 
-    const gameField = document.getElementById('game_field');
     const goal = document.getElementById('goal');
     const ball = document.getElementById('ball');
-    const success = document.getElementById('success');
-    const failure = document.getElementById('failure');
     const hitboxes = document.querySelectorAll('.hitbox');
+    const debugInfo = document.getElementById('debug-info');
 
-    // Game state
-    let playerScore = 0;
-    let computerScore = 0;
-    let playerPenalties = 0;
-    let computerPenalties = 0;
-    let isPlayerTurn = true;
-    let gameActive = true;
+    // შეამოწმეთ ელემენტები
+    console.log('Goal element:', goal);
+    console.log('Ball element:', ball);
+    console.log('Hitboxes found:', hitboxes.length);
 
-    // Goalkeeper images - MAKE SURE THESE IMAGES EXIST IN YOUR img FOLDER
-    const goalieImages = [
-      'img/leftdown.png',
-      'img/leftup.png', 
-      'img/centerup.png',
-      'img/rightup.png',
-      'img/rightdown.png'
-    ];
+    debugInfo.textContent = `ელემენტები: Goal=${!!goal}, Ball=${!!ball}, Hitboxes=${hitboxes.length}`;
 
-    // Initialize game
-    function initGame() {
-      console.log('Initializing game...');
-      
-      // Add click/touch listeners to hitboxes
-      hitboxes.forEach(hitbox => {
-        hitbox.addEventListener('click', handleHitboxClick);
-        hitbox.addEventListener('touchstart', handleHitboxClick, { passive: false });
+    // ჩართეთ hitboxes
+    hitboxes.forEach(hitbox => {
+      hitbox.addEventListener('click', function() {
+        debugInfo.textContent = `დაწკაპუნებული: ${this.getAttribute('box')}`;
+        console.log('Hitbox clicked:', this.getAttribute('box'));
+        
+        // ბურთის მოძრაობა
+        ball.style.transition = 'all 1s ease-in-out';
+        ball.style.left = this.style.left;
+        ball.style.top = this.style.top;
       });
+    });
 
-      updateUI();
-      showHitboxes();
-      
-      console.log('Game initialized successfully');
-    }
-
-    // Handle hitbox clicks
-    function handleHitboxClick(event) {
-      if (!gameActive || !isPlayerTurn) return;
-      
-      event.preventDefault();
-      const hitbox = event.currentTarget;
-      const boxIndex = parseInt(hitbox.getAttribute('box'));
-      
-      console.log('Hitbox clicked:', boxIndex);
-      
-      hideHitboxes();
-      takeShot(boxIndex);
-    }
-
-    // Take a shot
-    function takeShot(hitboxIndex) {
-      const goaliePosition = Math.floor(Math.random() * 5);
-      
-      // Set goalkeeper image
-      goal.style.backgroundImage = `url('${goalieImages[goaliePosition]}')`;
-      goal.style.animation = 'none';
-      
-      // Animate ball to hitbox position
-      const hitbox = document.querySelector(`.hitbox[box="${hitboxIndex}"]`);
-      const hitboxRect = hitbox.getBoundingClientRect();
-      const goalRect = goal.getBoundingClientRect();
-      
-      const targetX = hitboxRect.left + hitboxRect.width / 2 - goalRect.left;
-      const targetY = hitboxRect.top + hitboxRect.height / 2 - goalRect.top;
-      
-      // Move ball
-      ball.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      ball.style.left = `calc(50% + ${targetX - goalRect.width / 2}px)`;
-      ball.style.top = `${targetY}px`;
-      ball.classList.add('kicked');
-      
-      // Check if goal scored
-      setTimeout(() => {
-        const isGoal = hitboxIndex !== goaliePosition;
-        
-        if (isGoal) {
-          ball.classList.add('goal');
-          showResult(true);
-          playerScore++;
-        } else {
-          ball.classList.add('fall');
-          showResult(false);
-        }
-        
-        updateUI();
-        
-        // Next turn
-        setTimeout(() => {
-          resetAfterShot(isGoal);
-        }, 2000);
-      }, 800);
-    }
-
-    // Show result message
-    function showResult(isGoal) {
-      if (isGoal) {
-        success.style.display = 'block';
-        success.classList.add('show_result');
-      } else {
-        failure.style.display = 'block';
-        failure.classList.add('show_result');
-      }
-    }
-
-    // Reset after shot
-    function resetAfterShot(isGoal) {
-      // Reset goal
-      goal.style.backgroundImage = `url('https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028')`;
-      goal.style.animation = 'shake 0.25s linear infinite';
-      
-      // Reset ball
-      ball.style.transition = 'none';
-      ball.style.left = '50%';
-      ball.style.top = 'auto';
-      ball.style.bottom = '10%';
-      ball.classList.remove('kicked', 'goal', 'fall');
-      
-      // Hide results
-      success.style.display = 'none';
-      failure.style.display = 'none';
-      success.classList.remove('show_result');
-      failure.classList.remove('show_result');
-      
-      playerPenalties++;
-      isPlayerTurn = false;
-      
-      // Show hitboxes for next turn
-      setTimeout(() => {
-        showHitboxes();
-        isPlayerTurn = true;
-        updateUI();
-      }, 1000);
-    }
-
-    // UI functions
-    function showHitboxes() {
+    // დაადეთ პოზიციები hitboxes-ს
+    function positionHitboxes() {
       hitboxes.forEach(hitbox => {
-        hitbox.classList.remove('hidden');
+        const rect = hitbox.getBoundingClientRect();
+        console.log(`Hitbox ${hitbox.getAttribute('box')}:`, rect);
       });
     }
 
-    function hideHitboxes() {
-      hitboxes.forEach(hitbox => {
-        hitbox.classList.add('hidden');
-      });
-    }
-
-    function updateUI() {
-      document.getElementById('player-score').textContent = `მოთამაშე ${playerScore}:`;
-      document.getElementById('computer-score').textContent = `${computerScore} Kidsmart`;
-      document.getElementById('penalty-count').textContent = `პენალტი ${playerPenalties + 1}/5`;
-      document.getElementById('turn-indicator').textContent = isPlayerTurn ? 'თქვენი პენალტი' : 'Kidsmart-ის პენალტი';
-      document.getElementById('turn-indicator').style.background = isPlayerTurn ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)';
-    }
-
-    function restartGame() {
-      playerScore = 0;
-      computerScore = 0;
-      playerPenalties = 0;
-      computerPenalties = 0;
-      isPlayerTurn = true;
-      gameActive = true;
-      
-      document.getElementById('game-over').style.display = 'none';
-      updateUI();
-      showHitboxes();
-    }
-
-    // Start game when page loads
-    document.addEventListener('DOMContentLoaded', initGame);
-
-    // Prevent zoom and other touch behaviors
-    document.addEventListener('touchstart', function(e) {
-      if (e.touches.length > 1) e.preventDefault();
-    }, { passive: false });
-
-    document.addEventListener('touchmove', function(e) {
-      if (e.scale !== 1) e.preventDefault();
-    }, { passive: false });
+    // დაიწყეთ თამაში
+    setTimeout(() => {
+      debugInfo.textContent += ' | თამაში მზადაა';
+      positionHitboxes();
+    }, 1000);
 
   </script>
 </body>
