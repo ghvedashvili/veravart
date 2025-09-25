@@ -114,7 +114,7 @@
   }
   /* ახალი სტილები kidsmart-ის ფიგურებისთვის */
   .ai-pieces-info {
-    margin-top: 10px;
+    margin-top: 2px;
     padding: 8px;
     background: #f8fafc;
     border-radius: 6px;
@@ -228,13 +228,7 @@
   <div class="wrap">
     <div class="left">
       <div class="panel">
-        <!-- საერთო ანგარიში -->
-        <div class="score-panel">
-          <div class="score-total">
-            <span>საერთო ანგარიში:</span><hr>
-            <span id="totalResult">0 - 0</span>
-          </div>
-        </div>
+        
 
         <!-- Kidsmart-ის ფიგურები დაფის ზევით -->
         <div class="ai-pieces-info">
@@ -261,7 +255,7 @@
 
     <div class="right">
       <div class="panel">
-        <div><strong>Selected piece</strong></div>
+        <!--<div><strong>Selected piece</strong></div>-->
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
           <div id="selectedPreview" class="piece" style="min-width:120px;min-height:58px">No piece</div>
           <div style="display:flex;gap:6px">
@@ -286,11 +280,18 @@
         <!--<div class="muted" style="margin-top:6px">-->
         <!--  აირჩიე ფიგურა — დაფაზე მაშინვე გამოჩნდება ყველა შესაძლო ადგილი, სადაც შეგიძლია დადება (მწვანე). დააჭირე მონიშნულ უჯრას და ფიგურა დაიდება. პირველი შენიანი ნაბიჯი უნდა შეეხოს ზედა-მარცხით კუთხეს. (მობილურზეც მუშაობს — tap only).-->
         <!--</div>-->
+        <!-- საერთო ანგარიში -->
+        
       </div>
     </div>
   </div>
-
-  <footer>Simple Blokus-like game — AI (kidsmart) uses improved strategy.</footer>
+<div class="score-panel">
+          <div class="score-total">
+            <span>საერთო ანგარიში:</span><hr>
+            <span id="totalResult">0 - 0</span>
+          </div>
+        </div>
+  <!--<footer>Simple Blokus-like game — AI (kidsmart) uses improved strategy.</footer>-->
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
