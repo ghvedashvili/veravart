@@ -55,12 +55,52 @@
   .cell.highlight{ background:var(--highlight) !important; box-shadow: 0 0 0 2px rgba(0,0,0,0.03) inset; }
   /* right: pieces */
   .right{width:320px;min-width:240px}
-  .pieces{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;max-height:420px;overflow:auto;padding-bottom:6px}
-  .piece{border-radius:8px;border:1px solid #eee;padding:6px;min-width:62px;display:inline-grid;place-items:center;cursor:pointer;background:#fff}
-  .piece.used{opacity:.35;cursor:default}
-  .piece.selected{outline:3px solid rgba(34,197,94,0.18)}
-  .mini{display:grid;gap:2px}
-  .mini .pcell{width:10px;height:10px;border-radius:2px;background:#111}
+/* Your Pieces - Kidsmart-ის სტილში */
+.pieces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    max-height: 150px;
+    overflow: auto;
+    padding-bottom: 4px;
+}
+
+.piece {
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: white;
+    min-width: auto;
+}
+
+.piece.used {
+    opacity: .35;
+    cursor: default;
+}
+
+.piece.selected {
+    outline: 3px solid rgba(34,197,94,0.18);
+}
+
+/* წავშალოთ mini გრიდი და გავაკეთოთ Kidsmart-ის სტილში */
+.piece .mini {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.piece .mini .pcell {
+    width: auto;
+    height: auto;
+    border-radius: 1px;
+    background: #111;
+    opacity: 0.95;
+}
   .controls{display:flex;gap:8px;margin-top:8px}
   button{padding:7px 9px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer}
   button.secondary{background:#f8fafc}
@@ -203,7 +243,7 @@
         </div>
 
         <div class="board-head">
-          <div><strong>Board</strong> — 7 × 7</div>
+  
           <div class="muted">Turn: <span id="turnLabel">Player</span></div>
         </div>
 
@@ -211,9 +251,9 @@
           <div id="grid" class="grid" aria-hidden="false"></div>
         </div>
 
-        <div style="margin-top:10px" class="muted">
-          Player pieces left: <span id="pCount">0</span> — kidsmart pieces left: <span id="aiCount">0</span>
-        </div>
+        <!--<div style="margin-top:10px" class="muted">-->
+        <!--  Player pieces left: <span id="pCount">0</span> — kidsmart pieces left: <span id="aiCount">0</span>-->
+        <!--</div>-->
 
         <button id="restartBtn" class="restart-btn">თამაშის ხელახლა დაწყება</button>
       </div>
@@ -242,10 +282,10 @@
 
         <hr style="margin:10px 0">
 
-        <div><strong>Instructions</strong></div>
-        <div class="muted" style="margin-top:6px">
-          აირჩიე ფიგურა — დაფაზე მაშინვე გამოჩნდება ყველა შესაძლო ადგილი, სადაც შეგიძლია დადება (მწვანე). დააჭირე მონიშნულ უჯრას და ფიგურა დაიდება. პირველი შენიანი ნაბიჯი უნდა შეეხოს ზედა-მარცხით კუთხეს. (მობილურზეც მუშაობს — tap only).
-        </div>
+        <!--<div><strong>Instructions</strong></div>-->
+        <!--<div class="muted" style="margin-top:6px">-->
+        <!--  აირჩიე ფიგურა — დაფაზე მაშინვე გამოჩნდება ყველა შესაძლო ადგილი, სადაც შეგიძლია დადება (მწვანე). დააჭირე მონიშნულ უჯრას და ფიგურა დაიდება. პირველი შენიანი ნაბიჯი უნდა შეეხოს ზედა-მარცხით კუთხეს. (მობილურზეც მუშაობს — tap only).-->
+        <!--</div>-->
       </div>
     </div>
   </div>
@@ -459,31 +499,51 @@ function placePiece(owner, pieceId, shape, baseR, baseC){
 }
 
 function renderPieces(){
-  piecesEl.innerHTML = '';
-  playerPieces.forEach(p=>{
-    const b = document.createElement('div');
-    b.className = 'piece' + (p.used ? ' used' : '');
-    b.dataset.pieceId = p.id;
-    const norm = normalize(p.shape);
-    const w = Math.max(...norm.map(s=>s[0]))+1, h = Math.max(...norm.map(s=>s[1]))+1;
-    const mini = document.createElement('div'); mini.className='mini';
-    mini.style.gridTemplateColumns = `repeat(${w}, 10px)`;
-    for(let y=0;y<h;y++){
-      for(let x=0;x<w;x++){
-        const pc = document.createElement('div'); pc.className='pcell';
-        if(norm.some(a=>a[0]===x && a[1]===y)) pc.style.opacity = '0.95'; else pc.style.opacity = '0.06';
-        mini.appendChild(pc);
-      }
-    }
-    b.appendChild(mini);
-    b.addEventListener('click', ()=>{
-      if(p.used || turn !== 1 || gameOver) return;
-      selectPiece(p);
-      Array.from(piecesEl.children).forEach(ch => ch.classList.remove('selected'));
-      b.classList.add('selected');
+    piecesEl.innerHTML = '';
+    playerPieces.forEach(p=>{
+        const b = document.createElement('div');
+        b.className = 'piece' + (p.used ? ' used' : '');
+        b.dataset.pieceId = p.id;
+        
+        // Kidsmart-ის სტილის პრევიუ
+        const norm = normalize(p.shape);
+        const preview = document.createElement('div');
+        preview.style.display = 'flex';
+        preview.style.flexDirection = 'column';
+        preview.style.gap = '1px';
+        
+        const maxX = Math.max(...norm.map(s => s[0]));
+        const maxY = Math.max(...norm.map(s => s[1]));
+        
+        for (let y = 0; y <= maxY; y++) {
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.gap = '1px';
+            
+            for (let x = 0; x <= maxX; x++) {
+                const cell = document.createElement('div');
+                cell.style.width = '8px';
+                cell.style.height = '8px';
+                cell.style.borderRadius = '1px';
+                cell.style.backgroundColor = '#111';
+                cell.style.opacity = norm.some(a => a[0] === x && a[1] === y) ? '0.95' : '0';
+                row.appendChild(cell);
+            }
+            preview.appendChild(row);
+        }
+        
+        b.appendChild(preview);
+        
+        // click handler
+        b.addEventListener('click', ()=>{
+            if(p.used || turn !== 1 || gameOver) return;
+            selectPiece(p);
+            // update selected class visuals
+            Array.from(piecesEl.children).forEach(ch => ch.classList.remove('selected'));
+            b.classList.add('selected');
+        });
+        piecesEl.appendChild(b);
     });
-    piecesEl.appendChild(b);
-  });
 }
 
 function updateAiPiecesDisplay(){
@@ -519,7 +579,7 @@ function updateAiPiecesDisplay(){
         cell.style.height = '6px';
         cell.style.borderRadius = '1px';
         cell.style.backgroundColor = '#3b82f6';
-        cell.style.opacity = norm.some(a => a[0] === x && a[1] === y) ? '1' : '0.2';
+        cell.style.opacity = norm.some(a => a[0] === x && a[1] === y) ? '1' : '0';
         row.appendChild(cell);
       }
       preview.appendChild(row);
@@ -527,9 +587,9 @@ function updateAiPiecesDisplay(){
     
     pieceEl.appendChild(preview);
     
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = p.name;
-    pieceEl.appendChild(nameSpan);
+    // const nameSpan = document.createElement('span');
+    // nameSpan.textContent = p.name;
+    // pieceEl.appendChild(nameSpan);
     
     aiPiecesListEl.appendChild(pieceEl);
   });
@@ -636,7 +696,7 @@ function onCellClick(r,c){
       selected = null;
       Array.from(piecesEl.children).forEach(ch=>ch.classList.remove('selected'));
       updateSelectedPreview();
-      updateCounts();
+      //updateCounts();
       refreshBoardView();
       passed[1] = false;
       nextTurn();
@@ -709,10 +769,10 @@ function nextTurn(){
   checkEnd();
 }
 
-function updateCounts(){
-  pCountEl.textContent = playerPieces.filter(p=>!p.used).length;
-  aiCountEl.textContent = aiPieces.filter(p=>!p.used).length;
-}
+// function updateCounts(){
+//   pCountEl.textContent = playerPieces.filter(p=>!p.used).length;
+//   aiCountEl.textContent = aiPieces.filter(p=>!p.used).length;
+// }
 
 function aiMove(){
   if (gameOver) return;
@@ -766,7 +826,7 @@ function aiMove(){
   
   if(bestMove){
     placePiece(2, bestMove.piece.id, bestMove.shape, bestMove.r, bestMove.c);
-    updateCounts();
+   // updateCounts();
     refreshBoardView();
     passed[2] = false;
     nextTurn();
@@ -931,7 +991,7 @@ function restartGame() {
   gameOver = false;
   
   turnLabel.textContent = 'Player';
-  updateCounts();
+  //updateCounts();
   renderPieces();
   updateSelectedPreview();
   refreshBoardView();
@@ -973,7 +1033,7 @@ async function init(){
   drawGrid();
   renderPieces();
   updateSelectedPreview();
-  updateCounts();
+ // updateCounts();
   updateAiPiecesDisplay();
   
   await loadScoresFromFirebase();
