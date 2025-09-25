@@ -585,18 +585,32 @@ function highlightValidMoves(){
   if(!selected) return;
   const shape = getTransformedShape();
   
-  // First pass: mark all piece parts (without anchors)
+  // Find the actual anchor point that is part of the piece
+  // (the leftmost-topmost cell that is part of the piece)
+  let anchorX = Infinity, anchorY = Infinity;
+  for(const [x,y] of shape){
+    if(y < anchorY || (y === anchorY && x < anchorX)) {
+      anchorY = y;
+      anchorX = x;
+    }
+  }
+  
+  // For each valid placement, mark ALL cells that the piece would occupy
   for(let r=0;r<ROWS;r++){
     for(let c=0;c<COLS;c++){
       if(canPlaceAt(1, shape, r, c)){
-        // Mark all cells that will be occupied by the piece (except anchor)
+        // Calculate where the actual anchor would be placed on the board
+        const anchorR = r + anchorY;
+        const anchorC = c + anchorX;
+        
+        // Mark all cells that will be occupied by this piece
         for(const [x,y] of shape){
           const pieceR = r + y;
           const pieceC = c + x;
           if(pieceR >= 0 && pieceR < ROWS && pieceC >= 0 && pieceC < COLS){
             const idx = pieceR*COLS + pieceC;
-            // Check if this is the anchor position (0,0 in the normalized shape)
-            if(x === 0 && y === 0) {
+            // The anchor cell (leftmost-topmost part of the piece) gets special color
+            if(pieceR === anchorR && pieceC === anchorC) {
               cells[idx].classList.add('anchor-part');
               cells[idx].style.background = 'var(--anchor-highlight)';
             } else {
@@ -605,17 +619,6 @@ function highlightValidMoves(){
             }
           }
         }
-      }
-    }
-  }
-  
-  // Second pass: ensure anchors are visible (overwrite piece-part if needed)
-  for(let r=0;r<ROWS;r++){
-    for(let c=0;c<COLS;c++){
-      if(canPlaceAt(1, shape, r, c)){
-        const anchorIdx = r*COLS + c;
-        cells[anchorIdx].classList.add('anchor-part');
-        cells[anchorIdx].style.background = 'var(--anchor-highlight)';
       }
     }
   }
@@ -628,21 +631,36 @@ function onCellClick(r,c){
   // if player's turn & piece selected -> attempt to place
   if(turn === 1 && selected){
     const shape = getTransformedShape();
-    if(!canPlaceAt(1, shape, r, c)) {
-      // nothing
+    
+    // Find the actual anchor point that is part of the piece
+    let anchorX = Infinity, anchorY = Infinity;
+    for(const [x,y] of shape){
+      if(y < anchorY || (y === anchorY && x < anchorX)) {
+        anchorY = y;
+        anchorX = x;
+      }
+    }
+    
+    // Calculate the base position from the clicked anchor position
+    const baseR = r - anchorY;
+    const baseC = c - anchorX;
+    
+    // Check if placement is valid at the calculated base position
+    if(baseR >= 0 && baseR < ROWS && baseC >= 0 && baseC < COLS && 
+       canPlaceAt(1, shape, baseR, baseC)) {
+      
+      placePiece(1, selected.pieceId, shape, baseR, baseC);
+      // clear selection visually & logically
+      selected = null;
+      Array.from(piecesEl.children).forEach(ch=>ch.classList.remove('selected'));
+      updateSelectedPreview();
+      updateCounts();
+      refreshBoardView();
+      passed[1] = false;
+      // next
+      nextTurn();
       return;
     }
-    placePiece(1, selected.pieceId, shape, r, c);
-    // clear selection visually & logically
-    selected = null;
-    Array.from(piecesEl.children).forEach(ch=>ch.classList.remove('selected'));
-    updateSelectedPreview();
-    updateCounts();
-    refreshBoardView();
-    passed[1] = false;
-    // next
-    nextTurn();
-    return;
   }
   // if it's AI turn or no selection, nothing to do on click
 }
