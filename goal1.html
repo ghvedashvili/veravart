@@ -5,109 +5,71 @@
   <title>პენალტების სერია</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   
-  <!-- PWA Meta Tags for iOS -->
+  <!-- PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="პენალტები">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
   
-  <!-- Prevent zoom and touch callouts -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="format-detection" content="telephone=no">
-
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
   <style>
-    /* iOS Optimized Styles */
+    /* RESET AND BASE STYLES */
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
       font-family: sans-serif;
-      background: #2a2a2a;
-      height: 100vh;
-      height: -webkit-fill-available;
+      background: #000;
+      width: 100%;
+      height: 100%;
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
       touch-action: manipulation;
+      position: fixed;
     }
 
-    /* Safe Area Support for iPhone Notch */
-    .game-container {
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
+    /* SAFE AREA SUPPORT */
+    .container-fluid {
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
-    }
-
-    /* Prevent elastic scrolling */
-    body {
-      overscroll-behavior: none;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Your existing styles with iOS improvements */
-    h1 {
-      font-size: 10vw;
-      margin: 0;
-      position: absolute;
-      font-weight: 900;
-      color: gold;
-      text-shadow: 3px 3px black;
-      left: 50%;
-      top: 25%;
-      transform: translate(-50%, -50%);
-      opacity: 0;
-      pointer-events: none;
-      user-select: none;
-      z-index: 10;
-    }
-
-    .show_result {
-      transition: 0.75s;
-      transition-delay: 1s;
-      opacity: 1;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      background: #000;
     }
 
     .game-container {
-      background: url(img/image5.png);
-      background-repeat: no-repeat;
-      background-size: 115%;
-      background-position: top center;
+      background: url('img/image5.png') no-repeat center top;
+      background-size: cover;
       background-color: #000;
+      width: 100%;
+      height: 100vh;
+      height: -webkit-fill-available;
+      position: relative;
     }
 
+    /* GAME FIELD */
     #game_field {
       width: 100%;
-      height: calc(100vh - 100px);
-      height: calc(100dvh - 100px);
+      height: 100%;
       position: relative;
-      margin: 0 auto;
       overflow: hidden;
-      top: 100px;
     }
 
-    /* Rest of your existing CSS remains the same */
+    /* GOAL STYLES - FIXED */
     #goal {
       width: 80vw;
       max-width: 500px;
-      aspect-ratio: 2 / 1;
+      height: 200px;
       background: url('https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028') center center / cover no-repeat;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: 5vh;
+      top: 10%;
       animation: shake 0.25s linear infinite;
-      transition: all 0.3s ease;
     }
 
     @keyframes shake {
@@ -115,14 +77,15 @@
       75% { transform: translateX(-50%) rotate(-1deg); }
     }
 
+    /* HITBOXES - FIXED POSITIONS */
     .hitbox {
       position: absolute;
-      background-color: red;
+      background-color: rgba(255, 0, 0, 0.3);
       border-radius: 50%;
       opacity: 0.5;
-      transition: all 0.3s ease;
       pointer-events: auto;
       -webkit-tap-highlight-color: transparent;
+      border: 2px solid white;
     }
 
     .hitbox.hidden {
@@ -131,34 +94,42 @@
     }
 
     .hitbox.green {
-      background-color: #4CAF50;
-      opacity: 0.5;
+      background-color: rgba(76, 175, 80, 0.5);
     }
 
-    .hitbox[box="0"], .hitbox[box="4"] {
-      width: 15%;
-      height: 30%;
-      bottom: 0;
+    /* Hitbox positions - FIXED */
+    .hitbox[box="0"] { /* bottom left */
+      width: 20%; height: 25%;
+      bottom: 5%; left: 10%;
+    }
+    .hitbox[box="1"] { /* top left */
+      width: 20%; height: 25%;
+      top: 10%; left: 10%;
+    }
+    .hitbox[box="2"] { /* top center */
+      width: 20%; height: 25%;
+      top: 10%; left: 40%;
+    }
+    .hitbox[box="3"] { /* top right */
+      width: 20%; height: 25%;
+      top: 10%; right: 10%;
+    }
+    .hitbox[box="4"] { /* bottom right */
+      width: 20%; height: 25%;
+      bottom: 5%; right: 10%;
     }
 
-    .hitbox[box="0"] { left: 0; }
-    .hitbox[box="1"] { left: 0; top: 0; width: 15%; height: 30%; }
-    .hitbox[box="2"] { left: 40%; top: 0; width: 15%; height: 30%; }
-    .hitbox[box="3"] { right: 0; top: 0; width: 15%; height: 30%; }
-    .hitbox[box="4"] { right: 0; }
-
+    /* BALL STYLES */
     #ball {
-      width: 8vw;
-      max-width: 40px;
-      aspect-ratio: 1 / 1;
-      background-size: cover;
+      width: 60px;
+      height: 60px;
       position: absolute;
       left: 50%;
-      top: 85%;
-      transform: translate(-50%, -50%);
-      z-index: 5;
+      bottom: 10%;
+      transform: translate(-50%, 0);
+      z-index: 10;
       pointer-events: none;
-      transition: left 0.8s ease-out, top 0.8s ease-out;
+      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     #ball:after {
@@ -168,164 +139,371 @@
       height: 100%;
       background: url('http://upload.wikimedia.org/wikipedia/en/e/ec/Soccer_ball.svg') center center / contain no-repeat;
       border-radius: 50%;
-      animation: none;
     }
 
-    .kicked:after { animation: roll 1s linear infinite; }
+    #ball.kicked:after {
+      animation: roll 1s linear infinite;
+    }
 
     @keyframes roll {
-      100% { transform: rotate(1080deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    .goal { 
-      animation: score 0.5s linear 0.5s forwards;
-      transition: none !important;
-    }
-    .fall { 
-      animation: fall 0.5s linear 0.5s forwards;
-      transition: none !important;
+    #ball.goal {
+      animation: score 1s ease-in-out forwards;
     }
 
-    @keyframes score { to { top: 40%; } }
-    @keyframes fall { to { top: 40%; } }
+    #ball.fall {
+      animation: fall 1s ease-in-out forwards;
+    }
 
-    svg {
+    @keyframes score {
+      0% { transform: translate(-50%, 0); }
+      100% { transform: translate(-50%, -80vh) scale(0.5); }
+    }
+
+    @keyframes fall {
+      0% { transform: translate(-50%, 0); }
+      100% { transform: translate(-50%, -40vh) scale(0.8); }
+    }
+
+    /* RESULT MESSAGES */
+    h1 {
+      font-size: 4rem;
+      margin: 0;
       position: absolute;
+      font-weight: 900;
+      color: gold;
+      text-shadow: 3px 3px black;
+      left: 50%;
+      top: 40%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .show_result {
+      animation: showText 2s ease-in-out;
+    }
+
+    @keyframes showText {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* UI ELEMENTS */
+    .scoreboard {
+      position: absolute;
+      top: env(safe-area-inset-top);
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      z-index: 20;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .turn-indicator {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1.2rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 20px;
+      z-index: 20;
+    }
+
+    .penalty-count {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 16px;
+      border-radius: 15px;
+      z-index: 20;
+    }
+
+    .total-score {
+      position: absolute;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 0.9rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 10px;
+      z-index: 20;
+    }
+
+    .game-over {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      color: white;
     }
 
-    /* Your existing styles continue... */
+    .restart-btn {
+      margin-top: 20px;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <div class="container-fluid game-container">
-    <div class="row">
-      <div class="col-12">
-        <div id="total-score" class="total-score">საერთო ანგარიში: მოთამაშე 0 - 0 Kidsmart</div>
-        <div class="scoreboard">
-          <div id="player-score">მოთამაშე 0:</div>
-          <div id="computer-score">0 Kidsmart</div>
+  <div class="container-fluid p-0">
+    <div class="game-container">
+      <div class="scoreboard">
+        <div id="player-score">მოთამაშე 0:</div>
+        <div id="computer-score">0 Kidsmart</div>
+      </div>
+      
+      <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
+      <div id="penalty-count" class="penalty-count">პენალტი 1/5</div>
+      <div id="total-score" class="total-score">საერთო ანგარიში: მოთამაშე 0 - 0 Kidsmart</div>
+
+      <div id="game_field">
+        <div id="goal">
+          <div class="hitbox" box="0"></div>
+          <div class="hitbox" box="1"></div>
+          <div class="hitbox" box="2"></div>
+          <div class="hitbox" box="3"></div>
+          <div class="hitbox" box="4"></div>
         </div>
-        <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
-        
-        <div id="penalty-count" class="penalty-count">პენალტი 1/5</div>
-        
-        <div id="game_field">
-          <div id="goal">
-            <div class="hitbox" box="0"></div>
-            <div class="hitbox" box="1"></div>
-            <div class="hitbox" box="2"></div>
-            <div class="hitbox" box="3"></div>
-            <div class="hitbox" box="4"></div>
-          </div>
 
-          <div id="ball"></div>
+        <div id="ball"></div>
 
-          <svg id="svg" viewBox="0 0 100 100">
-            <path id="path" d="" stroke="transparent" fill="transparent" />
-            <circle id="circle" r="5" fill="rgba(255,0,0,0)">
-              <animateMotion id="bally" dur="1s" repeatCount="1" fill="freeze" />
-            </circle>
-          </svg>
-
-          <h1 id="success">GOAL!</h1>
-          <h1 id="failure" style="color: red;">FAIL</h1>
-        </div>
+        <h1 id="success" style="display: none;">GOAL!</h1>
+        <h1 id="failure" style="display: none; color: red;">FAIL</h1>
       </div>
     </div>
   </div>
 
-  <div id="game-over" class="game-over" style="display: none;">
+  <div id="game-over" class="game-over">
     <h2 id="result-message">გამარჯვებული!</h2>
-    <div id="final-score">ფინალური ანგარიში: 5 - 3</div>
+    <div id="final-score">ფინალური ანგარიში: 0 - 0</div>
     <button class="restart-btn" onclick="restartGame()">თავიდან დაწყება</button>
   </div>
 
-  <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
   <script>
-    // iOS Touch Optimization
-    document.addEventListener('touchstart', function(e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+    // SIMPLIFIED GAME LOGIC - WORKING VERSION
+    console.log('Game starting...');
 
-    document.addEventListener('touchmove', function(e) {
-      if (e.scale !== 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    // Prevent context menu on long press
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    });
-
-    // Your existing JavaScript code with iOS improvements
-    const game_field = document.getElementById('game_field');
+    const gameField = document.getElementById('game_field');
     const goal = document.getElementById('goal');
     const ball = document.getElementById('ball');
     const success = document.getElementById('success');
     const failure = document.getElementById('failure');
-    const svg = document.getElementById('svg');
-    const path = document.getElementById('path');
+    const hitboxes = document.querySelectorAll('.hitbox');
 
-    // Game state variables
+    // Game state
     let playerScore = 0;
     let computerScore = 0;
     let playerPenalties = 0;
     let computerPenalties = 0;
     let isPlayerTurn = true;
     let gameActive = true;
-    const maxPenalties = 5;
-    let selectedGoalkeeperPosition = null;
-    let isSuddenDeath = false;
 
-    // Goalkeeper images - make sure these paths are correct
-    const goalie = [
-      'img/leftdown.png',    // Position 0 - Left down
-      'img/leftup.png',      // Position 1 - Left up
-      'img/centerup.png',    // Position 2 - Center up
-      'img/rightup.png',     // Position 3 - Right up
-      'img/rightdown.png'    // Position 4 - Right down
+    // Goalkeeper images - MAKE SURE THESE IMAGES EXIST IN YOUR img FOLDER
+    const goalieImages = [
+      'img/leftdown.png',
+      'img/leftup.png', 
+      'img/centerup.png',
+      'img/rightup.png',
+      'img/rightdown.png'
     ];
 
-    // Rest of your existing JavaScript code...
-    // [Include all your existing JavaScript code here]
-
-    // Initialize game with iOS support
+    // Initialize game
     function initGame() {
-      // iOS-specific initialization
-      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-        document.body.style.height = '100vh';
-        document.body.style.height = '-webkit-fill-available';
-      }
+      console.log('Initializing game...');
       
-      // Your existing init code
-      initGameMeasurements();
-      // preloadImages(goalie); // Make sure image paths work
-      
-      goal.addEventListener('click', grabClick);
-      goal.addEventListener('touchstart', grabClick, { passive: false });
-      goal.addEventListener('mousemove', handleMouseMove);
-      
+      // Add click/touch listeners to hitboxes
+      hitboxes.forEach(hitbox => {
+        hitbox.addEventListener('click', handleHitboxClick);
+        hitbox.addEventListener('touchstart', handleHitboxClick, { passive: false });
+      });
+
       updateUI();
-      setHitboxesVisibility(true);
-      updateTotalScore();
+      showHitboxes();
+      
+      console.log('Game initialized successfully');
     }
 
-    // Make sure to call init when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initGame);
-    } else {
-      initGame();
+    // Handle hitbox clicks
+    function handleHitboxClick(event) {
+      if (!gameActive || !isPlayerTurn) return;
+      
+      event.preventDefault();
+      const hitbox = event.currentTarget;
+      const boxIndex = parseInt(hitbox.getAttribute('box'));
+      
+      console.log('Hitbox clicked:', boxIndex);
+      
+      hideHitboxes();
+      takeShot(boxIndex);
     }
+
+    // Take a shot
+    function takeShot(hitboxIndex) {
+      const goaliePosition = Math.floor(Math.random() * 5);
+      
+      // Set goalkeeper image
+      goal.style.backgroundImage = `url('${goalieImages[goaliePosition]}')`;
+      goal.style.animation = 'none';
+      
+      // Animate ball to hitbox position
+      const hitbox = document.querySelector(`.hitbox[box="${hitboxIndex}"]`);
+      const hitboxRect = hitbox.getBoundingClientRect();
+      const goalRect = goal.getBoundingClientRect();
+      
+      const targetX = hitboxRect.left + hitboxRect.width / 2 - goalRect.left;
+      const targetY = hitboxRect.top + hitboxRect.height / 2 - goalRect.top;
+      
+      // Move ball
+      ball.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      ball.style.left = `calc(50% + ${targetX - goalRect.width / 2}px)`;
+      ball.style.top = `${targetY}px`;
+      ball.classList.add('kicked');
+      
+      // Check if goal scored
+      setTimeout(() => {
+        const isGoal = hitboxIndex !== goaliePosition;
+        
+        if (isGoal) {
+          ball.classList.add('goal');
+          showResult(true);
+          playerScore++;
+        } else {
+          ball.classList.add('fall');
+          showResult(false);
+        }
+        
+        updateUI();
+        
+        // Next turn
+        setTimeout(() => {
+          resetAfterShot(isGoal);
+        }, 2000);
+      }, 800);
+    }
+
+    // Show result message
+    function showResult(isGoal) {
+      if (isGoal) {
+        success.style.display = 'block';
+        success.classList.add('show_result');
+      } else {
+        failure.style.display = 'block';
+        failure.classList.add('show_result');
+      }
+    }
+
+    // Reset after shot
+    function resetAfterShot(isGoal) {
+      // Reset goal
+      goal.style.backgroundImage = `url('https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028')`;
+      goal.style.animation = 'shake 0.25s linear infinite';
+      
+      // Reset ball
+      ball.style.transition = 'none';
+      ball.style.left = '50%';
+      ball.style.top = 'auto';
+      ball.style.bottom = '10%';
+      ball.classList.remove('kicked', 'goal', 'fall');
+      
+      // Hide results
+      success.style.display = 'none';
+      failure.style.display = 'none';
+      success.classList.remove('show_result');
+      failure.classList.remove('show_result');
+      
+      playerPenalties++;
+      isPlayerTurn = false;
+      
+      // Show hitboxes for next turn
+      setTimeout(() => {
+        showHitboxes();
+        isPlayerTurn = true;
+        updateUI();
+      }, 1000);
+    }
+
+    // UI functions
+    function showHitboxes() {
+      hitboxes.forEach(hitbox => {
+        hitbox.classList.remove('hidden');
+      });
+    }
+
+    function hideHitboxes() {
+      hitboxes.forEach(hitbox => {
+        hitbox.classList.add('hidden');
+      });
+    }
+
+    function updateUI() {
+      document.getElementById('player-score').textContent = `მოთამაშე ${playerScore}:`;
+      document.getElementById('computer-score').textContent = `${computerScore} Kidsmart`;
+      document.getElementById('penalty-count').textContent = `პენალტი ${playerPenalties + 1}/5`;
+      document.getElementById('turn-indicator').textContent = isPlayerTurn ? 'თქვენი პენალტი' : 'Kidsmart-ის პენალტი';
+      document.getElementById('turn-indicator').style.background = isPlayerTurn ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)';
+    }
+
+    function restartGame() {
+      playerScore = 0;
+      computerScore = 0;
+      playerPenalties = 0;
+      computerPenalties = 0;
+      isPlayerTurn = true;
+      gameActive = true;
+      
+      document.getElementById('game-over').style.display = 'none';
+      updateUI();
+      showHitboxes();
+    }
+
+    // Start game when page loads
+    document.addEventListener('DOMContentLoaded', initGame);
+
+    // Prevent zoom and other touch behaviors
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchmove', function(e) {
+      if (e.scale !== 1) e.preventDefault();
+    }, { passive: false });
+
   </script>
 </body>
 </html>
