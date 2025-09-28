@@ -1,0 +1,539 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<title>Memory Game</title> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script> 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script> 
+<style> 
+/* Your existing CSS styles remain the same */
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; -moz-osx-font-smoothing: grayscale; -webkit-font-smoothing: antialiased; font-smoothing: antialiased; color: #fff; touch-action: manipulation; } 
+div, img, svg, canvas, video, text { position: absolute; } 
+body, #container { width: 100%; height: 100%; background: #000; font-family: 'Oswald', sans-serif; font-weight: 500; letter-spacing: -0.75px; } 
+#container { max-width: 100%; max-height: 100%; left: 0; top: 0; transform: none; } 
+#game { width: 100%; height: 100%; position: relative; } 
+/* Button grid */ 
+#btnArea { display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 10px; width: calc(100% - 40px); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); justify-items: center; align-items: center; } 
+.btn { width: 60px; height: 60px; border-radius: 50%; border: 3px solid transparent; text-align: center; font-size: 40px; line-height: 56px; cursor: pointer; position: relative; background: rgba(255, 255, 255, 0.1); user-select: none; } 
+/* Adjust timer position to prevent overlap */ 
+.timeTxt { left: 50%; bottom: 30px; /* Moved up slightly */ transform: translateX(-50%); font-size: 40px; text-align: center; width: 100%; z-index: 4; } 
+.timePlus { left: 50%; bottom: 70px; transform: translateX(-50%); font-size: 25px; text-align: center; width: 100%; opacity: 0; } 
+/* Other elements */ 
+.foundTxt { left: 0; top: 20px; width: 100%; font-size: 25px; text-align: center; } 
+#hintBtn { right: 15px; bottom: 15px; width: 60px; height: 60px; border-radius: 50%; font-size: 30px; text-align: center; line-height: 60px; cursor: pointer; background: rgba(0, 110, 166, 0.7); opacity: 1; z-index: 10; } 
+#leaderboardBtn { left: 15px; bottom: 15px; width: 60px; height: 60px; border-radius: 50%; font-size: 30px; text-align: center; line-height: 60px; cursor: pointer; background: rgba(255, 193, 7, 0.7); opacity: 1; z-index: 10; } 
+.end { width: 100%; height: 100%; background: rgba(255, 255, 255, 0.1); opacity: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; } 
+.endTxt { text-align: center; font-size: 25px; width: 100%; padding: 0 20px; box-sizing: border-box; margin-bottom: 20px; } 
+#replayBtn { top:50%; width: 120px; height: 120px; cursor: pointer; transform: scale(0.6); } 
+/* Name input form */ 
+#nameForm, #startForm { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; width: 80%; max-width: 400px; text-align: center; z-index: 100; } 
+#nameInput, #playerName { width: 80%; padding: 10px; margin: 10px 0; font-size: 18px; border-radius: 5px; border: none; } 
+#submitName, #startGame { background: #006da6; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 18px; cursor: pointer; margin-top: 10px; } 
+/* Leaderboard */ 
+#leaderboard { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.8); padding: 10px; border-radius: 10px; width: 80%; max-width: 400px; max-height: 70%; overflow-y: auto; text-align: center; z-index: 100; } 
+#leaderboard h2 { margin-top: 0; } 
+#leaderboardList { list-style: none; padding: 0; margin: 0; } 
+#leaderboardList li { padding: 5px 0; border-bottom: 1px solid #333; } 
+#closeLeaderboard { background: #006da6; color: white; border: none; padding: 10px 10px; border-radius: 5px; font-size: 15px; cursor: pointer; margin-top: 15px; } 
+#viewLeaderboard { display:none; } 
+.nav-button { position: absolute; left: 15px; top: 15px; width: 60px; height: 60px; border-radius: 50%; font-size: 30x; text-align: center; line-height: 60px; cursor: pointer; background: rgba(46, 204, 113, 0.7); color: white; text-decoration: none; z-index: 10; } 
+/* Rank display */ 
+.rank-display { margin-bottom: 15px; } 
+.top-rank { color: gold; font-size: 30px; } 
+/* Start screen */ 
+#startScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; } 
+#gameTitle { font-size: 40px; margin-bottom: 30px; color: #fff; } 
+#gameInstructions { font-size: 18px; margin-bottom: 30px; color: #aaa; text-align: center; padding: 0 20px; max-width: 400px; } 
+@media (orientation: landscape) { 
+.btn { width: 50px; height: 50px; font-size: 30px; line-height: 46px; } 
+#btnArea { width: calc(100% - 20px); grid-gap: 5px; } 
+.timeTxt { bottom: 20px; } 
+.timePlus { font-size: 20px; bottom: 50px; } 
+#hintBtn, #leaderboardBtn, #navButton { width: 50px; height: 50px; font-size: 25px; line-height: 50px; } 
+} 
+.rank-col{ display: inline-block; width: 15%; } 
+.name-col{ display: inline-block; width: 45%; } 
+.score-col{ display: inline-block; width: 20%; } 
+.hints-col{ display: inline-block; width: 15%; } 
+.top-1 { color: gold; font-weight: bold; } 
+.top-2 { color: silver; font-weight: bold; } 
+.top-3 { color: #CD7F32; font-weight: bold; } 
+</style> 
+</head> 
+<body> 
+<div id="startScreen"> 
+<div id="startForm"> 
+<input type="text" id="playerName" placeholder="მითხარი შენი სახელი" maxlength="20"> 
+<button id="startGame">თამაშის დაწყება</button> 
+</div> 
+</div> 
+<div id="container" style="opacity:0;"> 
+<div id="game"> 
+<div class="foundTxt"></div> 
+<div class="timeTxt">30:00</div> 
+<div class="timePlus">+3 წმ</div> 
+<div id="btnArea"> 
+<div id="b1" class="btn"></div> 
+</div> 
+<div class="end"> 
+<div class="endTxt"></div> 
+<div id="replayBtn"> 
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240"> 
+<rect width="240" height="240" fill="none" /> 
+<path fill="#fff" d="M120,50V10L70,60l50,50V70c33.11,0,60,26.9,60,60c0,33.11-26.89,60-60,60c-33.1,0-60-26.89-60-60H40 c0,44.2,35.8,80,80,80s80-35.8,80-80S164.2,50,120,50z" /> 
+</svg> 
+</div> 
+</div> 
+</div> 
+<div id="hintBtn">💡</div> 
+<div id="leaderboardBtn">🏆</div> 
+</div> 
+
+<!-- Name Input Form --> 
+<div id="nameForm"> 
+<h2>თამაში დასრულდა!</h2> 
+<p>შენ იპოვე <span id="finalScore">0</span> ტყუპი</p> 
+<h5 id="rankDisplay" class="rank-display"></h5> 
+<button id="submitName">OK</button> 
+</div> 
+
+<!-- Leaderboard --> 
+<div id="leaderboard"> 
+<h2>Top Scores</h2> 
+<ul id="leaderboardList"></ul> 
+<button id="closeLeaderboard">Close</button> 
+</div> 
+
+<script> 
+// Firebase configuration 
+const firebaseConfig = { 
+apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q", 
+authDomain: "newspaperveravart-default-rtdb.firebaseapp.com", 
+databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com", 
+projectId: "newspaperveravart", 
+storageBucket: "newspaperveravart.appspot.com", 
+messagingSenderId: "1234567890", 
+appId: "1:1234567890:web:1234567890abcdef" 
+}; 
+
+// Initialize Firebase 
+firebase.initializeApp(firebaseConfig); 
+const database = firebase.database();
+
+var game = document.getElementById('game'),
+    btnArea = document.getElementById('btnArea'),
+    hintBtn = document.getElementById('hintBtn'),
+    leaderboardBtn = document.getElementById('leaderboardBtn'),
+    replayBtn = document.getElementById('replayBtn'),
+    nameForm = document.getElementById('nameForm'),
+    finalScore = document.getElementById('finalScore'),
+    rankDisplay = document.getElementById('rankDisplay'),
+    leaderboard = document.getElementById('leaderboard'),
+    leaderboardList = document.getElementById('leaderboardList'),
+    closeLeaderboard = document.getElementById('closeLeaderboard'),
+    startScreen = document.getElementById('startScreen'),
+    startForm = document.getElementById('startForm'),
+    playerNameInput = document.getElementById('playerName'),
+    startGameBtn = document.getElementById('startGame'),
+    timeLimit = 30 * 1000, // in millisec
+    timeLeft,
+    timeInt,
+    lastBtn,
+    hint,
+    msTilHint,
+    matched = false,
+    art = ['😄','🤣','🙂','🙃','😉','😇','😍','🤥','😘','😚','😛','😜','😋','🤗','🤔','🤐','😶','🤑','😏','🙄','😳','😬','😴','🤕','🤠','🤧','😢','😵','😎','🤓','😡','🤢','😭','😫','😠'],
+    found = 0,
+    hintCount = 0,
+    isTabActive = true,
+    lastActiveTime = Date.now(),
+    lastTabSwitchTime = Date.now(),
+    isInspecting = false,
+    currentPlayerName = '',
+    gameStartTime = 0,
+    lastUpdateTime = 0;
+
+// Make 16 buttons
+for (var i = 1; i <= 16; i++) {
+    var b;
+    if (i == 1) b = document.getElementById('b1');
+    else {
+        b = document.getElementById('b1').cloneNode(true);
+        b.id = 'b' + (i);
+        btnArea.appendChild(b);
+    }
+    b.onclick = b.ontouchend = btnClick;
+}
+
+// Show start screen with name input
+startForm.style.display = 'block';
+
+// Start game when name is entered
+startGameBtn.addEventListener('click', function() {
+    const name = playerNameInput.value.trim();
+    if (name) {
+        currentPlayerName = name;
+        startScreen.style.display = 'none';
+        new TimelineMax({onStart: populate})
+            .set(game, {userSelect: 'none', background: 'radial-gradient(#333, #000 120%)'})
+            .set('.foundTxt', {textContent: 'იპოვე ტყუპი სმაილები...'})
+            .set('.end', {autoAlpha: 0})
+            .set('#replayBtn', {transformOrigin: 'center'})
+            .to('#container', 0.2, {opacity: 1, ease: Power2.easeIn}, 0);
+    }
+});
+
+// Initial states...
+function populate() {
+    lastBtn = undefined;
+    matched = false;
+    msTilHint = 5000;
+    TweenMax.set(hintBtn, {autoAlpha: 0, textContent: "💡", fontSize: 30});
+    TweenMax.staggerFromTo('.btn', 0.3, {scale: 0.2, alpha: 0, rotation: 1}, { rotation: 0, alpha: 1, scale: 1, ease: Back.easeOut.config(4), stagger: {grid: [4, 4], from: "center", amount: 0.2} });
+
+    var btns = [];
+    for (var i = 0; i < 15; i++) makeNewNum();
+    
+    function makeNewNum() {
+        var n = art[Math.ceil(rand(0, art.length - 1))], valExists = false;
+        for (var i = 0; i < btns.length; i++) if (n == btns[i]) valExists = true;
+        (valExists) ? makeNewNum() : btns.push(n);
+    }
+    
+    hint = btns[14];
+    btns.push(btns[14]);
+    shuffleArray(btns);
+    
+    for (var b = 1; b <= 16; b++) window['b' + b].textContent = btns[b - 1];
+}
+
+function btnClick(e) {
+    if (e.type == 'touchend') e.currentTarget.onclick = undefined;
+    if (matched) return;
+    
+    if (timeInt == undefined) {
+        timeLeft = timeLimit;
+        gameStartTime = Date.now();
+        lastUpdateTime = gameStartTime;
+        timeInt = setInterval(updateTime, 100);
+    }
+    
+    var b = e.currentTarget;
+    TweenMax.to(b, 0.05, {scale: 0.95, yoyo: true, repeat: 1});
+    
+    if (lastBtn != undefined && lastBtn != b) {
+        if (b.textContent == lastBtn.textContent) {
+            found++;
+            matched = true;
+            
+            // FIX: Update gameStartTime instead of timeLeft to properly add 3 seconds
+            var currentTime = Date.now();
+            var elapsed = currentTime - gameStartTime;
+            var newElapsed = elapsed - 3000; // Subtract 3 seconds from elapsed time
+            gameStartTime = currentTime - newElapsed; // Adjust start time to effectively add 3 seconds
+            
+            new TimelineMax({onComplete: populate})
+                .set('.foundTxt', {textContent: 'ნაპოვნია: ' + found, fontWeight: 500}, 0)
+                .to('.timePlus', 0.1, {autoAlpha: 1, yoyo: true, repeat: 1, repeatDelay: 0.4}, 0)
+                .fromTo('.timePlus', 0.3, {scale: 0, rotation: 0.1}, {scale: 1, rotation: 0}, 0)
+                .to([b, lastBtn], 0.1, {border: '3px solid #08c04d'}, 0)
+                .to(b, 0.3, {rotation: 1, scale: 0.8, ease: Back.easeIn.config(7), yoyo: true, repeat: 1}, 0)
+                .to(lastBtn, 0.3, {rotation: 1, scale: 0.8, ease: Back.easeIn.config(7), yoyo: true, repeat: 1}, 0)
+                .to('.btn', 0.1, {border: '3px solid transparent'}, 0.5);
+            return;
+        } else {
+            TweenMax.to(lastBtn, 0.1, {border: '3px solid transparent'});
+        }
+    }
+    
+    TweenMax.to(b, 0.1, {border: '3px solid #006da6'});
+    lastBtn = e.currentTarget;
+}
+
+// Improved visibility change handler
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // Tab became inactive
+        lastTabSwitchTime = Date.now();
+        clearInterval(timeInt);
+        timeInt = undefined;
+    } else {
+        // Tab became active
+        var currentTime = Date.now();
+        var inactiveDuration = currentTime - lastTabSwitchTime;
+        
+        // Adjust gameStartTime to account for inactive period
+        gameStartTime += inactiveDuration;
+        lastUpdateTime = currentTime;
+        
+        // If time is up, trigger game over
+        if (timeLeft <= 0) {
+            timeLeft = 0;
+            clearInterval(timeInt);
+            timeInt = undefined;
+            gameOver();
+        } else if (matched === false) {
+            // If time is not up and not in matching process, restart timer
+            timeInt = setInterval(updateTime, 100);
+        }
+    }
+}
+
+// Improved time update function
+function updateTime() {
+    var currentTime = Date.now();
+    var elapsed = currentTime - gameStartTime;
+    timeLeft = Math.max(0, timeLimit - elapsed);
+    
+    var mil = Math.floor(timeLeft % 1000 / 10);
+    var sec = Math.floor(timeLeft / 1000);
+    
+    if (mil < 10) mil = "0" + mil;
+    if (sec < 10) sec = "0" + sec;
+    
+    var t = sec + ":" + mil;
+    TweenMax.set('.timeTxt', {textContent: t});
+    
+    // Update hint timer
+    if (msTilHint > 0) {
+        msTilHint -= (currentTime - lastUpdateTime);
+        if (msTilHint < 1) {
+            TweenMax.to(hintBtn, 0.5, {autoAlpha: 1});
+        }
+    }
+    
+    lastUpdateTime = currentTime;
+    
+    // Check if time is up
+    if (timeLeft <= 0) {
+        clearInterval(timeInt);
+        timeInt = undefined;
+        gameOver();
+    }
+}
+
+// Game over function
+function gameOver() {
+    if (found == 0) TweenMax.set('.foundTxt', {textContent: 'ნაპოვნია: 0', fontWeight: 500});
+    TweenMax.set('.endTxt', {textContent: hint + " კიდევ ვითამაშოთ? " + hint, fontSize: 30});
+    
+    new TimelineMax()
+        .to('.timeTxt', 0.3, {autoAlpha: 0}, 0)
+        .to(hintBtn, 0.3, {autoAlpha: 0}, 0)
+        .to(btnArea, 0.3, {autoAlpha: 0}, 0)
+        .to('.btn', 0.1, {border: '3px solid transparent'}, 0.3)
+        .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 2.5, y: 130, ease: Power2.easeInOut}, 0.2)
+        .to('.end', 0.6, {autoAlpha: 1, ease: Power2.easeInOut}, 0)
+        .fromTo(replayBtn, 1.0, {rotation: 360, scale: 0}, {scale: 0.6, rotation: 0, ease: Power1.easeInOut}, 0.5)
+        .call(showNameInput, [], "+=0.5");
+}
+
+function showNameInput() {
+    finalScore.textContent = found;
+    saveScore(currentPlayerName, found);
+    
+    // Check player's rank
+    database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        const scores = [];
+        snapshot.forEach((childSnapshot) => {
+            scores.push(childSnapshot.val());
+        });
+        
+        // Sort by score (descending) and then by hints used (ascending)
+        scores.sort((a, b) => {
+            if (b.score === a.score) {
+                return (a.hintsUsed || 0) - (b.hintsUsed || 0);
+            }
+            return b.score - a.score;
+        });
+        
+        // Find player's rank
+        let playerRank = -1;
+        for (let i = 0; i < scores.length; i++) {
+            if (scores[i].name === currentPlayerName && scores[i].score === found) {
+                playerRank = i + 1;
+                break;
+            }
+        }
+        
+        // Display appropriate message
+        if (playerRank !== -1 && playerRank <= 10) {
+            // Player is in top 10
+            let emoji = '';
+            if (playerRank === 1) emoji = '🥇';
+            else if (playerRank === 2) emoji = '🥈';
+            else if (playerRank === 3) emoji = '🥉';
+            else emoji = '🏆';
+            rankDisplay.innerHTML = `<span class="top-rank">${emoji} #${playerRank} in Top 10! ${emoji}</span>`;
+        } else {
+            // Player is not in top 10
+            const encouragements = [
+                "Good job! Keep practicing!",
+                "Nice try! You'll do better next time!",
+                "Well played! Challenge yourself to beat your score!",
+                "Great effort! The more you play, the better you'll get!",
+                "You're getting better with each game!"
+            ];
+            const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+            rankDisplay.textContent = randomEncouragement;
+        }
+        
+        nameForm.style.display = 'block';
+    });
+}
+
+function saveScore(name, score) {
+    const timestamp = new Date().getTime();
+    database.ref('scores').push({
+        name: name,
+        score: score,
+        hintsUsed: hintCount,
+        timestamp: timestamp
+    });
+    hintCount = 0; // Reset hint counter after saving
+}
+
+function loadLeaderboard() {
+    database.ref('scores').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        const scores = [];
+        snapshot.forEach((childSnapshot) => {
+            scores.push(childSnapshot.val());
+        });
+        
+        // Sort by score (descending) and then by hints used (ascending)
+        scores.sort((a, b) => {
+            if (b.score === a.score) {
+                return (a.hintsUsed || 0) - (b.hintsUsed || 0);
+            }
+            return b.score - a.score;
+        });
+        
+        // Clear previous leaderboard
+        leaderboardList.innerHTML = '';
+        
+        // Create table header
+        const header = document.createElement('li');
+        header.className = 'leaderboard-header';
+        header.innerHTML = `<span class="rank-col">რანკი</span> <span class="name-col">მოთამაშე</span> <span class="score-col">ქულა</span> <span class="hints-col">💡</span>`;
+        leaderboardList.appendChild(header);
+        
+        // Add entries to leaderboard
+        scores.forEach((entry, index) => {
+            const li = document.createElement('li');
+            li.className = 'leaderboard-entry';
+            
+            // Add emojis for top 3
+            let emoji = '';
+            if (index === 0) emoji = '🥇';
+            else if (index === 1) emoji = '🥈';
+            else if (index === 2) emoji = '🥉';
+            
+            li.innerHTML = `<span class="rank-col">${emoji} ${index + 1}</span> <span class="name-col">${entry.name || 'Anonymous'}</span> <span class="score-col">${entry.score}</span> <span class="hints-col">${entry.hintsUsed || 0}</span>`;
+            
+            // Highlight top 3 entries
+            if (index < 3) {
+                li.classList.add('top-' + (index + 1));
+            }
+            
+            leaderboardList.appendChild(li);
+        });
+    });
+}
+
+// Event listeners
+hintBtn.onclick = hintBtn.ontouchend = function(e) {
+    if (e.type == 'touchend') hintBtn.onclick = undefined;
+    TweenMax.set(hintBtn, {textContent: hint, fontSize: 30});
+    hintCount++; // Increment hint counter
+}
+
+leaderboardBtn.onclick = leaderboardBtn.ontouchend = function(e) {
+    if (e.type == 'touchend') leaderboardBtn.onclick = undefined;
+    loadLeaderboard();
+    leaderboard.style.display = 'block';
+}
+
+submitName.addEventListener('click', () => {
+    nameForm.style.display = 'none';
+    loadLeaderboard();
+    leaderboard.style.display = 'block';
+});
+
+closeLeaderboard.addEventListener('click', () => {
+    leaderboard.style.display = 'none';
+    if (timeInt === undefined) {
+        // Only reset game if it's not already running
+        resetGame();
+    }
+});
+
+replayBtn.onclick = replayBtn.ontouchend = function() {
+    resetGame();
+}
+
+function resetGame() {
+    new TimelineMax()
+        .to(replayBtn, 0.5, {rotation: -180, scale: 0, ease: Back.easeIn.config(3)}, 0)
+        .fromTo('.foundTxt', 0.4, {rotation: 0.1}, {rotation: 0, scale: 1, y: 0, ease: Power1.easeInOut}, 0.4)
+        .to('.end', 0.3, {autoAlpha: 0}, 0.5)
+        .to(['.timeTxt', btnArea], 0.3, {autoAlpha: 1}, 0.8)
+        .call(function() {
+            TweenMax.set('.foundTxt', {textContent: 'ნაპოვნია: 0'});
+            TweenMax.set('.timeTxt', {textContent: '30:00'});
+            found = 0;
+            hintCount = 0; // Reset hint counter on game reset
+            lastBtn = hint = undefined;
+            populate();
+        }, null, null, 0.8);
+}
+
+// Handle resize
+function doResize() {
+    var cw = window.innerWidth;
+    var ch = window.innerHeight;
+    
+    // Adjust button sizes based on screen size
+    var btnSize = Math.min(cw, ch) * 0.15;
+    if (btnSize > 80) btnSize = 80;
+    if (btnSize < 50) btnSize = 50;
+    
+    var fontSize = btnSize * 0.7;
+    TweenMax.set('.btn', { width: btnSize, height: btnSize, fontSize: fontSize, lineHeight: btnSize + 'px' });
+    
+    // Adjust grid gap based on screen size
+    var gridGap = Math.min(cw, ch) * 0.02;
+    if (gridGap < 5) gridGap = 5;
+    TweenMax.set('#btnArea', {gridGap: gridGap + 'px'});
+    
+    // Adjust hint button size
+    var hintBtnSize = btnSize * 0.8;
+    TweenMax.set('#hintBtn', { width: hintBtnSize, height: hintBtnSize, fontSize: hintBtnSize * 0.5, lineHeight: hintBtnSize + 'px' });
+    
+    // Adjust leaderboard button size
+    TweenMax.set('#leaderboardBtn', { width: hintBtnSize, height: hintBtnSize, fontSize: hintBtnSize * 0.5, lineHeight: hintBtnSize + 'px' });
+}
+
+doResize();
+window.addEventListener("resize", doResize);
+
+// Helper Functions
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+function rand(min, max) {
+    min = min || 0;
+    max = max || 1;
+    return min + (max - min) * Math.random();
+}
+</script> 
+</body> 
+</html>
