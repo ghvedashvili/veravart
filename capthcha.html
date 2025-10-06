@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPTCHA სისტემა</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .challenge-container {
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .challenge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .challenge-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .challenge-description {
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: #7f8c8d;
+        }
+        
+        /* CAPTCHA სტილები */
+        .captcha-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 8px;
+            margin: 0px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 3px solid #3498db;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .captcha-input {
+            font-size: 2.5rem;
+            padding: 15px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            margin: 5px 0;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .captcha-input:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        
+        .input-instruction {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 50px;
+            min-width: 150px;
+        }
+        
+        button:hover, button:active {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .success-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            flex-grow: 1;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: #2ecc71;
+            margin-bottom: 20px;
+        }
+        
+        .success-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .success-message {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        
+        .restart-button {
+            background: #2ecc71;
+        }
+        
+        .restart-button:hover, .restart-button:active {
+            background: #27ae60;
+        }
+        
+        .phase-indicator {
+            background: #e8f4fd;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 2px solid #b8daff;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        /* მონიშვნით CAPTCHA-ს სტილები */
+        .captcha-display.selectable {
+            cursor: pointer;
+            user-select: text;
+            -webkit-user-select: text;
+            transition: all 0.3s ease;
+        }
+        
+        .captcha-display.selectable:hover {
+            background: #e8f9fa;
+            border-color: #2980b9;
+        }
+        
+        .selection-indicator {
+            position: absolute;
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            pointer-events: none;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        
+        .special-instruction {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .warning-instruction {
+            background: #ffeaa7;
+            color: #d35400;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #f39c12;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .info-instruction {
+            background: #d6eaf8;
+            color: #21618c;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 100%;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .challenge-title {
+                font-size: 1.3rem;
+            }
+            
+            button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+            
+            .captcha-display, .captcha-input {
+                font-size: 2rem;
+                letter-spacing: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="mainTitle">CAPTCHA ტესტი</h1>
+            
+        </header>
+        
+        <div class="challenge-container">
+            <!-- პირველი ეტაპი - ქართული CAPTCHA -->
+            <div class="challenge active" id="georgianChallenge">
+                <div class="phase-indicator">ეტაპი 1/3</div>
+                
+                <p class="challenge-description">შეიყვანეთ ქვემოთ მოცემული CAPTCHA</p>
+                
+                <div class="captcha-display" id="georgianCaptchaDisplay">
+                    <!-- CAPTCHA ტექსტი დაემატება JavaScript-ით -->
+                </div>
+                
+                <div class="info-instruction">
+                    💡 არასოდეს დაივიწყო ის, რაც შენს იდენტობას ქმნის.
+                </div>
+
+                <input type="text" class="captcha-input" id="georgianCaptchaInput" maxlength="8" placeholder="ჩაწერეთ CAPTCHA ქართულად">
+                
+                <button id="verifyGeorgianButton">შემოწმება</button>
+            </div>
+            
+            <!-- მეორე ეტაპი - მონიშვნით CAPTCHA -->
+            <div class="challenge" id="selectionChallenge" style="display: none;">
+                <div class="phase-indicator">ეტაპი 2/3</div>
+                
+                <p class="challenge-description">შეიყვანეთ ქვემოთ მოცემული CAPTCHA</p>
+                
+                <div class="captcha-display selectable" id="selectionCaptchaDisplay">
+                    ********
+                </div>
+                
+                <div class="special-instruction">
+                    💡 არ არსებობს დაფარული, რომ არ გამოჩნდეს, და არც რამ საიდუმლო, რომ არ გამჟღავნდეს. ლუკა 12.2
+                </div>
+               
+                <input type="text" class="captcha-input" id="selectionCaptchaInput" maxlength="8" placeholder="ჩაწერეთ CAPTCHA">
+                
+                <button id="verifySelectionButton">შემოწმება</button>
+            </div>
+            
+            <!-- მესამე ეტაპი - ბრუნვადი CAPTCHA -->
+            <div class="challenge" id="rotatingChallenge" style="display: none;">
+                <div class="phase-indicator">ეტაპი 3/3</div>
+                
+                <p class="challenge-description">შეიყვანეთ ქვემოთ მოცემული CAPTCHA</p>
+                
+                <div class="captcha-display" id="rotatingCaptchaDisplay">
+                    <!-- CAPTCHA ტექსტი დაემატება JavaScript-ით -->
+                </div>
+                
+                <div class="warning-instruction">
+                    ⚠️ ცვლილებები არასდროს არ არის შემთხვევითობა!
+                </div>
+                <input type="text" class="captcha-input" id="rotatingCaptchaInput" maxlength="8" placeholder="ჩაწერეთ CAPTCHA">
+                
+                <button id="verifyRotatingButton">შემოწმება</button>
+            </div>
+            
+            <!-- ფინალური წარმატების ეკრანი -->
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon">✅</div>
+                <h2 class="success-title">გილოცავთ!</h2>
+                <p class="success-message">თქვენ წარმატებით დაამტკიცეთ, რომ არ ხართ რობოტი!</p>
+                <button class="restart-button" id="restartButton">თავიდან დაწყება</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ელემენტების მითითებები
+        const mainTitle = document.getElementById('mainTitle');
+        const georgianChallenge = document.getElementById('georgianChallenge');
+        const selectionChallenge = document.getElementById('selectionChallenge');
+        const rotatingChallenge = document.getElementById('rotatingChallenge');
+        const georgianCaptchaDisplay = document.getElementById('georgianCaptchaDisplay');
+        const selectionCaptchaDisplay = document.getElementById('selectionCaptchaDisplay');
+        const rotatingCaptchaDisplay = document.getElementById('rotatingCaptchaDisplay');
+        const georgianCaptchaInput = document.getElementById('georgianCaptchaInput');
+        const selectionCaptchaInput = document.getElementById('selectionCaptchaInput');
+        const rotatingCaptchaInput = document.getElementById('rotatingCaptchaInput');
+        const verifyGeorgianButton = document.getElementById('verifyGeorgianButton');
+        const verifySelectionButton = document.getElementById('verifySelectionButton');
+        const verifyRotatingButton = document.getElementById('verifyRotatingButton');
+        const successScreen = document.getElementById('successScreen');
+        const restartButton = document.getElementById('restartButton');
+        
+        // ინგლისურ-ქართული სიმბოლოების რუკა
+        const enToKaMap = {
+            'A': 'ა', 'B': 'ბ', 'C': 'ც', 'D': 'დ', 'E': 'ე', 'F': 'ფ', 'G': 'გ',
+            'H': 'ჰ', 'I': 'ი', 'J': 'ჯ', 'K': 'კ', 'L': 'ლ', 'M': 'მ', 'N': 'ნ',
+            'O': 'ო', 'P': 'პ', 'Q': 'ქ', 'R': 'რ', 'S': 'ს', 'T': 'ტ', 'U': 'უ',
+            'V': 'ვ', 'W': 'წ', 'X': 'ხ', 'Y': 'ყ', 'Z': 'ზ',
+            '0': '0', '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', 
+            '6': '6', '7': '7', '8': '8', '9': '9'
+        };
+        
+        // ყველა შესაძლო სიმბოლო
+        const allSymbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        
+        // გლობალური ცვლადები
+        let currentSelectionCaptcha = '';
+        let currentRotatingCaptcha = '';
+        let hasChangedInSelectionChallenge = false;
+        let selectionIndicator = null;
+        let lastRotatingInputValue = '';
+        let isSelectionCaptchaRevealed = false;
+        
+        // ქართული CAPTCHA-ს გენერირება
+        function generateGeorgianCaptcha() {
+            let captcha = '';
+            
+            for (let i = 0; i < 8; i++) {
+                captcha += allSymbols[Math.floor(Math.random() * allSymbols.length)];
+            }
+            
+            georgianCaptchaDisplay.textContent = captcha;
+            georgianCaptchaInput.value = '';
+        }
+        
+        // მონიშვნით CAPTCHA-ს გენერირება
+        function generateSelectionCaptcha() {
+            let captcha = '';
+            
+            for (let i = 0; i < 8; i++) {
+                captcha += allSymbols[Math.floor(Math.random() * allSymbols.length)];
+            }
+            
+            currentSelectionCaptcha = captcha;
+            // დავაბრუნოთ ვარსკვლავები
+            selectionCaptchaDisplay.textContent = '********';
+            selectionCaptchaInput.value = '';
+            hasChangedInSelectionChallenge = false;
+            isSelectionCaptchaRevealed = false;
+        }
+        
+        // ბრუნვადი CAPTCHA-ს გენერირება
+        function generateRotatingCaptcha() {
+            let captcha = '';
+            
+            for (let i = 0; i < 8; i++) {
+                captcha += allSymbols[Math.floor(Math.random() * allSymbols.length)];
+            }
+            
+            currentRotatingCaptcha = captcha;
+            rotatingCaptchaDisplay.textContent = currentRotatingCaptcha;
+            rotatingCaptchaInput.value = '';
+            lastRotatingInputValue = '';
+        }
+        
+        // ინგლისურიდან ქართულად გადაყვანა
+        function convertToGeorgian(englishText) {
+            return englishText.split('').map(char => enToKaMap[char] || char).join('');
+        }
+        
+        // ქართული CAPTCHA-ს შემოწმება
+        function verifyGeorgianCaptcha() {
+            const userInput = georgianCaptchaInput.value.trim();
+            const originalCaptcha = georgianCaptchaDisplay.textContent;
+            const expectedGeorgian = convertToGeorgian(originalCaptcha);
+            
+            const isCorrect = userInput === expectedGeorgian;
+            
+            if (isCorrect) {
+                // გადასვლა მეორე ეტაპზე
+                verifyGeorgianButton.textContent = '✅ სწორია!';
+                
+                setTimeout(() => {
+                    georgianChallenge.style.display = 'none';
+                    selectionChallenge.style.display = 'flex';
+                    mainTitle.textContent = 'CAPTCHA ტესტი';
+                    generateSelectionCaptcha();
+                }, 1000);
+            } else {
+                // არასწორი პასუხი
+                verifyGeorgianButton.style.background = '#e74c3c';
+                georgianCaptchaInput.style.borderColor = '#e74c3c';
+                
+                setTimeout(() => {
+                    verifyGeorgianButton.style.background = '#3498db';
+                    georgianCaptchaInput.style.borderColor = '#3498db';
+                    georgianCaptchaInput.value = '';
+                    generateGeorgianCaptcha();
+                }, 1000);
+            }
+        }
+        
+        // მონიშვნით CAPTCHA-ს ლოგიკა
+        function handleTextSelection() {
+            if (hasChangedInSelectionChallenge) return; // მხოლოდ ერთხელ შეიცვლება
+            
+            // თუ ტექსტი ჯერ არ არის გამოვლენილი, გამოვავლინოთ
+            if (!isSelectionCaptchaRevealed) {
+                selectionCaptchaDisplay.textContent = currentSelectionCaptcha;
+                isSelectionCaptchaRevealed = true;
+                return;
+            }
+            
+            // თუ ტექსტი უკვე გამოვლენილია, შევცვალოთ
+            const symbols = currentSelectionCaptcha.split('');
+            const changeCount = Math.floor(Math.random() * 2) + 2; // 2-3 სიმბოლოს ცვლილება
+            
+            for (let i = 0; i < changeCount; i++) {
+                const pos = Math.floor(Math.random() * 8);
+                symbols[pos] = allSymbols[Math.floor(Math.random() * allSymbols.length)];
+            }
+            
+            currentSelectionCaptcha = symbols.join('');
+            selectionCaptchaDisplay.textContent = currentSelectionCaptcha;
+            hasChangedInSelectionChallenge = true;
+            
+            // ანიმაცია
+            selectionCaptchaDisplay.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                selectionCaptchaDisplay.style.transform = 'scale(1)';
+            }, 200);
+        }
+        
+        // მობილურისთვის მონიშვნის დამუშავება
+        function handleMobileSelection(event) {
+            if (hasChangedInSelectionChallenge) return;
+            
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                handleTextSelection();
+                
+                // მონიშვნის ინდიკატორის ჩვენება
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                
+                if (selectionIndicator) {
+                    document.body.removeChild(selectionIndicator);
+                }
+                
+                selectionIndicator = document.createElement('div');
+                selectionIndicator.className = 'selection-indicator';
+                selectionIndicator.style.left = (rect.left + window.scrollX) + 'px';
+                selectionIndicator.style.top = (rect.top + window.scrollY) + 'px';
+                selectionIndicator.style.width = rect.width + 'px';
+                selectionIndicator.style.height = rect.height + 'px';
+                
+                document.body.appendChild(selectionIndicator);
+                
+                setTimeout(() => {
+                    if (selectionIndicator) {
+                        document.body.removeChild(selectionIndicator);
+                        selectionIndicator = null;
+                    }
+                }, 500);
+                
+                // მონიშვნის მოშორება
+                selection.removeAllRanges();
+            }
+        }
+        
+        // მონიშვნით CAPTCHA-ს შემოწმება
+        function verifySelectionCaptcha() {
+            const userInput = selectionCaptchaInput.value.toUpperCase();
+            const isCorrect = userInput === currentSelectionCaptcha;
+            
+            if (isCorrect) {
+                verifySelectionButton.textContent = '✅ სწორია!';
+                verifySelectionButton.disabled = true;
+                selectionCaptchaInput.disabled = true;
+                
+                setTimeout(() => {
+                    selectionChallenge.style.display = 'none';
+                    rotatingChallenge.style.display = 'flex';
+                    mainTitle.textContent = 'CAPTCHA ტესტი';
+                    generateRotatingCaptcha();
+                }, 1000);
+            } else {
+                verifySelectionButton.style.background = '#e74c3c';
+                selectionCaptchaInput.style.borderColor = '#e74c3c';
+                
+                setTimeout(() => {
+                    verifySelectionButton.style.background = '#3498db';
+                    selectionCaptchaInput.style.borderColor = '#3498db';
+                    verifySelectionButton.textContent = 'შემოწმება';
+                    selectionCaptchaInput.value = '';
+                    generateSelectionCaptcha();
+                }, 1000);
+            }
+        }
+        
+        // ბრუნვადი CAPTCHA-ს ლოგიკა
+// ბრუნვადი CAPTCHA-ს ლოგიკა
+function updateRotatingCaptchaBasedOnInput(currentInput) {
+    // მხოლოდ მაშინ ვცვლით როცა მომხმარებელი აკრეფს (არა როცა შლის)
+    if (currentInput.length > lastRotatingInputValue.length) {
+        const currentLength = currentInput.length;
+        
+        // როცა მომხმარებელი შეიყვანს 3 სიმბოლოს → იცვლება პირველი, მეხუთე და მეშვიდე სიმბოლო
+        if (currentLength === 3) {
+            updateRotatingSymbols([0, 4, 6], [1, 5, 7]);
+        }
+        // როცა მომხმარებელი შეიყვანს 6 სიმბოლოს → იცვლება წინა 3 სიმბოლო
+        else if (currentLength === 6) {
+            updateRotatingSymbols([0, 1, 2], [1, 2, 3]);
+        }
+        // როცა მომხმარებელი შეიყვანს 7 სიმბოლოს → პირველი, მეორე და მეოთხე
+        else if (currentLength === 7) {
+            updateRotatingSymbols([0, 1, 3], [1, 2, 4]);
+        }
+        // როცა მომხმარებელი შეიყვანს 8 სიმბოლოს → იცვლება წინა 7 სიმბოლო
+        else if (currentLength === 8) {
+            updateRotatingSymbols([0, 1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 7]);
+        }
+    }
+    // ჩანაცვლება მხოლოდ 3, 6, 7, 8 პოზიციებზე
+    else if (currentInput.length === lastRotatingInputValue.length && isReplacementAtSpecificPositions(currentInput)) {
+        const changedPosition = findChangedPosition(currentInput);
+        
+        if (changedPosition === 2) { // მე-3 პოზიცია
+            updateRotatingSymbols([0, 4, 6], [1, 5, 7]);
+        }
+        else if (changedPosition === 5) { // მე-6 პოზიცია
+            updateRotatingSymbols([0, 1, 2], [1, 2, 3]);
+        }
+        else if (changedPosition === 6) { // მე-7 პოზიცია
+            updateRotatingSymbols([0, 1, 3], [1, 2, 4]);
+        }
+        else if (changedPosition === 7) { // მე-8 პოზიცია
+            updateRotatingSymbols([0, 1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 7]);
+        }
+    }
+    
+    lastRotatingInputValue = currentInput;
+}
+
+// შეამოწმოს არის თუ არა ეს ჩანაცვლება კონკრეტულ პოზიციებზე (3, 6, 7, 8)
+function isReplacementAtSpecificPositions(currentInput) {
+    if (currentInput.length !== lastRotatingInputValue.length || currentInput === lastRotatingInputValue) {
+        return false;
+    }
+    
+    const changedPosition = findChangedPosition(currentInput);
+    return changedPosition === 2 || changedPosition === 5 || changedPosition === 6 || changedPosition === 7;
+}
+        
+        // შეამოწმოს არის თუ არა ეს ჩანაცვლება კონკრეტულ პოზიციებზე (6, 7, 8)
+        function isReplacementAtSpecificPositions(currentInput) {
+            if (currentInput.length !== lastRotatingInputValue.length || currentInput === lastRotatingInputValue) {
+                return false;
+            }
+            
+            const changedPosition = findChangedPosition(currentInput);
+            return changedPosition === 5 || changedPosition === 6 || changedPosition === 7;
+        }
+        
+        // იპოვოს შეცვლილი პოზიცია
+        function findChangedPosition(currentInput) {
+            for (let i = 0; i < currentInput.length; i++) {
+                if (currentInput[i] !== lastRotatingInputValue[i]) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
+        function updateRotatingSymbols(positions, steps) {
+            const symbols = currentRotatingCaptcha.split('');
+            
+            for (let i = 0; i < positions.length; i++) {
+                const position = positions[i];
+                const step = steps[i];
+                symbols[position] = getNextSymbol(symbols[position], step);
+            }
+            
+            currentRotatingCaptcha = symbols.join('');
+            rotatingCaptchaDisplay.textContent = currentRotatingCaptcha;
+        }
+        
+        function getNextSymbol(symbol, step) {
+            const index = allSymbols.indexOf(symbol);
+            if (index === -1) return symbol;
+            
+            return allSymbols[(index + step) % allSymbols.length];
+        }
+        
+        // ბრუნვადი CAPTCHA-ს შემოწმება
+        function verifyRotatingCaptcha() {
+            const userInput = rotatingCaptchaInput.value.toUpperCase();
+            const isCorrect = userInput === currentRotatingCaptcha;
+            
+            if (isCorrect) {
+                verifyRotatingButton.textContent = '✅ სწორია!';
+                verifyRotatingButton.disabled = true;
+                rotatingCaptchaInput.disabled = true;
+                
+                setTimeout(() => {
+                    rotatingChallenge.style.display = 'none';
+                    successScreen.style.display = 'flex';
+                }, 1000);
+            } else {
+                verifyRotatingButton.style.background = '#e74c3c';
+                rotatingCaptchaInput.style.borderColor = '#e74c3c';
+                
+                setTimeout(() => {
+                    verifyRotatingButton.style.background = '#3498db';
+                    rotatingCaptchaInput.style.borderColor = '#3498db';
+                    verifyRotatingButton.textContent = 'შემოწმება';
+                    rotatingCaptchaInput.value = '';
+                    lastRotatingInputValue = '';
+                    generateRotatingCaptcha();
+                }, 1000);
+            }
+        }
+        
+        // ინიციალიზაცია
+        document.addEventListener('DOMContentLoaded', function() {
+            generateGeorgianCaptcha();
+            
+            // მონიშვნით CAPTCHA-სთვის მონიშვნის მოსმენა
+            selectionCaptchaDisplay.addEventListener('select', handleTextSelection);
+            
+            // მობილურისთვის მონიშვნის მოსმენა
+            selectionCaptchaDisplay.addEventListener('touchstart', function(e) {
+                this.classList.add('selecting');
+            });
+            
+            selectionCaptchaDisplay.addEventListener('touchend', function(e) {
+                setTimeout(() => {
+                    handleMobileSelection(e);
+                    this.classList.remove('selecting');
+                }, 100);
+            });
+            
+            selectionCaptchaDisplay.addEventListener('mouseup', function(e) {
+                handleMobileSelection(e);
+            });
+            
+            // ბრუნვადი CAPTCHA-სთვის შეყვანის მონიტორინგი
+            rotatingCaptchaInput.addEventListener('input', function() {
+                updateRotatingCaptchaBasedOnInput(this.value.toUpperCase());
+            });
+        });
+        
+        // ღილაკების მოსმენა
+        verifyGeorgianButton.addEventListener('click', verifyGeorgianCaptcha);
+        verifySelectionButton.addEventListener('click', verifySelectionCaptcha);
+        verifyRotatingButton.addEventListener('click', verifyRotatingCaptcha);
+        
+        restartButton.addEventListener('click', function() {
+            successScreen.style.display = 'none';
+            georgianChallenge.style.display = 'flex';
+            selectionChallenge.style.display = 'none';
+            rotatingChallenge.style.display = 'none';
+            mainTitle.textContent = 'CAPTCHA ტესტი';
+            
+            verifyGeorgianButton.textContent = 'შემოწმება';
+            verifyGeorgianButton.disabled = false;
+            verifyGeorgianButton.style.background = '#3498db';
+            georgianCaptchaInput.disabled = false;
+            georgianCaptchaInput.style.borderColor = '#3498db';
+            
+            verifySelectionButton.textContent = 'შემოწმება';
+            verifySelectionButton.disabled = false;
+            verifySelectionButton.style.background = '#3498db';
+            selectionCaptchaInput.disabled = false;
+            selectionCaptchaInput.style.borderColor = '#3498db';
+            
+            verifyRotatingButton.textContent = 'შემოწმება';
+            verifyRotatingButton.disabled = false;
+            verifyRotatingButton.style.background = '#3498db';
+            rotatingCaptchaInput.disabled = false;
+            rotatingCaptchaInput.style.borderColor = '#3498db';
+            
+            georgianCaptchaInput.value = '';
+            selectionCaptchaInput.value = '';
+            rotatingCaptchaInput.value = '';
+            
+            generateGeorgianCaptcha();
+        });
+        
+        // Enter ღილაკის მხარდაჭერა
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (georgianChallenge.style.display !== 'none') {
+                    verifyGeorgianCaptcha();
+                } else if (selectionChallenge.style.display !== 'none') {
+                    verifySelectionCaptcha();
+                } else if (rotatingChallenge.style.display !== 'none') {
+                    verifyRotatingCaptcha();
+                } else if (successScreen.style.display === 'flex') {
+                    restartButton.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
