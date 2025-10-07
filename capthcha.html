@@ -379,18 +379,26 @@
         const successScreen = document.getElementById('successScreen');
         const restartButton = document.getElementById('restartButton');
         
-        // ინგლისურ-ქართული სიმბოლოების რუკა
+        // ინგლისურ-ქართული სიმბოლოების რუკა (დიდი და პატარა ასოები)
         const enToKaMap = {
             'A': 'ა', 'B': 'ბ', 'C': 'ც', 'D': 'დ', 'E': 'ე', 'F': 'ფ', 'G': 'გ',
             'H': 'ჰ', 'I': 'ი', 'J': 'ჯ', 'K': 'კ', 'L': 'ლ', 'M': 'მ', 'N': 'ნ',
             'O': 'ო', 'P': 'პ', 'Q': 'ქ', 'R': 'რ', 'S': 'ს', 'T': 'ტ', 'U': 'უ',
             'V': 'ვ', 'W': 'წ', 'X': 'ხ', 'Y': 'ყ', 'Z': 'ზ',
+            'a': 'ა', 'b': 'ბ', 'c': 'ც', 'd': 'დ', 'e': 'ე', 'f': 'ფ', 'g': 'გ',
+            'h': 'ჰ', 'i': 'ი', 'j': 'ჯ', 'k': 'კ', 'l': 'ლ', 'm': 'მ', 'n': 'ნ',
+            'o': 'ო', 'p': 'პ', 'q': 'ქ', 'r': 'რ', 's': 'ს', 't': 'ტ', 'u': 'უ',
+            'v': 'ვ', 'w': 'წ', 'x': 'ხ', 'y': 'ყ', 'z': 'ზ',
             '0': '0', '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', 
             '6': '6', '7': '7', '8': '8', '9': '9'
         };
         
-        // ყველა შესაძლო სიმბოლო
-        const allSymbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        // ყველა შესაძლო სიმბოლო (დიდი და პატარა ასოები + ციფრები)
+        const allSymbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const allSymbolsUpperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const allSymbolsLowerCase = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const digits = '0123456789';
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
         
         // გლობალური ცვლადები
         let currentSelectionCaptcha = '';
@@ -400,7 +408,7 @@
         let lastRotatingInputValue = '';
         let isSelectionCaptchaRevealed = false;
         
-        // ქართული CAPTCHA-ს გენერირება
+        // ქართული CAPTCHA-ს გენერირება (დიდი და პატარა ასოები)
         function generateGeorgianCaptcha() {
             let captcha = '';
             
@@ -412,7 +420,7 @@
             georgianCaptchaInput.value = '';
         }
         
-        // მონიშვნით CAPTCHA-ს გენერირება
+        // მონიშვნით CAPTCHA-ს გენერირება (დიდი და პატარა ასოები)
         function generateSelectionCaptcha() {
             let captcha = '';
             
@@ -442,7 +450,7 @@
             lastRotatingInputValue = '';
         }
         
-        // ინგლისურიდან ქართულად გადაყვანა
+        // ინგლისურიდან ქართულად გადაყვანა (დიდი და პატარა ასოები)
         function convertToGeorgian(englishText) {
             return englishText.split('').map(char => enToKaMap[char] || char).join('');
         }
@@ -490,13 +498,25 @@
                 return;
             }
             
-            // თუ ტექსტი უკვე გამოვლენილია, შევცვალოთ
+            // თუ ტექსტი უკვე გამოვლენილია, შევცვალოთ დიდი/პატარა ასოების შენარჩუნებით
             const symbols = currentSelectionCaptcha.split('');
             const changeCount = Math.floor(Math.random() * 2) + 2; // 2-3 სიმბოლოს ცვლილება
             
             for (let i = 0; i < changeCount; i++) {
                 const pos = Math.floor(Math.random() * 8);
-                symbols[pos] = allSymbols[Math.floor(Math.random() * allSymbols.length)];
+                const currentChar = symbols[pos];
+                
+                // შევინარჩუნოთ დიდი/პატარა ასოების ტიპი
+                if (currentChar >= 'A' && currentChar <= 'Z') {
+                    // დიდი ასო - შევცვალოთ სხვა დიდი ასოთი
+                    symbols[pos] = allSymbolsUpperCase[Math.floor(Math.random() * allSymbolsUpperCase.length)];
+                } else if (currentChar >= 'a' && currentChar <= 'z') {
+                    // პატარა ასო - შევცვალოთ სხვა პატარა ასოთი
+                    symbols[pos] = allSymbolsLowerCase[Math.floor(Math.random() * allSymbolsLowerCase.length)];
+                } else {
+                    // ციფრი - შევცვალოთ სხვა ციფრით
+                    symbols[pos] = digits[Math.floor(Math.random() * digits.length)];
+                }
             }
             
             currentSelectionCaptcha = symbols.join('');
@@ -547,9 +567,9 @@
             }
         }
         
-        // მონიშვნით CAPTCHA-ს შემოწმება
+        // მონიშვნით CAPTCHA-ს შემოწმება (მნიშვნელობა აქვს დიდ/პატარა ასოებს)
         function verifySelectionCaptcha() {
-            const userInput = selectionCaptchaInput.value.toUpperCase();
+            const userInput = selectionCaptchaInput.value; // აღარ ვაქცევთ uppercase-ად
             const isCorrect = userInput === currentSelectionCaptcha;
             
             if (isCorrect) {
@@ -577,104 +597,64 @@
             }
         }
         
-        // ბრუნვადი CAPTCHA-ს ლოგიკა
-// ბრუნვადი CAPTCHA-ს ლოგიკა
-function updateRotatingCaptchaBasedOnInput(currentInput) {
-    // მხოლოდ მაშინ ვცვლით როცა მომხმარებელი აკრეფს (არა როცა შლის)
-    if (currentInput.length > lastRotatingInputValue.length) {
-        const currentLength = currentInput.length;
-        
-        // როცა მომხმარებელი შეიყვანს 3 სიმბოლოს → იცვლება პირველი, მეხუთე და მეშვიდე სიმბოლო
-        if (currentLength === 3) {
-            updateRotatingSymbols([0, 4, 6], [1, 5, 7]);
-        }
-        // როცა მომხმარებელი შეიყვანს 6 სიმბოლოს → იცვლება წინა 3 სიმბოლო
-        else if (currentLength === 6) {
-            updateRotatingSymbols([0, 1, 2], [1, 2, 3]);
-        }
-        // როცა მომხმარებელი შეიყვანს 7 სიმბოლოს → პირველი, მეორე და მეოთხე
-        else if (currentLength === 7) {
-            updateRotatingSymbols([0, 1, 3], [1, 2, 4]);
-        }
-        // როცა მომხმარებელი შეიყვანს 8 სიმბოლოს → იცვლება წინა 7 სიმბოლო
-        else if (currentLength === 8) {
-            updateRotatingSymbols([0, 1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 7]);
-        }
-    }
-    // ჩანაცვლება მხოლოდ 3, 6, 7, 8 პოზიციებზე
-    else if (currentInput.length === lastRotatingInputValue.length && isReplacementAtSpecificPositions(currentInput)) {
-        const changedPosition = findChangedPosition(currentInput);
-        
-        if (changedPosition === 2) { // მე-3 პოზიცია
-            updateRotatingSymbols([0, 4, 6], [1, 5, 7]);
-        }
-        else if (changedPosition === 5) { // მე-6 პოზიცია
-            updateRotatingSymbols([0, 1, 2], [1, 2, 3]);
-        }
-        else if (changedPosition === 6) { // მე-7 პოზიცია
-            updateRotatingSymbols([0, 1, 3], [1, 2, 4]);
-        }
-        else if (changedPosition === 7) { // მე-8 პოზიცია
-            updateRotatingSymbols([0, 1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 7]);
-        }
-    }
-    
-    lastRotatingInputValue = currentInput;
-}
-
-// შეამოწმოს არის თუ არა ეს ჩანაცვლება კონკრეტულ პოზიციებზე (3, 6, 7, 8)
-function isReplacementAtSpecificPositions(currentInput) {
-    if (currentInput.length !== lastRotatingInputValue.length || currentInput === lastRotatingInputValue) {
-        return false;
-    }
-    
-    const changedPosition = findChangedPosition(currentInput);
-    return changedPosition === 2 || changedPosition === 5 || changedPosition === 6 || changedPosition === 7;
-}
-        
-        // შეამოწმოს არის თუ არა ეს ჩანაცვლება კონკრეტულ პოზიციებზე (6, 7, 8)
-        function isReplacementAtSpecificPositions(currentInput) {
-            if (currentInput.length !== lastRotatingInputValue.length || currentInput === lastRotatingInputValue) {
-                return false;
+        // ბრუნვადი CAPTCHA-ს ლოგიკა - ყოველი სიმბოლოს შეყვანაზე ყველა სიმბოლო 1 ბიჯით გადადის
+        function updateRotatingCaptchaBasedOnInput(currentInput) {
+            // ყოველი სიმბოლოს შეყვანაზე ან ჩასწორებაზე ყველა სიმბოლო 1 ბიჯით გადადის
+            if (currentInput.length !== lastRotatingInputValue.length || currentInput !== lastRotatingInputValue) {
+                updateAllSymbolsByOneStep();
             }
             
-            const changedPosition = findChangedPosition(currentInput);
-            return changedPosition === 5 || changedPosition === 6 || changedPosition === 7;
+            lastRotatingInputValue = currentInput;
         }
-        
-        // იპოვოს შეცვლილი პოზიცია
-        function findChangedPosition(currentInput) {
-            for (let i = 0; i < currentInput.length; i++) {
-                if (currentInput[i] !== lastRotatingInputValue[i]) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        
-        function updateRotatingSymbols(positions, steps) {
+
+        // ყველა სიმბოლოს 1 ბიჯით გადაწევა
+        function updateAllSymbolsByOneStep() {
             const symbols = currentRotatingCaptcha.split('');
             
-            for (let i = 0; i < positions.length; i++) {
-                const position = positions[i];
-                const step = steps[i];
-                symbols[position] = getNextSymbol(symbols[position], step);
+            for (let i = 0; i < symbols.length; i++) {
+                // ყველა სიმბოლო 1 ბიჯით გადადის
+                if (symbols[i] >= '0' && symbols[i] <= '9') {
+                    // ციფრი - ვცვლით ციფრებზე (0-9)
+                    symbols[i] = getNextDigit(symbols[i], 1);
+                } else {
+                    // ასო - ვცვლით ასოებზე (a-z)
+                    symbols[i] = getNextLetter(symbols[i], 1);
+                }
             }
             
             currentRotatingCaptcha = symbols.join('');
             rotatingCaptchaDisplay.textContent = currentRotatingCaptcha;
         }
         
-        function getNextSymbol(symbol, step) {
-            const index = allSymbols.indexOf(symbol);
-            if (index === -1) return symbol;
+        function getNextLetter(letter, step) {
+            // ასოებისთვის - ვიყენებთ მხოლოდ a-z ასოებს
+            const letterIndex = letters.indexOf(letter.toLowerCase());
+            if (letterIndex !== -1) {
+                const nextIndex = (letterIndex + step) % letters.length;
+                const nextLetter = letters[nextIndex];
+                
+                // შევინარჩუნოთ დიდი/პატარა ასოების ტიპი
+                if (letter >= 'A' && letter <= 'Z') {
+                    return nextLetter.toUpperCase();
+                } else {
+                    return nextLetter;
+                }
+            }
             
-            return allSymbols[(index + step) % allSymbols.length];
+            // თუ არ არის ასო, ვაბრუნებთ იგივეს
+            return letter;
+        }
+        
+        function getNextDigit(digit, step) {
+            const index = digits.indexOf(digit);
+            if (index === -1) return digit;
+            
+            return digits[(index + step) % digits.length];
         }
         
         // ბრუნვადი CAPTCHA-ს შემოწმება
         function verifyRotatingCaptcha() {
-            const userInput = rotatingCaptchaInput.value.toUpperCase();
+            const userInput = rotatingCaptchaInput.value; // აღარ ვაქცევთ uppercase-ად
             const isCorrect = userInput === currentRotatingCaptcha;
             
             if (isCorrect) {
@@ -726,7 +706,7 @@ function isReplacementAtSpecificPositions(currentInput) {
             
             // ბრუნვადი CAPTCHA-სთვის შეყვანის მონიტორინგი
             rotatingCaptchaInput.addEventListener('input', function() {
-                updateRotatingCaptchaBasedOnInput(this.value.toUpperCase());
+                updateRotatingCaptchaBasedOnInput(this.value);
             });
         });
         
