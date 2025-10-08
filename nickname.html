@@ -203,7 +203,7 @@
             },
             {
                 id: 2,
-                text: "Nickname უნდა შეიცავდეს რიცხვს",
+                text: "Nickname უნდა შეიცავდეს ციფრს",
                 check: (pwd) => /\d/.test(pwd)
             },
             {
@@ -218,7 +218,7 @@
             },
             {
                 id: 5,
-                text: "Nickname რიცხვების ჯამი უნდა იყოს 35",
+                text: "Nickname-ში ციფრების ჯამი უნდა იყოს 35",
                 check: (pwd) => {
                     const numbers = pwd.match(/\d/g);
                     if (!numbers) return false;
@@ -227,7 +227,7 @@
             },
             {
                 id: 6,
-                text: "Nickname უნდა შეიცავდეს კვირის დღევანდელ დღეს",
+                text: "Nickname უნდა შეიცავდეს კვირის დღევანდელ დღეს (მინიმუმ 3 სიმბოლო)",
                 check: (pwd) => {
                     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
                     const today = new Date().getDay();
@@ -262,7 +262,7 @@
                 text: "Nickname უნდა შეიცავდეს რომაულ ციფრს (მინიმუმ 3 სიმბოლო)",
                 check: (pwd) => /[IVXLCDM]{3,}/i.test(pwd)
             },
-            { id: 12, text: "პაროლის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო (გაიტვალისწინე emoji შეიძლება იკავებდეს 2 ადგილს)", check: (pwd) => pwd.length <= 35 },
+            { id: 12, text: "Nickname-ის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო (გაიტვალისწინე emoji შეიძლება იკავებდეს 2 ადგილს)", check: (pwd) => pwd.length <= 35 },
             
             {
                 id: 13,
@@ -278,8 +278,8 @@
             },
             {
                 id: 14,
-                text: "Nickname უნდა შეიცავდეს 2 ხმოვანს ზედიზედ",
-                check: (pwd) => /[aeiouAEIOU]{2,}/.test(pwd)
+                text: "Nickname უნდა შეიცავდეს 4 ხმოვანს ზედიზედ",
+                check: (pwd) => /[aeiouAEIOU]{4,}/.test(pwd)
             },
             {
                 id: 15,
@@ -293,7 +293,7 @@
             },
             {
                 id: 17,
-                text: "Nickname არ უნდა შეიცავდეს ერთსა და იმავე სიმბოლოს 3-ზე მეტჯერ",
+                text: "Nickname არ უნდა შეიცავდეს გადაბმულა ერთსა და იმავე სიმბოლოს 2-ზე მეტჯერ",
                 check: (pwd) => {
                     for (let i = 0; i < pwd.length - 2; i++) {
                         if (pwd[i] === pwd[i+1] && pwd[i] === pwd[i+2]) {
@@ -323,23 +323,18 @@
             },
             {
                 id: 20,
-                text: "Nickname უნდა შეიცავდეს მათემატიკურ ოპერატორს",
-                check: (pwd) => /[+\-*/^=]/.test(pwd)
-            },
-            {
-                id: 21,
                 text: "Nickname უნდა შეიცავდეს ფერის სახელს hex ფორმატში (#RRGGBB)",
                 check: (pwd) => /#[0-9A-Fa-f]{6}/.test(pwd)
             },
             {
-                id: 22,
+                id: 21,
                 text: "Nickname-ში არ უნდა იყოს '41'",
                 check: (pwd) => !pwd.includes("41")
             },
             
             
             {
-                id: 25,
+                id: 22,
                 text: "Nickname უნდა შეიცავდეს 20 ზე მეტ მარტივ 2 ნიშნა რიცხვს",
                 check: (pwd) => {
                     const primes = [ "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67", "71", "73", "79", "83", "89", "97"];
@@ -347,7 +342,7 @@
                 }
             },
             {
-                id: 26,
+                id: 23,
                 text: "Nickname უნდა შეიცავდეს ციფრულ დროს (12:34, 23:59)",
                 check: (pwd) => {
                     const timeRegex = /([01]?[0-9]|2[0-3]):[0-5][0-9]/;
@@ -355,12 +350,12 @@
                 }
             },
             {
-                id: 33,
+                id: 24,
                 text: "Nickname აკრძალულია კოდი RU",
                 check: (pwd) => !pwd.toUpperCase().includes("RU")
             },
             {
-                id: 34,
+                id: 25,
                 text: "Nickname კენტი და ლუწი ციფრები უნდა იყოს თანაბარი რაოდენობის",
                 check: (pwd) => {
                     const numbers = pwd.match(/\d/g);
@@ -371,7 +366,7 @@
                 }
             },
             {
-                id: 35,
+                id: 26,
                 text: "Nickname-ში ციფრების ნამრავლი 0-ზე მეტი უნდა იყოს",
                 check: (pwd) => {
                     const numbers = pwd.match(/\d/g);
@@ -395,12 +390,12 @@
         // Copy-Paste-Cut ბლოკირება
         passwordInput.addEventListener('copy', (e) => {
             e.preventDefault();
-            alert('Copy აკრძალულია! თქვენ უნდა თავად აკრიფოთ პაროლი.');
+            alert('Copy აკრძალულია! თქვენ უნდა თავად აკრიფოთ Nickname.');
         });
 
         passwordInput.addEventListener('paste', (e) => {
             e.preventDefault();
-            alert('Paste აკრძალულია! თქვენ უნდა თავად აკრიფოთ პაროლი.');
+            alert('Paste აკრძალულია! თქვენ უნდა თავად აკრიფოთ Nickname.');
         });
 
         passwordInput.addEventListener('cut', (e) => {
