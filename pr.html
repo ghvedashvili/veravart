@@ -43,33 +43,36 @@
   </style>
 </head>
 <body>
-  <div class="controls">
-    <button id="toggleHeadless">Simulate headless: OFF</button>
-    <button id="printBtn" style="margin-left:8px">Print (Save as PDF)</button>
+
   </div>
 
   <div id="real-content" class="wrap">
     <div>
-      <h1>ეს არის ნამდვილი ვებ-საიტი</h1>
-      <p>როდესაც დააჭერ Print, გამოჩნდება placeholder ტექსტი.</p>
+      
+     <p>💡  ციფრულ სამყარო არც ისე სანდოა </p> 
+     <p>💡  რაც ეკრანზე ჩანს, ყოველთვის სიმართლე არ არის </p> 
+     <p>💡  ძველი მეთოდები ბევრად სანდოა </p> 
+
+
+
+
+      
+      
     </div>
   </div>
 
-  <div id="placeholder">
-    გვერდი დაცულია — სქრინშოტზე ცარიელი ჩანს
-  </div>
+  
 
   <!-- PRINT MODE PLACEHOLDER (ახლა არაა display:none) -->
   <div id="print-placeholder" class="wrap" style="display:none;">
-    ეს გვერდი დაცულია — ბეჭდვაზე არ ჩანს რეალური კონტენტი
+   ყოჩაღ აქ სავარაუდო პასუხი იქნება.
   </div>
 
   <script>
     (function(){
       const real = document.getElementById('real-content');
       const placeholder = document.getElementById('placeholder');
-      const toggleBtn = document.getElementById('toggleHeadless');
-      const printBtn = document.getElementById('printBtn');
+
 
       function showPlaceholder(on) {
         if (on) {
@@ -79,7 +82,7 @@
           real.style.display = 'flex';
           placeholder.style.display = 'none';
         }
-        toggleBtn.textContent = 'Simulate headless: ' + (on ? 'ON' : 'OFF');
+      
       }
 
       const automatedDetected = navigator.webdriver === true ||
@@ -97,7 +100,7 @@
         showPlaceholder(simulated);
       });
 
-      printBtn.addEventListener('click', ()=> window.print());
+     
     })();
   </script>
 </body>
