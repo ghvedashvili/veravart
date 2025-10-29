@@ -43,15 +43,11 @@
   </style>
 </head>
 <body>
-  <div class="controls">
-    <button id="toggleHeadless">Simulate headless: OFF</button>
-    <button id="printBtn" style="margin-left:8px">Print (Save as PDF)</button>
-  </div>
-
   <div id="real-content" class="wrap">
     <div>
-      <h1>ტესტ</h1>
       <p> ციფრულ სამყარო არც ისე სანდოა</p>
+      <p> რაც ეკრანზე ჩანს, ყოველთვის სიმართლე არ არის </p>
+      <p> ძველი მეთოდები ახალ საიდუმლოებებს ამჟღავნებს </p>
     </div>
   </div>
 
@@ -79,7 +75,7 @@
           real.style.display = 'flex';
           placeholder.style.display = 'none';
         }
-        toggleBtn.textContent = 'Simulate headless: ' + (on ? 'ON' : 'OFF');
+        
       }
 
       const automatedDetected = navigator.webdriver === true ||
@@ -97,8 +93,9 @@
         showPlaceholder(simulated);
       });
 
-      printBtn.addEventListener('click', ()=> window.print());
+     
     })();
   </script>
 </body>
 </html>
+
