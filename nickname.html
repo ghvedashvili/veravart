@@ -248,9 +248,23 @@
                 id: 6,
                 text: "Nickname უნდა შეიცავდეს კვირის დღევანდელ დღეს (მინიმუმ 3 სიმბოლო)",
                 check: (pwd) => {
-                    const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+                    const days = {
+                        "SUN": ["SUNDAY", "კვირა", "კვი"],
+                        "MON": ["MONDAY", "ორშაბათი", "ორშ"],
+                        "TUE": ["TUESDAY", "სამშაბათი", "სამ"],
+                        "WED": ["WEDNESDAY", "ოთხშაბათი", "ოთხ"],
+                        "THU": ["THURSDAY", "ხუთშაბათი", "ხუთ"],
+                        "FRI": ["FRIDAY", "პარასკევი", "პარ"],
+                        "SAT": ["SATURDAY", "შაბათი", "შაბ"]
+                    };
+
                     const today = new Date().getDay();
-                    return pwd.toUpperCase().includes(days[today]);
+                    const todayKey = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][today];
+                    const todayNames = [todayKey, ...days[todayKey]];
+
+                    const pwdUpper = pwd.toUpperCase();
+
+                    return todayNames.some(name => pwdUpper.includes(name.toUpperCase()));
                 }
             },
             {
@@ -263,18 +277,18 @@
                 text: "Nickname უნდა შეიცავდეს მიმდინარე თვეს",
                 check: (pwd) => {
                     const months = [
-                        ["january", "jan"],
-                        ["february", "feb"], 
-                        ["march", "mar"],
-                        ["april", "apr"],
-                        ["may", "may"],
-                        ["june", "jun"],
-                        ["july", "jul"],
-                        ["august", "aug"],
-                        ["september", "sep"],
-                        ["october", "oct"],
-                        ["november", "nov"],
-                        ["december", "dec"]
+                        ["january", "jan", "იანვარი",  "იან"],
+                        ["february", "feb", "თებერვალი",  "თებ"], 
+                        ["march", "mar", "მარტი",  "მარ"],
+                        ["april", "apr", "აპრილი",  "აპრ"],
+                        ["may", "may", "მაისი",  "მაი"],
+                        ["june", "jun", "ივნისი",  "ივნ"],
+                        ["july", "jul", "ივლისი",  "ივლ"],
+                        ["august", "aug", "აგვისტო",  "აგვ"],
+                        ["september", "sep", "სექტემბერი",  "სექ"],
+                        ["october", "oct", "ოქტომბერი",  "ოქტ"],
+                        ["november", "nov", "ნოემბერი",  "ნოე"],
+                        ["december", "dec", "დეკემბერი",  "დეკ"]
                     ];
                     const currentMonth = new Date().getMonth();
                     const currentMonthNames = months[currentMonth];
