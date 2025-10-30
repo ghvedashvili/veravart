@@ -41,6 +41,7 @@
         
         .password-container {
             margin-bottom: 30px;
+            position: relative;
         }
         
         #passwordInput {
@@ -51,11 +52,49 @@
             border-radius: 10px;
             outline: none;
             transition: all 0.3s;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        #passwordInput:disabled {
+            background-color: #f5f5f5;
+            border-color: #27ae60;
+            color: #333;
         }
         
         #passwordInput:focus {
             border-color: #e74c3c;
             box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+        }
+        
+        .char-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        .char-counter.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .char-counter.near-limit {
+            color: #e67e22;
+            font-weight: bold;
+        }
+        
+        .char-counter.over-limit {
+            color: #e74c3c;
+            font-weight: bold;
+            animation: pulse 0.5s ease-in-out;
         }
         
         .rules-container {
@@ -86,59 +125,37 @@
             animation: pulse 0.5s ease-in-out;
         }
         
-        @keyframes pulse {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
-        }
-        
-        .win-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .win-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .win-title {
-            font-size: 2rem;
-            color: #27ae60;
-            margin-bottom: 20px;
-        }
-        
-        .win-password {
-            font-size: 1.2rem;
-            background: #f8f9fa;
+        .win-message {
+            margin: 10px 0;
             padding: 15px;
             border-radius: 8px;
-            margin: 20px 0;
-            word-break: break-all;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: #d4f8e8;
+            color: #27ae60;
+            border-left: 6px solid #2ecc71;
+            text-align: center;
+        }
+        
+        .copy-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
         }
         
         .copy-btn {
             background: #3498db;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .copy-btn:hover {
@@ -148,6 +165,25 @@
         .copy-btn.copied {
             background: #27ae60;
         }
+        
+        .copy-feedback {
+            color: #27ae60;
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .copy-feedback.show {
+            opacity: 1;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -155,44 +191,27 @@
     
     <div class="container">
         <div class="password-container">
-    <textarea id="passwordInput" placeholder="შეიყვანეთ Nickname" rows="3"></textarea>
-</div>
+            <textarea id="passwordInput" placeholder="შეიყვანეთ Nickname" rows="3"></textarea>
+            <div class="char-counter" id="charCounter">0/35</div>
+        </div>
         
         <div class="rules-container" id="rulesContainer">
             <!-- წესები აქ დაიჯენერირდება JavaScript-ით -->
         </div>
-    </div>
-
-    <!-- გამარჯვების ფანჯარა -->
-    <div class="win-modal" id="winModal">
-        <div class="win-content">
-            <div class="win-title">🎉 გილოცავთ! 🎉</div>
-            <p>თქვენ წარმატებით შექმენით Nickname!</p>
-            <div class="win-password" id="winPassword"></div>
-            <button class="copy-btn" onclick="copyPassword()">📋 კოპირება</button>
+        
+        <div class="copy-section" id="copySection" style="display: none;">
+            <button class="copy-btn" id="copyBtn">
+                📋 კოპირება
+            </button>
+            <div class="copy-feedback" id="copyFeedback">დაკოპირებულია!</div>
         </div>
     </div>
 
     <script>
         // ყველა ქვეყნის ISO კოდები
         const allCountryCodes = [
-            "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ",
-            "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BQ", "BA", "BW", "BV", "BR", 
-            "IO", "BN", "BG", "BF", "BI", "CV", "KH", "CM", "CA", "KY", "CF", "TD", "CL", "CN", "CX", "CC", 
-            "CO", "KM", "CD", "CG", "CK", "CR", "HR", "CU", "CW", "CY", "CZ", "CI", "DK", "DJ", "DM", "DO",
-            "EC", "EG", "SV", "GQ", "ER", "EE", "SZ", "ET", "FK", "FO", "FJ", "FI", "FR", "GF", "PF", "TF", 
-            "GA", "GM", "GE", "DE", "GH", "GI", "GR", "GL", "GD", "GP", "GU", "GT", "GG", "GN", "GW", "GY",
-            "HT", "HM", "VA", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE", "IM", "IL", "IT", "JM",
-            "JP", "JE", "JO", "KZ", "KE", "KI", "KP", "KR", "KW", "KG", "LA", "LV", "LB", "LS", "LR", "LY",
-            "LI", "LT", "LU", "MO", "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ", "MR", "MU", "YT", "MX",
-            "FM", "MD", "MC", "MN", "ME", "MS", "MA", "MZ", "MM", "NA", "NR", "NP", "NL", "NC", "NZ", "NI",
-            "NE", "NG", "NU", "NF", "MK", "MP", "NO", "OM", "PK", "PW", "PS", "PA", "PG", "PY", "PE", "PH",
-            "PN", "PL", "PT", "PR", "QA", "RO", "RU", "RW", "RE", "BL", "SH", "KN", "LC", "MF", "PM", "VC",
-            "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG", "SX", "SK", "SI", "SB", "SO", "ZA", "GS",
-            "SS", "ES", "LK", "SD", "SR", "SJ", "SE", "CH", "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TK",
-            "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG", "UA", "AE", "GB", "US", "UM", "UY", "UZ", "VU",
-            "VE", "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW"
-        ];
+           "AR",  "AZ", "GE",  "RU"
+           ];
 
         // წესების მასივი
         const rules = [
@@ -218,11 +237,11 @@
             },
             {
                 id: 5,
-                text: "Nickname-ში ციფრების ჯამი უნდა იყოს 35",
+                text: "Nickname-ში ციფრების ჯამი უნდა იყოს 15",
                 check: (pwd) => {
                     const numbers = pwd.match(/\d/g);
                     if (!numbers) return false;
-                    return numbers.reduce((sum, num) => sum + parseInt(num), 0) === 35;
+                    return numbers.reduce((sum, num) => sum + parseInt(num), 0) === 15;
                 }
             },
             {
@@ -235,14 +254,33 @@
                 }
             },
             {
-    id: 7,
-    text: "Nickname უნდა შეიცავდეს ჭადრაკის ნოტაციას ",
-    check: (pwd) => /([a-h][1-8]|[nbrqk][a-h][1-8])/.test(pwd)
-},
+                id: 7,
+                text: "Nickname უნდა შეიცავდეს ჭადრაკის ნოტაციას",
+                check: (pwd) => /([a-h][1-8]|[nbrqk][a-h][1-8])/.test(pwd)
+            },
             {
                 id: 8,
-                text: "Nickname უნდა შეიცავდეს CAPTCHA-ს: Eh14TErc",
-                check: (pwd) => pwd.includes("Eh14TErc")
+                text: "Nickname უნდა შეიცავდეს მიმდინარე თვეს",
+                check: (pwd) => {
+                    const months = [
+                        ["january", "jan"],
+                        ["february", "feb"], 
+                        ["march", "mar"],
+                        ["april", "apr"],
+                        ["may", "may"],
+                        ["june", "jun"],
+                        ["july", "jul"],
+                        ["august", "aug"],
+                        ["september", "sep"],
+                        ["october", "oct"],
+                        ["november", "nov"],
+                        ["december", "dec"]
+                    ];
+                    const currentMonth = new Date().getMonth();
+                    const currentMonthNames = months[currentMonth];
+                    const pwdLower = pwd.toLowerCase();
+                    return currentMonthNames.some(month => pwdLower.includes(month));
+                }
             },
             {
                 id: 9,
@@ -251,7 +289,7 @@
             },
             {
                 id: 10,
-                text: "Nickname უნდა შეიცავდეს ქვეყნის ISO კოდს",
+                text: "Nickname უნდა შეიცავდეს საქართველოს ან მისი მეზობელი ქვეყნის ISO კოდს",
                 check: (pwd) => {
                     const pwdUpper = pwd.toUpperCase();
                     return allCountryCodes.some(country => pwdUpper.includes(country));
@@ -262,8 +300,11 @@
                 text: "Nickname უნდა შეიცავდეს რომაულ ციფრს (მინიმუმ 3 სიმბოლო)",
                 check: (pwd) => /[IVXLCDM]{3,}/i.test(pwd)
             },
-            { id: 12, text: "Nickname-ის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო (გაიტვალისწინე emoji შეიძლება იკავებდეს 2 ადგილს)", check: (pwd) => pwd.length <= 35 },
-            
+            { 
+                id: 12, 
+                text: "Nickname-ის სიგრძე უნდა იყოს მაქსიმუმ 35 სიმბოლო (გაითვალისწინე emoji შეიძლება იკავებდეს 2 ადგილს)", 
+                check: (pwd) => pwd.length <= 35 
+            },
             {
                 id: 13,
                 text: "ყოველი მე-4 ასო უნდა იყოს დიდი",
@@ -278,13 +319,18 @@
             },
             {
                 id: 14,
-                text: "Nickname უნდა შეიცავდეს 4 ხმოვანს ზედიზედ",
-                check: (pwd) => /[aeiouAEIOU]{4,}/.test(pwd)
+                text: "Nickname უნდა შეიცავდეს 3 ხმოვანს ზედიზედ",
+                check: (pwd) => /[aeiouAEIOU]{3,}/.test(pwd)
             },
             {
                 id: 15,
-                text: "Nickname უნდა შეიცავდეს წილადს",
-                check: (pwd) => /\d+\/\d+/.test(pwd)
+                text: "Nickname უნდა შეიცავდეს ათწილადს",
+                check: (pwd) => /\d+\.\d+/.test(pwd)
+            },
+            {
+                id: 27,
+                text: "Nickname უნდა შეიცავდეს არითმეტიკულ მოქმედებას (+, -, *, /)",
+                check: (pwd) => /[\+\-\*\/]/.test(pwd)
             },
             {
                 id: 16,
@@ -293,7 +339,7 @@
             },
             {
                 id: 17,
-                text: "Nickname არ უნდა შეიცავდეს გადაბმულა ერთსა და იმავე სიმბოლოს 2-ზე მეტჯერ",
+                text: "Nickname არ უნდა შეიცავდეს მიმდევრობით ერთსა და იმავე სიმბოლოს 2-ზე მეტჯერ",
                 check: (pwd) => {
                     for (let i = 0; i < pwd.length - 2; i++) {
                         if (pwd[i] === pwd[i+1] && pwd[i] === pwd[i+2]) {
@@ -317,27 +363,29 @@
                 id: 19,
                 text: "Nickname უნდა შეიცავდეს 💧-ს ან 🧂-ს ქიმიური ნაერთის კოდს",
                 check: (pwd) => {
-                    const compounds = ["H2O",  "NaCl"];
-                    return compounds.some(compound => pwd.includes(compound));
+                    const compounds = ["H2O", "NaCl"];
+                    const pwdUpper = pwd.toUpperCase();
+                    return compounds.some(compound => pwdUpper.includes(compound.toUpperCase()));
                 }
             },
             {
                 id: 20,
-                text: "Nickname უნდა შეიცავდეს ფერის სახელს hex ფორმატში (#RRGGBB)",
-                check: (pwd) => /#[0-9A-Fa-f]{6}/.test(pwd)
+                text: "Nickname უნდა შეიცავდეს საქართველოს ავტომობილების სტანდარტულ სარეგისტრაციო ნომერს",
+                check: (pwd) => {
+                    const plateRegex = /[A-Z]{2}-\d{3}-[A-Z]{2}/;
+                    return plateRegex.test(pwd.toUpperCase());
+                }
             },
             {
                 id: 21,
                 text: "Nickname-ში არ უნდა იყოს '41'",
                 check: (pwd) => !pwd.includes("41")
             },
-            
-            
             {
                 id: 22,
-                text: "Nickname უნდა შეიცავდეს 20 ზე მეტ მარტივ 2 ნიშნა რიცხვს",
+                text: "Nickname უნდა შეიცავდეს მარტივ 2 ნიშნა რიცხვს",
                 check: (pwd) => {
-                    const primes = [ "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67", "71", "73", "79", "83", "89", "97"];
+                    const primes = ["11","13", "17","19","23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67", "71", "73", "79", "83", "89", "97"];
                     return primes.some(prime => pwd.includes(prime));
                 }
             },
@@ -351,7 +399,7 @@
             },
             {
                 id: 24,
-                text: "Nickname აკრძალულია კოდი RU",
+                text: "Nickname-ში აკრძალულია კოდი RU (რუსეთი ოკუპანტია)",
                 check: (pwd) => !pwd.toUpperCase().includes("RU")
             },
             {
@@ -379,42 +427,111 @@
         // DOM ელემენტები
         const passwordInput = document.getElementById('passwordInput');
         const rulesContainer = document.getElementById('rulesContainer');
-        const winModal = document.getElementById('winModal');
-        const winPassword = document.getElementById('winPassword');
+        const charCounter = document.getElementById('charCounter');
+        const copySection = document.getElementById('copySection');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyFeedback = document.getElementById('copyFeedback');
 
         // ინიციალიზაცია
         let allRules = [...rules];
         let activeRules = [allRules[0]]; // მხოლოდ პირველი წესი
         let completedRules = new Set();
+        let gameWon = false;
 
-        // Copy-Paste-Cut ბლოკირება
+        // Copy-Paste-Cut ბლოკირება მხოლოდ როცა თამაში მიმდინარეობს
         passwordInput.addEventListener('copy', (e) => {
-            e.preventDefault();
-            alert('Copy აკრძალულია! თქვენ უნდა თავად აკრიფოთ Nickname.');
+            if (!gameWon) {
+                e.preventDefault();
+                alert('Copy აკრძალულია! თქვენ უნდა თავად აკრიფოთ Nickname.');
+            }
         });
 
         passwordInput.addEventListener('paste', (e) => {
-            e.preventDefault();
-            alert('Paste აკრძალულია! თქვენ უნდა თავად აკრიფოთ Nickname.');
+            if (!gameWon) {
+                e.preventDefault();
+                alert('Paste აკრძალულია! თქვენ უნდა თავად აკრიფოთ Nickname.');
+            }
         });
 
         passwordInput.addEventListener('cut', (e) => {
-            e.preventDefault();
-            alert('Cut აკრძალულია!');
+            if (!gameWon) {
+                e.preventDefault();
+                alert('Cut აკრძალულია!');
+            }
         });
 
         // კოპირების ფუნქცია
         function copyPassword() {
             const password = passwordInput.value;
-            navigator.clipboard.writeText(password).then(() => {
-                const copyBtn = document.querySelector('.copy-btn');
-                copyBtn.textContent = '✅ კოპირებული!';
-                copyBtn.classList.add('copied');
-                setTimeout(() => {
-                    copyBtn.textContent = '📋 კოპირება';
-                    copyBtn.classList.remove('copied');
-                }, 2000);
-            });
+            
+            // ვქმნით დროებით input ელემენტს კოპირებისთვის
+            const tempInput = document.createElement('input');
+            tempInput.value = password;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); // მობილურისთვის
+            
+            try {
+                // ვცდილობთ კოპირებას
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyFeedback();
+                }
+            } catch (err) {
+                console.error('კოპირება ვერ მოხერხდა: ', err);
+            }
+            
+            // ვშლით დროებით input-ს
+            document.body.removeChild(tempInput);
+            
+            // ასევე ვცდილობთ ახალი Clipboard API-ის გამოყენებით
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(password).catch(err => {
+                    console.error('Clipboard API error: ', err);
+                });
+            }
+        }
+
+        function showCopyFeedback() {
+            copyBtn.textContent = '✅ კოპირებული!';
+            copyBtn.classList.add('copied');
+            copyFeedback.classList.add('show');
+            
+            setTimeout(() => {
+                copyBtn.textContent = '📋 კოპირება';
+                copyBtn.classList.remove('copied');
+                copyFeedback.classList.remove('show');
+            }, 2000);
+        }
+
+        // სიმბოლოების მთველის განახლება
+        function updateCharCounter() {
+            const password = passwordInput.value;
+            const length = password.length;
+            const maxLength = 35;
+            
+            charCounter.textContent = `${length}/${maxLength}`;
+            
+            // ფერის ცვლილება ლიმიტის მიხედვით
+            charCounter.classList.remove('near-limit', 'over-limit');
+            
+            if (length > maxLength) {
+                charCounter.classList.add('over-limit');
+            } else if (length > maxLength - 5) {
+                charCounter.classList.add('near-limit');
+            }
+        }
+
+        // სიმბოლოების მთველის ხილვადობის კონტროლი
+        function toggleCharCounter() {
+            const rule12Active = activeRules.some(rule => rule.id === 12);
+            
+            if (rule12Active) {
+                charCounter.classList.add('visible');
+                updateCharCounter();
+            } else {
+                charCounter.classList.remove('visible');
+            }
         }
 
         // გამარჯვების შემოწმება
@@ -422,14 +539,30 @@
             return allRules.every(rule => rule.check(password));
         }
 
-        // გამარჯვების ფანჯრის ჩვენება
-        function showWinModal() {
-            winPassword.textContent = passwordInput.value;
-            winModal.style.display = 'flex';
+        // გამარჯვების ფუნქცია
+        function showWinState() {
+            gameWon = true;
+            
+            // გავაუმოქმედოთ textarea
+            passwordInput.disabled = true;
+            
+            // დავამალოთ ყველა წესი
+            rulesContainer.innerHTML = '';
+            
+            // დავამატოთ გილოცვის შეტყობინება
+            const winMessage = document.createElement('div');
+            winMessage.className = 'win-message';
+            winMessage.textContent = 'გილოცავთ! თქვენ წარმატებით შექმენით Nickname!';
+            rulesContainer.appendChild(winMessage);
+            
+            // გამოვაჩინოთ კოპირების სექცია
+            copySection.style.display = 'flex';
         }
 
         // წესების დამატება DOM-ში
         function renderRules() {
+            if (gameWon) return;
+            
             rulesContainer.innerHTML = '';
             
             const password = passwordInput.value;
@@ -454,13 +587,18 @@
             
             // გამარჯვების შემოწმება
             if (checkWin(password)) {
-                showWinModal();
+                showWinState();
             }
         }
 
         // პაროლის შემოწმება
         function checkPassword() {
             const password = passwordInput.value;
+            
+            // განვაახლოთ სიმბოლოების მთველი (მხოლოდ თუ წესი 12 აქტიურია)
+            if (activeRules.some(rule => rule.id === 12)) {
+                updateCharCounter();
+            }
             
             // განვაახლოთ დასრულებული წესები
             allRules.forEach(rule => {
@@ -481,6 +619,8 @@
                 );
                 if (nextRule) {
                     activeRules.push(nextRule);
+                    // განვაახლოთ სიმბოლოების მთველი, თუ ახალი წესია 12
+                    toggleCharCounter();
                 }
             }
             
@@ -489,10 +629,16 @@
 
         // ავტომატური სუბმიტი ყოველი ცვლილებისას
         passwordInput.addEventListener('input', function() {
-            checkPassword();
+            if (!gameWon) {
+                checkPassword();
+            }
         });
 
+        // კოპირების ღილაკის მოვლენა
+        copyBtn.addEventListener('click', copyPassword);
+
         // თამაშის დაწყება
+        toggleCharCounter();
         renderRules();
     </script>
 </body>
