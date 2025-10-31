@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>ინკოგნიტო ტესტი</title>
+<style>
+body { font-family: sans-serif; text-align: center; padding-top: 100px; }
+#msg { font-size: 22px; }
+</style>
+</head>
+<body>
+<div id="msg">ტესტირება მიმდინარეობს...</div>
+
+<script>
+async function isIncognito() {
+  return new Promise(resolve => {
+    const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
+    if (!fs) {
+      resolve(false); // ბრაუზერი არ უჭერს მხარს — ვერ გამოვიცნობთ
+      return;
+    }
+    fs(window.TEMPORARY, 100, () => resolve(false), () => resolve(true));
+  });
+}
+
+(async () => {
+  const incog = await isIncognito();
+  const msg = document.getElementById("msg");
+
+  if (incog) {
+    msg.textContent = "შენ ახლა ინკოგნიტო რეჟიმში ხარ 🕵️‍♂️ — საიდუმლო გრძელდება...";
+    document.body.style.background = "#111";
+    document.body.style.color = "#0f0";
+  } else {
+    msg.textContent = "მოგესალმები ჩვეულ რეჟიმში 🌞";
+    document.body.style.background = "#fafafa";
+    document.body.style.color = "#000";
+  }
+})();
+</script>
+</body>
+</html>
