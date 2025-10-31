@@ -1,226 +1,65 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Incognito + Blow — უკეთესი დეტექცია</title>
-<style>
-  body{font-family: Arial, sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background:#f7fbff;color:#111}
-  #msg{font-size:18px;margin-bottom:12px;text-align:center;max-width:90%}
-  #bubble{width:140px;height:140px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,#6cc1ff 40%,#2a8bd1 100%);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#033;box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .2s,opacity .2s}
-  .popped{transform:scale(.12);opacity:0}
-  #controls{margin-top:14px}
-  button{padding:8px 12px;font-size:14px;margin:6px}
-  small{display:block;margin-top:10px;color:#666}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ინკოგნიტო დეტექცია + ტექსტი</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 50px; }
+    #message { font-size: 24px; color: #333; }
+  </style>
 </head>
 <body>
-  <div id="msg">ინკოგნიტო დეტექცია — ტესტი იწყება...</div>
-  <div id="bubble">ბუშტი</div>
-  <div id="controls">
-    <button id="start">სტარტი</button>
-    <button id="stop" disabled>სტოპ</button>
-  </div>
-  <small id="debug" aria-hidden="true"></small>
+  <div id="message">პირდაპირ ვგეგმავ რეჟიმის შესამოწმებლად…</div>
 
-<script>
-/*
-  ძლიერი ინკოგნიტო დეტექცია — მრავალ ჰეისტიკურ ტესტებზე დაფუძნებული.
-  ყურადღება: არცერთი მეთოდი არ არის 100% — ზოგი ბრაუზერი purposefully ატყუებს.
-  ამ კოდის ამოცანა: გაზარდოს ალბათობა და მოაჩვენოს განსხვავებული UI თუ ინკოგნიტოა.
-*/
+  <script>
+    async function detectIncognitoMode() {
+      // მრავალჰეისტიკური მიდგომა
+      const results = [];
 
-const msg = document.getElementById('msg');
-const debug = document.getElementById('debug');
-const bubble = document.getElementById('bubble');
-const startBtn = document.getElementById('start');
-const stopBtn  = document.getElementById('stop');
+      // ტესტი 1: storageEstimate
+      if (navigator.storage && navigator.storage.estimate) {
+        try {
+          const { quota } = await navigator.storage.estimate();
+          // მაგალითად: ინკოგნიტოში შესაძლოა კვოტა ნაკლები იყოს
+          results.push({ test: 'storageEstimate', value: quota < 120_000_000, raw: quota });
+        } catch(e) {
+          results.push({ test: 'storageEstimate', value: null, error: e.toString() });
+        }
+      } else {
+        results.push({ test: 'storageEstimate', value: null });
+      }
 
-let audioCtx, analyser, dataArray, source, rafId, stream;
-let blowCooldown = false;
-
-startBtn.addEventListener('click', async () => {
-  startBtn.disabled = true;
-  msg.textContent = 'ინკოგნიტო იცნობა... გთხოვ დაიცადო წამი';
-  const inc = await detectIncognitoRobust();
-  if (inc) {
-    msg.textContent = '🕵️ შენ ინკოგნიტოში ხარ — სპეციფიკური ტექსტი აქ.';
-    document.body.style.background = '#0b1220';
-    document.body.style.color = '#cfeffd';
-  } else {
-    msg.textContent = '🌞 ჩვეულ რეჟიმში ხარ — ბუშტი მზადაა შებერვისთვის.';
-    document.body.style.background = '#f7fbff';
-    document.body.style.color = '#111';
-  }
-
-  // შენიშვნა: შემდეგ ვარსებობთ მიკროფონის ფუნქციას სულ ორივე შემთხვევაში
-  await startMic();
-  stopBtn.disabled = false;
-});
-
-stopBtn.addEventListener('click', stopMic);
-
-async function startMic(){
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch (e) {
-    msg.textContent = 'მიკროფონის წვდომა უარყოფილია ან ვერ მოიპოვება.';
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    return;
-  }
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 2048;
-  dataArray = new Float32Array(analyser.fftSize);
-  source = audioCtx.createMediaStreamSource(stream);
-  source.connect(analyser);
-
-  msg.textContent = 'მიკროფონი ON — შუბერის გასაგებად მზად ვარ.';
-  tick();
-}
-
-function stopMic(){
-  if (stream) stream.getTracks().forEach(t=>t.stop());
-  if (audioCtx) audioCtx.close();
-  cancelAnimationFrame(rafId);
-  msg.textContent = 'მიკროფონი გათიშულია.';
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
-  bubble.classList.remove('popped');
-}
-
-function getRMS(buffer){
-  let sum=0;
-  for (let i=0;i<buffer.length;i++){const v=buffer[i]; sum+=v*v;}
-  return Math.sqrt(sum/buffer.length);
-}
-
-function tick(){
-  analyser.getFloatTimeDomainData(dataArray);
-  const rms = getRMS(dataArray);
-  const perc = Math.min(1, rms*500);
-  // ნაცრად ვიზუალი (თქვენ შეგიძლიათ დაამატოთ meter)
-  // debug.innerText = 'RMS: ' + rms.toFixed(4);
-  if (!blowCooldown && rms > 0.03) {
-    // მარტივი ამოცნობა — მკვეთრი ხმა
-    triggerBlow();
-  }
-  rafId = requestAnimationFrame(tick);
-}
-
-function triggerBlow(){
-  blowCooldown = true;
-  bubble.classList.add('popped');
-  setTimeout(()=>{ bubble.classList.remove('popped'); }, 500);
-  setTimeout(()=>{ blowCooldown = false; }, 800);
-}
-
-/* ========================
-  Incognito detection (robust)
-   - აწარმოებს რამდენიმე ტესტს და აბრუნებს {incognito:bool, details:array}
-   - კონსოლში და debug-ში გამოაქვს დეტალები
-   - ზოგი ბრაუზერი შეიძლება უცებ დაასწრო (false negatives), ამიტომ ვიყენებთ ხმას
-   ======================== */
-
-async function detectIncognitoRobust() {
-  const results = [];
-
-  // 1) Storage estimate ტესტი
-  try {
-    if (navigator.storage && navigator.storage.estimate) {
-      const est = await navigator.storage.estimate();
-      const quota = est.quota || 0;
-      // Safari incognito მართლა აბალანსებს მცირე quota — მაგრამ ეს არ აგრესიული ნორმალურ Android-ზე
-      const res = quota < 120_000_000; // 120MB
-      results.push({name:'storageEstimate', value:res, raw:quota});
-    } else {
-      results.push({name:'storageEstimate', value:null, raw:null});
-    }
-  } catch (e) { results.push({name:'storageEstimate', value:true, error:e.toString()}); }
-
-  // 2) IndexedDB ტესტი
-  try {
-    const idb = await new Promise(resolve => {
-      let opened = false;
+      // ტესტი 2: indexedDB
       try {
-        const req = indexedDB.open('incognito_test_' + Date.now());
-        req.onsuccess = ()=> { if(!opened){ opened=true; req.result.close(); resolve(false);} };
-        req.onerror = ()=> { if(!opened){ opened=true; resolve(true);} };
-        req.onupgradeneeded = ()=> { /* წარმატებით ქმნის DB — ნიშნავს ნორმალურ რეჟიმს */ };
-        // ასევე timebound: თუ არ მოდის პასუხი, შევუშვებთ false
-        setTimeout(()=> { if(!opened){ opened=true; resolve(false);} }, 700);
-      } catch(e){ resolve(true); }
-    });
-    results.push({name:'indexedDB', value:idb});
-  } catch(e){ results.push({name:'indexedDB', value:true, error:e.toString()}); }
+        const dbReq = indexedDB.open('test-incognito');
+        let isError = false;
+        dbReq.onerror = () => { isError = true; };
+        dbReq.onsuccess = () => { /* ok */ };
+        await new Promise(r => setTimeout(r, 500));
+        results.push({ test: 'indexedDB', value: isError, raw: isError });
+      } catch(e) {
+        results.push({ test: 'indexedDB', value: true, error: e.toString() });
+      }
 
-  // 3) FileSystem API (webkit) ტესტი (Chrome/Old Safari)
-  try {
-    const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
-    if (fs) {
-      const res = await new Promise(r => {
-        fs(window.TEMPORARY, 100, ()=> r(false), ()=> r(true));
-        // მოკლე timeout fallback
-        setTimeout(()=> r(false), 700);
-      });
-      results.push({name:'fileSystem', value:res});
-    } else results.push({name:'fileSystem', value:null});
-  } catch(e) { results.push({name:'fileSystem', value:true, error:e.toString()}); }
+      // დასკვნა
+      // თუ ერთ-ზე მეტი ტესტი მიუთითებს ინკოგნიტოზე → მივიჩნიოთ “ინკოგნიტო რეჟიმი”
+      let countTrue = results.reduce((c, r) => (r.value === true ? c+1 : c), 0);
+      const isIncognito = (countTrue >= 1);
+      console.log('Incognito detection results:', results, '→', isIncognito);
+      return isIncognito;
+    }
 
-  // 4) Cookie ბადე — ზოგ ინკოგნიტოში third-party cookie მცირდება, მაგრამ ეს მკაფიო არ არის.
-  try {
-    document.cookie = "incogTest=1; SameSite=Lax";
-    const has = document.cookie.indexOf('incogTest=1') !== -1;
-    results.push({name:'cookieWritable', value: !has ? true : false, raw: document.cookie});
-    // წავშალეთ
-    document.cookie = "incogTest=; Max-Age=0";
-  } catch(e) { results.push({name:'cookieWritable', value:null, error:e.toString()}); }
+    (async () => {
+      const messageEl = document.getElementById('message');
+      const incog = await detectIncognitoMode();
 
-  // 5) Performance/navigation timing trick — ინკოგნიტოში ზოგჯერ resource timing არის შეზღუდული
-  try {
-    const perf = performance && performance.getEntries ? performance.getEntries().length : null;
-    results.push({name:'perfEntries', value: perf !== null && perf < 5, raw: perf});
-  } catch(e){ results.push({name:'perfEntries', value:null, error:e.toString()}); }
-
-  // 6) User agent / features quick checks
-  try {
-    // iOS Safari: storage quota small + indexedDB fails often — already covered.
-    const ua = navigator.userAgent || '';
-    results.push({name:'userAgent', value:null, raw: ua});
-  } catch(e){ results.push({name:'userAgent', value:null}); }
-
-  // Decide: თითოეულ პოზიტიურ ტესტს ვანიჭებთ 1 ქულას; ნეიტრალს 0; ნეგატიურს -1
-  let score = 0;
-  const details = [];
-  for (const t of results) {
-    let val = t.value;
-    let point = 0;
-    if (val === true) point = 1;
-    else if (val === false) point = -1;
-    else point = 0;
-    score += point;
-    details.push({test: t.name, value: t.value, raw: t.raw ?? null, point});
-  }
-
-  // debug
-  debug.innerText = 'Detect details: ' + JSON.stringify(details, null, 2);
-
-  // ყურადრება: ადრინდელი გამოცდილებით score >= 1 ხშირად ნიშნავს ინკოგნიტოს, >=2 — ძლიერ ეჭვი.
-  const incognito = score >= 1;
-
-  // ასევე ავბეჭდოთ console-ში (დეველოპერებისთვის)
-  console.log('Incognito detection score:', score, details);
-
-  return incognito;
-}
-
-/* Notes:
- - ზოგი ბრაუზერი (ახალი Safari, newest Chrome) purposefully არ გამოირჩევა — ისინი purposefully აჩერებენ ამ ტესტებს.
- - თუ კონკრეტულად iOS Safari-ზე ვერ იცნობთ, სცადეთ შესთავაზოთ მომხმარებელს მცირე დაშვებული კითხვით
-   (მაგ. "ხართ ინკოგნიტოში?" ბუტონი) — მაგრამ ეს UX-ია.
- - ეს კოდი დაბრუნებს boolean; შეგიძლიათ შეცვალოთ decision thresholds.
-*/
-</script>
+      if (incog) {
+        messageEl.textContent = "შენ INCOGNITO რეჟიმში ხარ — სპეციალური ტექსტი აქაა.";
+      } else {
+        messageEl.textContent = "შენ ჩვეულ რეჟიმში ხარ — ჩვეულებრივი ტექსტი.";
+      }
+    })();
+  </script>
 </body>
 </html>
