@@ -2,37 +2,57 @@
 <html lang="ka">
 <head>
 <meta charset="UTF-8">
-<title>ინკოგნიტო ტესტი</title>
+<title>ინკოგნიტო დეტექცია (ყველა ბრაუზერი)</title>
 <style>
-body { font-family: sans-serif; text-align: center; padding-top: 100px; }
+body {
+  font-family: sans-serif;
+  text-align: center;
+  padding-top: 100px;
+  transition: all 0.3s ease;
+}
 #msg { font-size: 22px; }
 </style>
 </head>
 <body>
-<div id="msg">ტესტირება მიმდინარეობს...</div>
+<div id="msg">მიმდინარეობს ინკოგნიტოს შემოწმება...</div>
 
 <script>
-async function isIncognito() {
+async function detectIncognito() {
+  // 1️⃣ Storage Estimate – Safari და Chrome გვაძლევს განსხვავებულ ქცევას
+  if (navigator.storage && navigator.storage.estimate) {
+    try {
+      const estimate = await navigator.storage.estimate();
+      if (estimate.quota && estimate.quota < 120000000) {
+        // ნაკლები ქოუტა ხშირად ნიშნავს ინკოგნიტოს (განსაკუთრებით iOS-ზე)
+        return true;
+      }
+    } catch {}
+  }
+
+  // 2️⃣ IndexedDB – Safari-ზე incognito ხშირად ბლოკავს
+  let db;
+  try {
+    db = indexedDB.open("testIncognitoDB");
+  } catch (e) {
+    return true;
+  }
   return new Promise(resolve => {
-    const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
-    if (!fs) {
-      resolve(false); // ბრაუზერი არ უჭერს მხარს — ვერ გამოვიცნობთ
-      return;
-    }
-    fs(window.TEMPORARY, 100, () => resolve(false), () => resolve(true));
+    db.onerror = () => resolve(true);
+    db.onsuccess = () => resolve(false);
+    db.onupgradeneeded = () => resolve(false);
   });
 }
 
 (async () => {
-  const incog = await isIncognito();
+  const incog = await detectIncognito();
   const msg = document.getElementById("msg");
 
   if (incog) {
-    msg.textContent = "შენ ახლა ინკოგნიტო რეჟიმში ხარ 🕵️‍♂️ — საიდუმლო გრძელდება...";
-    document.body.style.background = "#111";
+    msg.textContent = "🕵️ შენ ახლა ინკოგნიტო რეჟიმში ხარ — საიდუმლო გრძელდება...";
+    document.body.style.background = "#000";
     document.body.style.color = "#0f0";
   } else {
-    msg.textContent = "მოგესალმები ჩვეულ რეჟიმში 🌞";
+    msg.textContent = "🌞 ჩვეულ რეჟიმში ხარ — ყველაფერი ღიაა.";
     document.body.style.background = "#fafafa";
     document.body.style.color = "#000";
   }
