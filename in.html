@@ -1,65 +1,58 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ინკოგნიტო დეტექცია + ტექსტი</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 50px; }
-    #message { font-size: 24px; color: #333; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PWA / Standalone Mode Detector</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    text-align: center;
+    padding: 50px;
+    transition: background 0.3s, color 0.3s;
+  }
+  .standalone {
+    background-color: #071007;
+    color: #bfffc7;
+  }
+  .browser {
+    background-color: #ffffff;
+    color: #111111;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  p {
+    font-size: 18px;
+  }
+</style>
 </head>
-<body>
-  <div id="message">პირდაპირ ვგეგმავ რეჟიმის შესამოწმებლად…</div>
+<body id="body">
+  <h1>PWA / Standalone Mode Checker</h1>
+  <p id="status">მიმდინარეობს შემოწმება...</p>
 
-  <script>
-    async function detectIncognitoMode() {
-      // მრავალჰეისტიკური მიდგომა
-      const results = [];
+<script>
+function detectStandalone() {
+  const body = document.getElementById('body');
+  const status = document.getElementById('status');
 
-      // ტესტი 1: storageEstimate
-      if (navigator.storage && navigator.storage.estimate) {
-        try {
-          const { quota } = await navigator.storage.estimate();
-          // მაგალითად: ინკოგნიტოში შესაძლოა კვოტა ნაკლები იყოს
-          results.push({ test: 'storageEstimate', value: quota < 120_000_000, raw: quota });
-        } catch(e) {
-          results.push({ test: 'storageEstimate', value: null, error: e.toString() });
-        }
-      } else {
-        results.push({ test: 'storageEstimate', value: null });
-      }
+  // iOS Safari standalone
+  const isIOSStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
 
-      // ტესტი 2: indexedDB
-      try {
-        const dbReq = indexedDB.open('test-incognito');
-        let isError = false;
-        dbReq.onerror = () => { isError = true; };
-        dbReq.onsuccess = () => { /* ok */ };
-        await new Promise(r => setTimeout(r, 500));
-        results.push({ test: 'indexedDB', value: isError, raw: isError });
-      } catch(e) {
-        results.push({ test: 'indexedDB', value: true, error: e.toString() });
-      }
+  // Generic PWA detection (Chrome, Edge, Android)
+  const isPWAMode = window.matchMedia('(display-mode: standalone)').matches;
 
-      // დასკვნა
-      // თუ ერთ-ზე მეტი ტესტი მიუთითებს ინკოგნიტოზე → მივიჩნიოთ “ინკოგნიტო რეჟიმი”
-      let countTrue = results.reduce((c, r) => (r.value === true ? c+1 : c), 0);
-      const isIncognito = (countTrue >= 1);
-      console.log('Incognito detection results:', results, '→', isIncognito);
-      return isIncognito;
-    }
+  if (isIOSStandalone || isPWAMode) {
+    body.className = 'standalone';
+    status.textContent = "🌟 საიტი PWA / Standalone რეჟიმშია!";
+  } else {
+    body.className = 'browser';
+    status.textContent = "⚪ საიტი ჩვეულებრივი ბრაუზერშია.";
+  }
+}
 
-    (async () => {
-      const messageEl = document.getElementById('message');
-      const incog = await detectIncognitoMode();
-
-      if (incog) {
-        messageEl.textContent = "შენ INCOGNITO რეჟიმში ხარ — სპეციალური ტექსტი აქაა.";
-      } else {
-        messageEl.textContent = "შენ ჩვეულ რეჟიმში ხარ — ჩვეულებრივი ტექსტი.";
-      }
-    })();
-  </script>
+// Run detection
+detectStandalone();
+</script>
 </body>
 </html>
