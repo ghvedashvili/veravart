@@ -3,476 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incognito/Private Mode Detector</title>
+    <title>ტექსტის ფერები</title>
     <style>
         body {
+            background-color: white;
             font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        
+        .container {
             max-width: 800px;
-            margin: 50px auto;
+            margin: 0 auto;
+            background-color: white;
             padding: 20px;
-            background: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .info-box {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .result {
-            text-align: center;
-            padding: 40px;
-            border-radius: 15px;
-            margin: 20px 0;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .incognito {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .normal {
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-            color: white;
-        }
-        .unknown {
-            background: linear-gradient(135deg, #ff9800 0%, #FFC107 100%);
-            color: white;
-        }
-        .icon {
-            font-size: 64px;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-        }
-        .info-item:last-child {
-            border-bottom: none;
-        }
-        .label {
-            font-weight: bold;
-            color: #333;
-        }
-        .value {
-            color: #666;
-        }
+        
         h1 {
             color: #333;
             text-align: center;
         }
-        .badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .badge-yes {
-            background: #f44336;
-            color: white;
-        }
-        .badge-no {
-            background: #4CAF50;
-            color: white;
-        }
-        .badge-maybe {
-            background: #ff9800;
-            color: white;
-        }
-        .tip {
-            background: #e3f2fd;
-            border: 1px solid #2196F3;
-            padding: 15px;
-            border-radius: 8px;
+        
+        .text-section {
             margin: 20px 0;
-            color: #1565c0;
-            font-size: 14px;
+            padding: 15px;
+            border-radius: 5px;
         }
-        .section-title {
-            font-size: 18px;
+        
+        .visible-text {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .invisible-text {
+            background-color: white;
+            color: white; /* ეს ტექსტი არ ჩანს თეთრ ფონზე */
+            border: 1px dashed #ccc;
+        }
+        
+        .highlighted {
+            background-color: #ffeb3b;
+            padding: 5px;
+        }
+        
+        .colorful-text {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             font-weight: bold;
-            color: #667eea;
-            margin: 20px 0 10px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        .method {
-            background: #f9f9f9;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        .method-name {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-        .method-result {
-            color: #666;
-            font-size: 14px;
+            font-size: 1.2em;
         }
     </style>
 </head>
 <body>
-    <h1>🕵️ Incognito/Private Mode Detector</h1>
-    
-    <div class="info-box">
-        <div id="mainResult" class="loading">
-            <div style="font-size: 48px;">🔍</div>
-            <p>ვამოწმებ...</p>
+    <div class="container">
+        <h1>ტექსტის ფერების დემონსტრაცია</h1>
+        
+        <div class="text-section visible-text">
+            <h2>ეს ტექსტი კარგად ჩანს</h2>
+            <p>ეს არის ნორმალური ტექსტი, რომელიც კარგად ჩანს თეთრ ფონზე.</p>
+        </div>
+        
+        <div class="text-section invisible-text">
+            <h2>ეს ტექსტი თეთრია და არ ჩანს</h2>
+            <p>ეს ტექსტი თეთრი ფერისაა თეთრ ფონზე, ამიტომ ის პრაქტიკულად უხილავია. მხოლოდ მის გარშემო არსებული ჩარჩო მიგვანიშნებს, რომ აქ რაღაც ტექსტია.</p>
+        </div>
+        
+        <div class="text-section visible-text">
+            <h2>კიდევ ერთი ხილული ტექსტი</h2>
+            <p>ეს არის ჩვეულებრივი შავი ტექსტი თეთრ ფონზე, რომელიც კარგად იკითხება.</p>
+            <p class="highlighted">ეს ტექსტი გამოკვეთილია ყვითელი ფონით.</p>
+        </div>
+        
+        <div class="text-section">
+            <h2 class="colorful-text">ფერადი გრადიენტის ტექსტი</h2>
+            <p>ეს ტექსტი აქვს ფერადი გრადიენტი და ძალიან კარგად გამოიყურება.</p>
         </div>
     </div>
-
-    <div class="info-box">
-        <div class="section-title">🔬 გამოყენებული მეთოდები</div>
-        <div id="methodsInfo"></div>
-    </div>
-
-    <div class="info-box">
-        <div class="section-title">📊 დამატებითი ინფორმაცია</div>
-        <div id="additionalInfo"></div>
-    </div>
-
-    <div class="tip">
-        <strong>💡 როგორ მუშაობს:</strong><br>
-        • ბრაუზერები ზღუდავენ ზოგიერთ API-ს incognito რეჟიმში<br>
-        • ვამოწმებთ Storage Quota, IndexedDB, FileSystem და სხვა APIs<br>
-        • სხვადასხვა ბრაუზერი სხვადასხვა ნიშნებს იძლევა<br>
-        • 100% სიზუსტე შეუძლებელია, მაგრამ დიდი ალბათობით ვადგენთ
-    </div>
-
-    <script>
-        const detectionMethods = [];
-        let finalResult = 'unknown';
-
-        // Method 1: Storage Quota API
-        async function checkStorageQuota() {
-            try {
-                if ('storage' in navigator && 'estimate' in navigator.storage) {
-                    const {quota, usage} = await navigator.storage.estimate();
-                    
-                    // Incognito-ში quota ძალიან მცირეა
-                    const isLowQuota = quota < 120000000; // < 120MB
-                    const quotaMB = (quota / 1024 / 1024).toFixed(2);
-                    
-                    detectionMethods.push({
-                        name: 'Storage Quota API',
-                        result: isLowQuota ? 'incognito' : 'normal',
-                        details: `Quota: ${quotaMB} MB`,
-                        confidence: 'high',
-                        icon: isLowQuota ? '🔴' : '🟢'
-                    });
-                    
-                    return isLowQuota ? 'incognito' : 'normal';
-                }
-            } catch (e) {
-                detectionMethods.push({
-                    name: 'Storage Quota API',
-                    result: 'error',
-                    details: 'არ მუშაობს',
-                    confidence: 'none',
-                    icon: '⚠️'
-                });
-            }
-            return 'unknown';
-        }
-
-        // Method 2: IndexedDB
-        async function checkIndexedDB() {
-            try {
-                if ('indexedDB' in window) {
-                    // Incognito-ში IndexedDB ხშირად შეზღუდულია
-                    const request = indexedDB.open('test');
-                    
-                    return new Promise((resolve) => {
-                        const timeout = setTimeout(() => {
-                            detectionMethods.push({
-                                name: 'IndexedDB',
-                                result: 'incognito',
-                                details: 'დაბლოკილია ან შეზღუდული',
-                                confidence: 'medium',
-                                icon: '🔴'
-                            });
-                            resolve('incognito');
-                        }, 100);
-                        
-                        request.onsuccess = () => {
-                            clearTimeout(timeout);
-                            detectionMethods.push({
-                                name: 'IndexedDB',
-                                result: 'normal',
-                                details: 'მუშაობს ნორმალურად',
-                                confidence: 'medium',
-                                icon: '🟢'
-                            });
-                            resolve('normal');
-                        };
-                        
-                        request.onerror = () => {
-                            clearTimeout(timeout);
-                            detectionMethods.push({
-                                name: 'IndexedDB',
-                                result: 'incognito',
-                                details: 'შეცდომა - შესაძლოა incognito',
-                                confidence: 'medium',
-                                icon: '🔴'
-                            });
-                            resolve('incognito');
-                        };
-                    });
-                }
-            } catch (e) {
-                detectionMethods.push({
-                    name: 'IndexedDB',
-                    result: 'error',
-                    details: 'არ მუშაობს',
-                    confidence: 'none',
-                    icon: '⚠️'
-                });
-            }
-            return 'unknown';
-        }
-
-        // Method 3: RequestFileSystem (Chrome specific)
-        function checkFileSystem() {
-            return new Promise((resolve) => {
-                if ('webkitRequestFileSystem' in window) {
-                    window.webkitRequestFileSystem(
-                        window.TEMPORARY,
-                        1,
-                        () => {
-                            detectionMethods.push({
-                                name: 'FileSystem API',
-                                result: 'normal',
-                                details: 'ხელმისაწვდომია',
-                                confidence: 'high',
-                                icon: '🟢'
-                            });
-                            resolve('normal');
-                        },
-                        () => {
-                            detectionMethods.push({
-                                name: 'FileSystem API',
-                                result: 'incognito',
-                                details: 'დაბლოკილია',
-                                confidence: 'high',
-                                icon: '🔴'
-                            });
-                            resolve('incognito');
-                        }
-                    );
-                } else {
-                    detectionMethods.push({
-                        name: 'FileSystem API',
-                        result: 'not-available',
-                        details: 'არ არის მხარდაჭერილი',
-                        confidence: 'none',
-                        icon: '⚪'
-                    });
-                    resolve('unknown');
-                }
-            });
-        }
-
-        // Method 4: LocalStorage persistence
-        function checkLocalStorage() {
-            try {
-                const testKey = '_incognito_test_' + Date.now();
-                localStorage.setItem(testKey, '1');
-                const retrieved = localStorage.getItem(testKey);
-                localStorage.removeItem(testKey);
-                
-                if (retrieved === '1') {
-                    detectionMethods.push({
-                        name: 'LocalStorage',
-                        result: 'normal',
-                        details: 'მუშაობს ნორმალურად',
-                        confidence: 'low',
-                        icon: '🟢'
-                    });
-                    return 'normal';
-                } else {
-                    detectionMethods.push({
-                        name: 'LocalStorage',
-                        result: 'incognito',
-                        details: 'არ ინახავს მონაცემებს',
-                        confidence: 'medium',
-                        icon: '🔴'
-                    });
-                    return 'incognito';
-                }
-            } catch (e) {
-                detectionMethods.push({
-                    name: 'LocalStorage',
-                    result: 'blocked',
-                    details: 'დაბლოკილია',
-                    confidence: 'medium',
-                    icon: '🔴'
-                });
-                return 'incognito';
-            }
-        }
-
-        // Method 5: Chrome specific - window.chrome check
-        function checkChromePrivate() {
-            if ('chrome' in window && 'runtime' in chrome) {
-                // Chrome-ში incognito რეჟიმში chrome.runtime განსხვავებულია
-                detectionMethods.push({
-                    name: 'Chrome Runtime',
-                    result: 'detected',
-                    details: 'Chrome browser detected',
-                    confidence: 'low',
-                    icon: '🔵'
-                });
-            }
-        }
-
-        // დამატებითი ინფორმაცია
-        function getAdditionalInfo() {
-            const info = [];
-            
-            // Cookies
-            try {
-                const cookiesEnabled = navigator.cookieEnabled;
-                info.push({
-                    label: 'Cookies',
-                    value: cookiesEnabled ? 'ჩართულია' : 'გამორთულია',
-                    icon: cookiesEnabled ? '🍪' : '🚫'
-                });
-            } catch (e) {}
-            
-            // Do Not Track
-            const dnt = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-            info.push({
-                label: 'Do Not Track',
-                value: dnt === '1' ? 'ჩართულია' : 'გამორთულია',
-                icon: dnt === '1' ? '🔒' : '🔓'
-            });
-            
-            // Service Worker
-            const swSupported = 'serviceWorker' in navigator;
-            info.push({
-                label: 'Service Worker',
-                value: swSupported ? 'მხარდაჭერილია' : 'არ არის',
-                icon: swSupported ? '⚙️' : '❌'
-            });
-            
-            // Storage Estimate Support
-            const storageSupported = 'storage' in navigator && 'estimate' in navigator.storage;
-            info.push({
-                label: 'Storage Estimate API',
-                value: storageSupported ? 'მხარდაჭერილია' : 'არ არის',
-                icon: storageSupported ? '💾' : '❌'
-            });
-            
-            return info;
-        }
-
-        // ყველა მეთოდის გაშვება
-        async function detectIncognito() {
-            // Run all detection methods
-            await Promise.all([
-                checkStorageQuota(),
-                checkIndexedDB(),
-                checkFileSystem()
-            ]);
-            
-            checkLocalStorage();
-            checkChromePrivate();
-            
-            // ანალიზი
-            const incognitoCount = detectionMethods.filter(m => m.result === 'incognito').length;
-            const normalCount = detectionMethods.filter(m => m.result === 'normal').length;
-            
-            // გადაწყვეტილება
-            if (incognitoCount > normalCount) {
-                finalResult = 'incognito';
-            } else if (normalCount > incognitoCount) {
-                finalResult = 'normal';
-            } else {
-                finalResult = 'unknown';
-            }
-            
-            displayResults();
-        }
-
-        // შედეგების ჩვენება
-        function displayResults() {
-            const mainDiv = document.getElementById('mainResult');
-            const methodsDiv = document.getElementById('methodsInfo');
-            const additionalDiv = document.getElementById('additionalInfo');
-            
-            // მთავარი შედეგი
-            let icon, text, className, description;
-            
-            if (finalResult === 'incognito') {
-                icon = '🕵️';
-                text = 'Incognito/Private რეჟიმი';
-                className = 'incognito';
-                description = 'თქვენ ალბათ იყენებთ Incognito/Private Browsing რეჟიმს';
-            } else if (finalResult === 'normal') {
-                icon = '👤';
-                text = 'ნორმალური რეჟიმი';
-                className = 'normal';
-                description = 'თქვენ იყენებთ ჩვეულებრივ ბრაუზერის რეჟიმს';
-            } else {
-                icon = '❓';
-                text = 'გაურკვეველი';
-                className = 'unknown';
-                description = 'ვერ მოხერხდა ზუსტი განსაზღვრა';
-            }
-            
-            mainDiv.className = 'result ' + className;
-            mainDiv.innerHTML = `
-                <div class="icon">${icon}</div>
-                <div>${text}</div>
-                <div style="font-size: 16px; margin-top: 10px; font-weight: normal;">${description}</div>
-            `;
-            
-            // მეთოდების დეტალები
-            let methodsHtml = '';
-            detectionMethods.forEach(method => {
-                let badge = 'badge-maybe';
-                if (method.result === 'incognito' || method.result === 'blocked') badge = 'badge-yes';
-                if (method.result === 'normal') badge = 'badge-no';
-                
-                methodsHtml += `
-                    <div class="method">
-                        <div class="method-name">${method.icon} ${method.name}</div>
-                        <div class="method-result">
-                            ${method.details}
-                            ${method.confidence !== 'none' ? `<span style="color: #999;"> (${method.confidence} confidence)</span>` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-            methodsDiv.innerHTML = methodsHtml;
-            
-            // დამატებითი ინფო
-            const additionalInfo = getAdditionalInfo();
-            let additionalHtml = '';
-            additionalInfo.forEach(info => {
-                additionalHtml += `
-                    <div class="info-item">
-                        <span class="label">${info.icon} ${info.label}:</span>
-                        <span class="value">${info.value}</span>
-                    </div>
-                `;
-            });
-            additionalDiv.innerHTML = additionalHtml;
-        }
-
-        // დაწყება
-        detectIncognito();
-    </script>
 </body>
 </html>
