@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>თამაში - Private Mode დეტექტორით</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .private-warning {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .private-warning h1 {
+            color: #e74c3c;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .private-warning .icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .private-warning p {
+            color: #555;
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .game-container {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .game-container h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .game-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .score {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .game-box {
+            width: 100px;
+            height: 100px;
+            background: #667eea;
+            margin: 20px auto;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-box:hover {
+            transform: scale(1.1) rotate(5deg);
+            background: #764ba2;
+        }
+
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            font-size: 2em;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="loading">🔍 შემოწმება...</div>
+    </div>
+
+    <script>
+        // Private Mode დეტექტორი
+        async function detectPrivateMode() {
+            // Safari localStorage მეთოდი
+            try {
+                localStorage.setItem('test', '1');
+                localStorage.removeItem('test');
+            } catch (e) {
+                return true;
+            }
+
+            // დამატებითი შემოწმება IndexedDB-ით
+            try {
+                await new Promise((resolve, reject) => {
+                    const db = indexedDB.open('test');
+                    db.onsuccess = () => {
+                        indexedDB.deleteDatabase('test');
+                        resolve();
+                    };
+                    db.onerror = () => reject();
+                });
+            } catch (e) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // გაფრთხილების ეკრანი
+        function showPrivateWarning() {
+            const container = document.getElementById('mainContainer');
+            container.innerHTML = `
+                <div class="private-warning">
+                    <div class="icon">🔒</div>
+                    <h1>Private Browsing რეჟიმი</h1>
+                    <p>თქვენ იყენებთ Private/Incognito რეჟიმს.</p>
+                    <p>ეს თამაში მოითხოვს მონაცემების შენახვას localStorage-ში.</p>
+                    <p><strong>გთხოვთ გახსენით ნორმალურ რეჟიმში!</strong></p>
+                    <br>
+                    <p style="font-size: 0.9em; color: #888;">
+                        Safari: გახსენით ახალი ჩვეულებრივი ტაბი<br>
+                        Chrome: გამოდით Incognito-დან<br>
+                        Firefox: გამოდით Private Window-დან
+                    </p>
+                </div>
+            `;
+        }
+
+        // თამაშის ინიციალიზაცია
+        function initGame() {
+            const container = document.getElementById('mainContainer');
+            
+            // სტატუსის ინდიკატორი
+            const status = document.createElement('div');
+            status.className = 'status';
+            status.textContent = '✅ ნორმალური რეჟიმი';
+            document.body.appendChild(status);
+
+            // ქულის ჩატვირთვა
+            let score = parseInt(localStorage.getItem('gameScore')) || 0;
+            let clicks = 0;
+
+            container.innerHTML = `
+                <div class="game-container">
+                    <h1>🎮 მარტივი თამაში</h1>
+                    <div class="game-area">
+                        <div class="score">ქულა: <span id="score">${score}</span></div>
+                        <div class="score" style="font-size: 1em;">დაჭერები: <span id="clicks">${clicks}</span></div>
+                        <div class="game-box" id="gameBox">🎯</div>
+                        <p style="color: #666; margin-top: 20px;">დააჭირე ყუთს ქულების მისაღებად!</p>
+                    </div>
+                    <button onclick="resetGame()">თავიდან დაწყება</button>
+                </div>
+            `;
+
+            // თამაშის ლოგიკა
+            const gameBox = document.getElementById('gameBox');
+            const scoreElement = document.getElementById('score');
+            const clicksElement = document.getElementById('clicks');
+
+            gameBox.addEventListener('click', () => {
+                score += 10;
+                clicks++;
+                
+                // შენახვა localStorage-ში
+                localStorage.setItem('gameScore', score);
+                
+                scoreElement.textContent = score;
+                clicksElement.textContent = clicks;
+
+                // ემოჯის შეცვლა
+                const emojis = ['🎯', '⭐', '🌟', '✨', '💫', '🎪', '🎨', '🎭'];
+                gameBox.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            });
+        }
+
+        // თამაშის რესეტი
+        function resetGame() {
+            if (confirm('დარწმუნებული ხარ, რომ გინდა თავიდან დაწყება?')) {
+                localStorage.setItem('gameScore', '0');
+                location.reload();
+            }
+        }
+
+        // მთავარი ფუნქცია
+        async function init() {
+            const isPrivate = await detectPrivateMode();
+            
+            if (isPrivate) {
+                showPrivateWarning();
+            } else {
+                initGame();
+            }
+        }
+
+        // გვერდის ჩატვირთვისას
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
