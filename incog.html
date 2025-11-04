@@ -3,356 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>თამაში - Private Mode დეტექტორით</title>
+    <title>ინკოგნიტო რეჟიმის შემოწმება</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 90%;
+            font-family: 'Arial', sans-serif;
             text-align: center;
+            padding: 50px;
+            transition: background-color 0.3s ease;
         }
-
-        .private-warning {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        .private-warning h1 {
-            color: #e74c3c;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        .private-warning .icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-
-        .private-warning p {
-            color: #555;
-            font-size: 1.2em;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .game-container {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        .game-container h1 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 30px;
-        }
-
-        .game-area {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px 0;
-        }
-
-        .score {
-            font-size: 1.5em;
+        
+        .normal-mode {
+            background-color: #f0f8ff;
             color: #333;
-            margin-bottom: 20px;
-            font-weight: bold;
         }
-
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2em;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin: 10px;
+        
+        .incognito-mode {
+            background-color: #2d2d2d;
+            color: #fff;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .game-box {
-            width: 100px;
-            height: 100px;
-            background: #667eea;
-            margin: 20px auto;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3em;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .game-box:hover {
-            transform: scale(1.1) rotate(5deg);
-            background: #764ba2;
-        }
-
-        .status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #27ae60;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .status.private {
-            background: #e74c3c;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .loading {
-            font-size: 2em;
-            color: #667eea;
-        }
-
-        .debug-info {
-            background: #f0f0f0;
-            padding: 15px;
+        
+        .message {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 20px;
             border-radius: 10px;
-            margin-top: 20px;
-            font-size: 0.85em;
-            text-align: left;
-            color: #666;
+        }
+        
+        .normal-message {
+            background-color: #e8f5e8;
+            border: 2px solid #4caf50;
+        }
+        
+        .incognito-message {
+            background-color: #444;
+            border: 2px solid #ff9800;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="mainContainer">
-        <div class="loading">🔍 შემოწმება...</div>
+    <div id="content">
+        <h1>რეჟიმის შემოწმება</h1>
+        <div id="message" class="message"></div>
+        <p id="details"></p>
     </div>
 
     <script>
-        // Safari Private Mode დეტექტორი - გაუმჯობესებული ვერსია
-        async function detectPrivateMode() {
-            const tests = {
-                localStorage: false,
-                indexedDB: false,
-                serviceWorker: false,
-                storageQuota: false
-            };
-
-            // ტესტი 1: localStorage
-            try {
-                const testKey = '__private_test_' + Math.random();
-                localStorage.setItem(testKey, '1');
-                localStorage.removeItem(testKey);
-                tests.localStorage = false; // მუშაობს
-            } catch (e) {
-                tests.localStorage = true; // Private mode
-                return { isPrivate: true, tests };
+        function checkIncognitoMode() {
+            const messageElement = document.getElementById('message');
+            const detailsElement = document.getElementById('details');
+            const body = document.body;
+            
+            // ინკოგნიტო რეჟიმის შემოწმების სხვადასხვა მეთოდი
+            let isIncognito = false;
+            
+            // მეთოდი 1: window.ctrl-ის შემოწმება
+            if (window.ctrl) {
+                isIncognito = true;
             }
-
-            // ტესტი 2: IndexedDB
-            try {
-                const dbTest = indexedDB.open('__test_' + Math.random());
-                await new Promise((resolve, reject) => {
-                    dbTest.onerror = () => {
-                        tests.indexedDB = true;
-                        reject();
-                    };
-                    dbTest.onsuccess = () => {
-                        indexedDB.deleteDatabase(dbTest.result.name);
-                        tests.indexedDB = false;
-                        resolve();
-                    };
-                });
-            } catch (e) {
-                tests.indexedDB = true;
+            
+            // მეთODI 2: FileSystem API-ის შემოწმება
+            else if (window.RequestFileSystem || window.webkitRequestFileSystem) {
+                if (!window.RequestFileSystem && !window.webkitRequestFileSystem) {
+                    isIncognito = true;
+                }
             }
-
-            // ტესტი 3: Storage Quota (Safari Private-ში ძალიან მცირეა)
-            if ('storage' in navigator && 'estimate' in navigator.storage) {
-                try {
-                    const estimate = await navigator.storage.estimate();
-                    // Safari Private mode-ში quota ძალიან მცირეა (~10MB)
-                    if (estimate.quota && estimate.quota < 120000000) {
-                        tests.storageQuota = true;
+            
+            // მეთოდი 3: quota-ის შემოწმება
+            else if (navigator.storage && navigator.storage.estimate) {
+                // ეს მეთოდი ასინქრონულია, ამიტომ ვიყენებთ Promise-ს
+                navigator.storage.estimate().then(estimate => {
+                    if (estimate.quota < 120000000) { // დაახლოებით 120MB
+                        isIncognito = true;
+                        updateDisplay(isIncognito);
                     }
-                } catch (e) {
-                    tests.storageQuota = true;
-                }
+                });
             }
-
-            // ტესტი 4: Service Worker
-            if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.getRegistrations();
-                    tests.serviceWorker = false;
-                } catch (e) {
-                    tests.serviceWorker = true;
-                }
-            }
-
-            // თუ რომელიმე ტესტი დადებითია - Private mode
-            const isPrivate = tests.indexedDB || tests.storageQuota || tests.serviceWorker;
             
-            return { isPrivate, tests };
-        }
-
-        // გაფრთხილების ეკრანი
-        function showPrivateWarning(testResults) {
-            const container = document.getElementById('mainContainer');
-            container.innerHTML = `
-                <div class="private-warning">
-                    <div class="icon">🔒</div>
-                    <h1>Private Browsing რეჟიმი</h1>
-                    <p>თქვენ იყენებთ Private/Incognito რეჟიმს.</p>
-                    <p>ეს თამაში მოითხოვს მონაცემების შენახვას.</p>
-                    <p><strong>გთხოვთ გახსენით ნორმალურ რეჟიმში!</strong></p>
-                    <br>
-                    <p style="font-size: 0.9em; color: #888;">
-                        Safari: გახსენით ახალი ჩვეულებრივი ტაბი<br>
-                        Chrome: გამოდით Incognito-დან<br>
-                        Firefox: გამოდით Private Window-დან
-                    </p>
-                    <div class="debug-info">
-                        <strong>დეტექციის შედეგები:</strong><br>
-                        localStorage: ${testResults.localStorage ? '❌ დაბლოკილი' : '✅ მუშაობს'}<br>
-                        IndexedDB: ${testResults.indexedDB ? '❌ დაბლოკილი' : '✅ მუშაობს'}<br>
-                        Storage Quota: ${testResults.storageQuota ? '❌ შეზღუდული' : '✅ ნორმალური'}<br>
-                        Service Worker: ${testResults.serviceWorker ? '❌ დაბლოკილი' : '✅ მუშაობს'}
-                    </div>
-                </div>
-            `;
-        }
-
-        // თამაშის ინიციალიზაცია
-        function initGame(testResults) {
-            const container = document.getElementById('mainContainer');
+            updateDisplay(isIncognito);
             
-            // სტატუსის ინდიკატორი
-            const status = document.createElement('div');
-            status.className = 'status';
-            status.textContent = '✅ ნორმალური რეჟიმი';
-            document.body.appendChild(status);
-
-            // ქულის ჩატვირთვა
-            let score = parseInt(localStorage.getItem('gameScore')) || 0;
-            let clicks = 0;
-
-            container.innerHTML = `
-                <div class="game-container">
-                    <h1>🎮 მარტივი თამაში</h1>
-                    <div class="game-area">
-                        <div class="score">ქულა: <span id="score">${score}</span></div>
-                        <div class="score" style="font-size: 1em;">დაჭერები: <span id="clicks">${clicks}</span></div>
-                        <div class="game-box" id="gameBox">🎯</div>
-                        <p style="color: #666; margin-top: 20px;">დააჭირე ყუთს ქულების მისაღებად!</p>
-                    </div>
-                    <button onclick="resetGame()">თავიდან დაწყება</button>
-                    <div class="debug-info">
-                        <strong>სისტემის ინფო:</strong><br>
-                        Storage Quota: ${testResults.storageQuota ? 'შეზღუდული' : 'ნორმალური'}<br>
-                        localStorage: მუშაობს ✅<br>
-                        IndexedDB: მუშაობს ✅
-                    </div>
-                </div>
-            `;
-
-            // თამაშის ლოგიკა
-            const gameBox = document.getElementById('gameBox');
-            const scoreElement = document.getElementById('score');
-            const clicksElement = document.getElementById('clicks');
-
-            gameBox.addEventListener('click', () => {
-                score += 10;
-                clicks++;
-                
-                // შენახვა localStorage-ში
-                localStorage.setItem('gameScore', score);
-                
-                scoreElement.textContent = score;
-                clicksElement.textContent = clicks;
-
-                // ემოჯის შეცვლა
-                const emojis = ['🎯', '⭐', '🌟', '✨', '💫', '🎪', '🎨', '🎭'];
-                gameBox.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-            });
-        }
-
-        // თამაშის რესეტი
-        function resetGame() {
-            if (confirm('დარწმუნებული ხარ, რომ გინდა თავიდან დაწყება?')) {
-                localStorage.setItem('gameScore', '0');
-                location.reload();
-            }
-        }
-
-        // მთავარი ფუნქცია
-        async function init() {
-            try {
-                const result = await detectPrivateMode();
-                
-                console.log('Detection results:', result);
-                
-                if (result.isPrivate) {
-                    showPrivateWarning(result.tests);
+            function updateDisplay(incognito) {
+                if (incognito) {
+                    // ინკოგნიტო რეჟიმი
+                    body.className = 'incognito-mode';
+                    messageElement.className = 'message incognito-message';
+                    messageElement.innerHTML = '🕶️ <strong>ინკოგნიტო რეჟიმი</strong>';
+                    detailsElement.innerHTML = 'თქვენ იმყოფებით ინკოგნიტო/პრივატურ რეჟიმში.<br>თქვენი ქმედებები არ ინახება ისტორიაში.';
                 } else {
-                    initGame(result.tests);
+                    // ნორმალური რეჟიმი
+                    body.className = 'normal-mode';
+                    messageElement.className = 'message normal-message';
+                    messageElement.innerHTML = '🌐 <strong>ნორმალური რეჟიმი</strong>';
+                    detailsElement.innerHTML = 'თქვენ იმყოფებით ნორმალურ რეჟიმში.<br>ბრაუზერი ინახავს ისტორიას და cookies-ებს.';
                 }
-            } catch (e) {
-                console.error('Detection error:', e);
-                // შეცდომის შემთხვევაში ვუშვებთ თამაშს
-                initGame({ localStorage: false, indexedDB: false, storageQuota: false, serviceWorker: false });
             }
         }
-
-        // გვერდის ჩატვირთვისას
-        window.addEventListener('load', init);
+        
+        // გვერდის ჩატვირთვისას შევამოწმოთ რეჟიმი
+        document.addEventListener('DOMContentLoaded', checkIncognitoMode);
+        
+        // ყოველ 5 წამში ერთხელ განაახლეთ შემოწმება (არასავალდებულო)
+        setInterval(checkIncognitoMode, 5000);
     </script>
 </body>
 </html>
