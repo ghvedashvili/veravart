@@ -128,6 +128,10 @@
             animation: slideIn 0.5s ease-out;
         }
 
+        .status.private {
+            background: #e74c3c;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -154,6 +158,16 @@
             font-size: 2em;
             color: #667eea;
         }
+
+        .debug-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.85em;
+            text-align: left;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -162,42 +176,82 @@
     </div>
 
     <script>
-        // Private Mode დეტექტორი
+        // Safari Private Mode დეტექტორი - გაუმჯობესებული ვერსია
         async function detectPrivateMode() {
-            // Safari localStorage მეთოდი
+            const tests = {
+                localStorage: false,
+                indexedDB: false,
+                serviceWorker: false,
+                storageQuota: false
+            };
+
+            // ტესტი 1: localStorage
             try {
-                localStorage.setItem('test', '1');
-                localStorage.removeItem('test');
+                const testKey = '__private_test_' + Math.random();
+                localStorage.setItem(testKey, '1');
+                localStorage.removeItem(testKey);
+                tests.localStorage = false; // მუშაობს
             } catch (e) {
-                return true;
+                tests.localStorage = true; // Private mode
+                return { isPrivate: true, tests };
             }
 
-            // დამატებითი შემოწმება IndexedDB-ით
+            // ტესტი 2: IndexedDB
             try {
+                const dbTest = indexedDB.open('__test_' + Math.random());
                 await new Promise((resolve, reject) => {
-                    const db = indexedDB.open('test');
-                    db.onsuccess = () => {
-                        indexedDB.deleteDatabase('test');
+                    dbTest.onerror = () => {
+                        tests.indexedDB = true;
+                        reject();
+                    };
+                    dbTest.onsuccess = () => {
+                        indexedDB.deleteDatabase(dbTest.result.name);
+                        tests.indexedDB = false;
                         resolve();
                     };
-                    db.onerror = () => reject();
                 });
             } catch (e) {
-                return true;
+                tests.indexedDB = true;
             }
 
-            return false;
+            // ტესტი 3: Storage Quota (Safari Private-ში ძალიან მცირეა)
+            if ('storage' in navigator && 'estimate' in navigator.storage) {
+                try {
+                    const estimate = await navigator.storage.estimate();
+                    // Safari Private mode-ში quota ძალიან მცირეა (~10MB)
+                    if (estimate.quota && estimate.quota < 120000000) {
+                        tests.storageQuota = true;
+                    }
+                } catch (e) {
+                    tests.storageQuota = true;
+                }
+            }
+
+            // ტესტი 4: Service Worker
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.getRegistrations();
+                    tests.serviceWorker = false;
+                } catch (e) {
+                    tests.serviceWorker = true;
+                }
+            }
+
+            // თუ რომელიმე ტესტი დადებითია - Private mode
+            const isPrivate = tests.indexedDB || tests.storageQuota || tests.serviceWorker;
+            
+            return { isPrivate, tests };
         }
 
         // გაფრთხილების ეკრანი
-        function showPrivateWarning() {
+        function showPrivateWarning(testResults) {
             const container = document.getElementById('mainContainer');
             container.innerHTML = `
                 <div class="private-warning">
                     <div class="icon">🔒</div>
                     <h1>Private Browsing რეჟიმი</h1>
                     <p>თქვენ იყენებთ Private/Incognito რეჟიმს.</p>
-                    <p>ეს თამაში მოითხოვს მონაცემების შენახვას localStorage-ში.</p>
+                    <p>ეს თამაში მოითხოვს მონაცემების შენახვას.</p>
                     <p><strong>გთხოვთ გახსენით ნორმალურ რეჟიმში!</strong></p>
                     <br>
                     <p style="font-size: 0.9em; color: #888;">
@@ -205,12 +259,19 @@
                         Chrome: გამოდით Incognito-დან<br>
                         Firefox: გამოდით Private Window-დან
                     </p>
+                    <div class="debug-info">
+                        <strong>დეტექციის შედეგები:</strong><br>
+                        localStorage: ${testResults.localStorage ? '❌ დაბლოკილი' : '✅ მუშაობს'}<br>
+                        IndexedDB: ${testResults.indexedDB ? '❌ დაბლოკილი' : '✅ მუშაობს'}<br>
+                        Storage Quota: ${testResults.storageQuota ? '❌ შეზღუდული' : '✅ ნორმალური'}<br>
+                        Service Worker: ${testResults.serviceWorker ? '❌ დაბლოკილი' : '✅ მუშაობს'}
+                    </div>
                 </div>
             `;
         }
 
         // თამაშის ინიციალიზაცია
-        function initGame() {
+        function initGame(testResults) {
             const container = document.getElementById('mainContainer');
             
             // სტატუსის ინდიკატორი
@@ -233,6 +294,12 @@
                         <p style="color: #666; margin-top: 20px;">დააჭირე ყუთს ქულების მისაღებად!</p>
                     </div>
                     <button onclick="resetGame()">თავიდან დაწყება</button>
+                    <div class="debug-info">
+                        <strong>სისტემის ინფო:</strong><br>
+                        Storage Quota: ${testResults.storageQuota ? 'შეზღუდული' : 'ნორმალური'}<br>
+                        localStorage: მუშაობს ✅<br>
+                        IndexedDB: მუშაობს ✅
+                    </div>
                 </div>
             `;
 
@@ -267,12 +334,20 @@
 
         // მთავარი ფუნქცია
         async function init() {
-            const isPrivate = await detectPrivateMode();
-            
-            if (isPrivate) {
-                showPrivateWarning();
-            } else {
-                initGame();
+            try {
+                const result = await detectPrivateMode();
+                
+                console.log('Detection results:', result);
+                
+                if (result.isPrivate) {
+                    showPrivateWarning(result.tests);
+                } else {
+                    initGame(result.tests);
+                }
+            } catch (e) {
+                console.error('Detection error:', e);
+                // შეცდომის შემთხვევაში ვუშვებთ თამაშს
+                initGame({ localStorage: false, indexedDB: false, storageQuota: false, serviceWorker: false });
             }
         }
 
