@@ -9,7 +9,7 @@
             font-family: 'Arial', sans-serif;
             text-align: center;
             padding: 50px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .normal-mode {
@@ -22,11 +22,19 @@
             color: #fff;
         }
         
+        .unknown-mode {
+            background-color: #fff8f0;
+            color: #333;
+        }
+        
         .message {
             font-size: 24px;
             margin: 20px 0;
             padding: 20px;
             border-radius: 10px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .normal-message {
@@ -38,6 +46,34 @@
             background-color: #444;
             border: 2px solid #ff9800;
         }
+        
+        .unknown-message {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+        }
+        
+        .test-buttons {
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .test-localstorage {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .test-indexeddb {
+            background-color: #2196f3;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -45,64 +81,110 @@
         <h1>რეჟიმის შემოწმება</h1>
         <div id="message" class="message"></div>
         <p id="details"></p>
+        
+        <div class="test-buttons">
+            <button class="test-localstorage" onclick="testLocalStorage()">შევამოწმოთ Local Storage</button>
+            <button class="test-indexeddb" onclick="testIndexedDB()">შევამოწმოთ IndexedDB</button>
+        </div>
+        
+        <div id="testResults"></div>
     </div>
 
     <script>
-        function checkIncognitoMode() {
+        async function checkIncognitoMode() {
             const messageElement = document.getElementById('message');
             const detailsElement = document.getElementById('details');
             const body = document.body;
             
-            // ინკოგნიტო რეჟიმის შემოწმების სხვადასხვა მეთოდი
             let isIncognito = false;
+            let detectionMethod = '';
             
-            // მეთოდი 1: window.ctrl-ის შემოწმება
-            if (window.ctrl) {
+            // მეთოდი 1: localStorage-ის შემოწმება
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+            } catch (e) {
                 isIncognito = true;
+                detectionMethod = 'localStorage ბლოკირებულია';
             }
             
-            // მეთODI 2: FileSystem API-ის შემოწმება
-            else if (window.RequestFileSystem || window.webkitRequestFileSystem) {
-                if (!window.RequestFileSystem && !window.webkitRequestFileSystem) {
-                    isIncognito = true;
-                }
+            // მეთოდი 2: IndexedDB-ის შემოწმება
+            if (!isIncognito && !window.indexedDB) {
+                isIncognito = true;
+                detectionMethod = 'IndexedDB ხელმიუწვდომელია';
             }
             
-            // მეთოდი 3: quota-ის შემოწმება
-            else if (navigator.storage && navigator.storage.estimate) {
-                // ეს მეთოდი ასინქრონულია, ამიტომ ვიყენებთ Promise-ს
-                navigator.storage.estimate().then(estimate => {
-                    if (estimate.quota < 120000000) { // დაახლოებით 120MB
+            // მეთოდი 3: FileSystem API-ის შემოწმება
+            if (!isIncognito && !window.requestFileSystem && !window.webkitRequestFileSystem) {
+                // ზოგიერთ ბრაუზერში ეს შეიძლება იყოს ინკოგნიტოს ნიშანი
+                detectionMethod += ' FileSystem API ხელმიუწვდომელია';
+            }
+            
+            // მეთოდი 4: Quota Storage API-ის შემოწმება
+            if (!isIncognito && navigator.storage && navigator.storage.estimate) {
+                try {
+                    const estimate = await navigator.storage.estimate();
+                    // ინკოგნიტოში quota ჩვეულებრივ ძალიან პატარაა
+                    if (estimate.quota < 120000000) { // 120MB-ზე ნაკლები
                         isIncognito = true;
-                        updateDisplay(isIncognito);
+                        detectionMethod = 'storage quota ძალიან პატარაა: ' + (estimate.quota / 1000000).toFixed(1) + 'MB';
                     }
-                });
-            }
-            
-            updateDisplay(isIncognito);
-            
-            function updateDisplay(incognito) {
-                if (incognito) {
-                    // ინკოგნიტო რეჟიმი
-                    body.className = 'incognito-mode';
-                    messageElement.className = 'message incognito-message';
-                    messageElement.innerHTML = '🕶️ <strong>ინკოგნიტო რეჟიმი</strong>';
-                    detailsElement.innerHTML = 'თქვენ იმყოფებით ინკოგნიტო/პრივატურ რეჟიმში.<br>თქვენი ქმედებები არ ინახება ისტორიაში.';
-                } else {
-                    // ნორმალური რეჟიმი
-                    body.className = 'normal-mode';
-                    messageElement.className = 'message normal-message';
-                    messageElement.innerHTML = '🌐 <strong>ნორმალური რეჟიმი</strong>';
-                    detailsElement.innerHTML = 'თქვენ იმყოფებით ნორმალურ რეჟიმში.<br>ბრაუზერი ინახავს ისტორიას და cookies-ებს.';
+                } catch (e) {
+                    console.log('Quota შემოწმება ვერ მოხერხდა');
                 }
             }
+            
+            updateDisplay(isIncognito, detectionMethod);
+        }
+        
+        function updateDisplay(incognito, method) {
+            const messageElement = document.getElementById('message');
+            const detailsElement = document.getElementById('details');
+            const body = document.body;
+            
+            if (incognito) {
+                body.className = 'incognito-mode';
+                messageElement.className = 'message incognito-message';
+                messageElement.innerHTML = '🕶️ <strong>ინკოგნიტო რეჟიმი (სავარაუდო)</strong>';
+                detailsElement.innerHTML = `თქვენ სავარაუდოდ ინკოგნიტო/პრივატურ რეჟიმში იმყოფებით.<br>გამოვლინების მეთოდი: ${method}`;
+            } else {
+                body.className = 'normal-mode';
+                messageElement.className = 'message normal-message';
+                messageElement.innerHTML = '🌐 <strong>ნორმალური რეჟიმი (სავარაუდო)</strong>';
+                detailsElement.innerHTML = `თქვენ სავარაუდოდ ნორმალურ რეჟიმში იმყოფებით.<br>${method ? 'დამატებითი ინფო: ' + method : ''}`;
+            }
+        }
+        
+        function testLocalStorage() {
+            const results = document.getElementById('testResults');
+            try {
+                const testKey = 'incognito_test_' + Date.now();
+                localStorage.setItem(testKey, 'test_value');
+                const retrieved = localStorage.getItem(testKey);
+                localStorage.removeItem(testKey);
+                
+                if (retrieved === 'test_value') {
+                    results.innerHTML = '<p style=\"color: green\">✅ Local Storage მუშაობს</p>';
+                } else {
+                    results.innerHTML = '<p style=\"color: red\">❌ Local Storage არ მუშაობს სწორად</p>';
+                }
+            } catch (e) {
+                results.innerHTML = '<p style=\"color: red\">❌ Local Storage ბლოკირებულია: ' + e.message + '</p>';
+            }
+        }
+        
+        function testIndexedDB() {
+            const results = document.getElementById('testResults');
+            if (!window.indexedDB) {
+                results.innerHTML = '<p style=\"color: red\">❌ IndexedDB არ არის ხელმისაწვდომი</p>';
+                return;
+            }
+            
+            results.innerHTML = '<p style=\"color: green\">✅ IndexedDB ხელმისაწვდომია</p>';
         }
         
         // გვერდის ჩატვირთვისას შევამოწმოთ რეჟიმი
         document.addEventListener('DOMContentLoaded', checkIncognitoMode);
-        
-        // ყოველ 5 წამში ერთხელ განაახლეთ შემოწმება (არასავალდებულო)
-        setInterval(checkIncognitoMode, 5000);
     </script>
 </body>
 </html>
