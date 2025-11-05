@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title></title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, sans-serif;
+      background: linear-gradient(180deg, #f0f0f0, #dcdcdc);
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .box {
+      text-align: center;
+      padding: 30px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: all 0.4s;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 1.6rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .offline {
+      background: #282c34;
+      color: white;
+    }
+
+    .offline .box {
+      background: #333;
+      color: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="box" id="statusBox">
+    <h1 id="title">📶 შენ ხარ ონლაინ!</h1>
+    <p id="text">ინტერნეტი მუშაობს ჩვეულებრივ რეჟიმში.</p>
+  </div>
+
+  <script>
+    const title = document.getElementById('title');
+    const text = document.getElementById('text');
+    const box = document.getElementById('statusBox');
+
+    function updateStatus() {
+      if (navigator.onLine) {
+        document.body.classList.remove('offline');
+        title.textContent = "📶 შენ ხარ ონლაინ!";
+        text.textContent = "ინტერნეტი მუშაობს ჩვეულებრივ რეჟიმში.";
+      } else {
+        document.body.classList.add('offline');
+        title.textContent = "🎉 მილოცვა! შენ ახლა ოფლაინ ხარ!";
+        text.textContent = "დროა დაისვენო — შემდეგ ეტაპზე გადადი (რელაქსი 😌)";
+      }
+    }
+
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus(); // სტარტზე შეამოწმოს სტატუსი
+  </script>
+</body>
+</html>
