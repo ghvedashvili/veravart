@@ -1,79 +1,405 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ka">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title></title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(180deg, #f0f0f0, #dcdcdc);
-      transition: background 0.4s, color 0.4s;
-    }
-
-    .box {
-      text-align: center;
-      padding: 30px;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      transition: all 0.4s;
-    }
-
-    h1 {
-      margin: 0 0 10px 0;
-      font-size: 1.6rem;
-    }
-
-    p {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .offline {
-      background: #282c34;
-      color: white;
-    }
-
-    .offline .box {
-      background: #333;
-      color: #fff;
-      transform: scale(1.05);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>სრული სისტემის ინფორმაცია</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            color: #333;
+        }
+        .value {
+            color: #666;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-green {
+            background: #4CAF50;
+            color: white;
+        }
+        .badge-blue {
+            background: #2196F3;
+            color: white;
+        }
+        .badge-orange {
+            background: #ff9800;
+            color: white;
+        }
+        .badge-red {
+            background: #f44336;
+            color: white;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .icon {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="box" id="statusBox">
-    <h1 id="title">📶 შენ ხარ ონლაინ!</h1>
-    <p id="text">ინტერნეტი მუშაობს ჩვეულებრივ რეჟიმში.</p>
-  </div>
+    <div class="container">
+        <h1>🖥️ სრული სისტემის ინფორმაცია</h1>
 
-  <script>
-    const title = document.getElementById('title');
-    const text = document.getElementById('text');
-    const box = document.getElementById('statusBox');
+```
+    <div class="grid">
+        <!-- მოწყობილობის ინფორმაცია -->
+        <div class="card">
+            <h2>📱 მოწყობილობა</h2>
+            <div id="deviceInfo"></div>
+        </div>
 
-    function updateStatus() {
-      if (navigator.onLine) {
-        document.body.classList.remove('offline');
-        title.textContent = "📶 შენ ხარ ონლაინ!";
-        text.textContent = "ინტერნეტი მუშაობს ჩვეულებრივ რეჟიმში.";
-      } else {
-        document.body.classList.add('offline');
-        title.textContent = "🎉 მილოცვა! შენ ახლა ოფლაინ ხარ!";
-        text.textContent = "დროა დაისვენო — შემდეგ ეტაპზე გადადი (რელაქსი 😌)";
-      }
+        <!-- ბატარეა -->
+        <div class="card">
+            <h2>🔋 ბატარეა</h2>
+            <div id="batteryInfo"></div>
+        </div>
+
+        <!-- Display Mode -->
+        <div class="card">
+            <h2>🖼️ Display Mode</h2>
+            <div id="displayInfo"></div>
+        </div>
+
+        <!-- ქსელი -->
+        <div class="card">
+            <h2>🌐 ქსელი</h2>
+            <div id="networkInfo"></div>
+        </div>
+
+        <!-- ეკრანი -->
+        <div class="card">
+            <h2>🖥️ ეკრანი</h2>
+            <div id="screenInfo"></div>
+        </div>
+
+        <!-- დრო და ლოკაცია -->
+        <div class="card">
+            <h2>🕐 დრო</h2>
+            <div id="timeInfo"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. მოწყობილობის ინფორმაცია
+    function updateDeviceInfo() {
+        const ua = navigator.userAgent;
+        let os = 'უცნობი';
+        if (/android/i.test(ua)) os = 'Android';
+        else if (/iPad|iPhone|iPod/.test(ua)) os = 'iOS';
+        else if (/Windows/.test(ua)) os = 'Windows';
+        else if (/Mac/.test(ua)) os = 'MacOS';
+        else if (/Linux/.test(ua)) os = 'Linux';
+        
+        let browser = 'უცნობი';
+        if (/Chrome/.test(ua) && !/Edg/.test(ua)) browser = 'Chrome';
+        else if (/Safari/.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
+        else if (/Firefox/.test(ua)) browser = 'Firefox';
+        else if (/Edg/.test(ua)) browser = 'Edge';
+        
+        let deviceType = 'დესკტოპი';
+        if (/Mobile/.test(ua)) deviceType = 'მობილური';
+        else if (/Tablet|iPad/.test(ua)) deviceType = 'ტაბლეტი';
+        
+        document.getElementById('deviceInfo').innerHTML = `
+            <div class="icon">📱</div>
+            <div class="info-item">
+                <span class="label">OS:</span>
+                <span class="value"><span class="badge badge-blue">${os}</span></span>
+            </div>
+            <div class="info-item">
+                <span class="label">ბრაუზერი:</span>
+                <span class="value">${browser}</span>
+            </div>
+            <div class="info-item">
+                <span class="label">ტიპი:</span>
+                <span class="value">${deviceType}</span>
+            </div>
+            <div class="info-item">
+                <span class="label">ენა:</span>
+                <span class="value">${navigator.language}</span>
+            </div>
+        `;
     }
 
-    window.addEventListener('online', updateStatus);
-    window.addEventListener('offline', updateStatus);
-    updateStatus(); // სტარტზე შეამოწმოს სტატუსი
-  </script>
+    // 2. ბატარეის ინფორმაცია
+    async function updateBatteryInfo() {
+        const div = document.getElementById('batteryInfo');
+        if (!('getBattery' in navigator)) {
+            div.innerHTML = '<p style="color: #999;">არ არის მხარდაჭერილი</p>';
+            return;
+        }
+        
+        try {
+            const battery = await navigator.getBattery();
+            const level = Math.round(battery.level * 100);
+            const charging = battery.charging;
+            
+            div.innerHTML = `
+                <div class="icon">${charging ? '⚡' : '🔋'}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${level}%">${level}%</div>
+                </div>
+                <div class="info-item">
+                    <span class="label">სტატუსი:</span>
+                    <span class="value"><span class="badge ${charging ? 'badge-green' : 'badge-orange'}">${charging ? 'იტენება' : 'არ იტენება'}</span></span>
+                </div>
+            `;
+            
+            battery.addEventListener('levelchange', updateBatteryInfo);
+            battery.addEventListener('chargingchange', updateBatteryInfo);
+        } catch (e) {
+            div.innerHTML = '<p style="color: #f44336;">შეცდომა</p>';
+        }
+    }
+
+    // 3. Display Mode
+    function updateDisplayInfo() {
+        let mode = 'browser';
+        let icon = '🌐';
+        let desc = 'ბრაუზერი';
+        
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            mode = 'standalone';
+            icon = '📱';
+            desc = 'Home Screen';
+        }
+        
+        const isIOSPWA = window.navigator.standalone === true;
+        
+        document.getElementById('displayInfo').innerHTML = `
+            <div class="icon">${icon}</div>
+            <div class="info-item">
+                <span class="label">Mode:</span>
+                <span class="value"><span class="badge badge-blue">${mode.toUpperCase()}</span></span>
+            </div>
+            <div class="info-item">
+                <span class="label">აღწერა:</span>
+                <span class="value">${desc}</span>
+            </div>
+            <div class="info-item">
+                <span class="label">iOS PWA:</span>
+                <span class="value">${isIOSPWA ? '✓' : '✗'}</span>
+            </div>
+        `;
+    }
+
+    // 4. ქსელის ინფორმაცია
+    function updateNetworkInfo() {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const isOnline = navigator.onLine;
+        
+        if (!connection) {
+            document.getElementById('networkInfo').innerHTML = `
+                <div class="icon">🌐</div>
+                <div class="info-item">
+                    <span class="label">სტატუსი:</span>
+                    <span class="value"><span class="badge ${isOnline ? 'badge-green' : 'badge-red'}">${isOnline ? 'Online' : 'Offline'}</span></span>
+                </div>
+                <p style="color: #999; margin-top: 10px;">API არ არის მხარდაჭერილი</p>
+            `;
+            return;
+        }
+        
+        const type = connection.effectiveType || 'უცნობი';
+        const downlink = connection.downlink || 0;
+        const saveData = connection.saveData || false;
+        
+        document.getElementById('networkInfo').innerHTML = `
+            <div class="icon">📶</div>
+            <div class="info-item">
+                <span class="label">სტატუსი:</span>
+                <span class="value"><span class="badge ${isOnline ? 'badge-green' : 'badge-red'}">${isOnline ? 'Online' : 'Offline'}</span></span>
+            </div>
+            <div class="info-item">
+                <span class="label">ტიპი:</span>
+                <span class="value"><span class="badge badge-blue">${type.toUpperCase()}</span></span>
+            </div>
+            <div class="info-item">
+                <span class="label">სიჩქარე:</span>
+                <span class="value">${downlink} Mbps</span>
+            </div>
+            <div class="info-item">
+                <span class="label">დამზოგველი:</span>
+                <span class="value">${saveData ? '✓' : '✗'}</span>
+            </div>
+        `;
+    }
+
+    // 5. ეკრანის ინფორმაცია
+    function updateScreenInfo() {
+        const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const touchSupport = 'ontouchstart' in window;
+        
+        document.getElementById('screenInfo').innerHTML = `
+            <div class="icon">${darkMode ? '🌙' : '☀️'}</div>
+            <div class="info-item">
+                <span class="label">თემა:</span>
+                <span class="value"><span class="badge ${darkMode ? 'badge-blue' : 'badge-orange'}">${darkMode ? 'მუქი' : 'ღია'}</span></span>
+            </div>
+            <div class="info-item">
+                <span class="label">რეზოლუცია:</span>
+                <span class="value">${screen.width} x ${screen.height}</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Pixel Ratio:</span>
+                <span class="value">${window.devicePixelRatio}x</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Touch:</span>
+                <span class="value">${touchSupport ? '✓' : '✗'}</span>
+            </div>
+        `;
+    }
+
+    // 6. დროის ინფორმაცია
+    function updateTimeInfo() {
+        const now = new Date();
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const time = now.toLocaleTimeString('ka-GE');
+        const date = now.toLocaleDateString('ka-GE');
+        
+        document.getElementById('timeInfo').innerHTML = `
+            <div class="icon">🕐</div>
+            <div class="info-item">
+                <span class="label">დრო:</span>
+                <span class="value"><strong>${time}</strong></span>
+            </div>
+            <div class="info-item">
+                <span class="label">თარიღი:</span>
+                <span class="value">${date}</span>
+            </div>
+            <div class="info-item">
+                <span class="label">სარტყელი:</span>
+                <span class="value">${timezone}</span>
+            </div>
+        `;
+    }
+
+    // ინიციალიზაცია
+    updateDeviceInfo();
+    updateBatteryInfo();
+    updateDisplayInfo();
+    updateNetworkInfo();
+    updateScreenInfo();
+    updateTimeInfo();
+
+    // პერიოდული განახლება
+    setInterval(updateTimeInfo, 1000);
+    
+    // მოსმენა ცვლილებებზე
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection) {
+        connection.addEventListener('change', updateNetworkInfo);
+    }
+    window.addEventListener('online', updateNetworkInfo);
+    window.addEventListener('offline', updateNetworkInfo);
+    window.addEventListener('resize', updateScreenInfo);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateScreenInfo);
+</script>
+```
+
 </body>
 </html>
