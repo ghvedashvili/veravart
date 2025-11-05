@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>დროის სარტყელი</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #fff;
             margin: 0;
             padding: 20px;
             min-height: 100vh;
@@ -19,7 +19,7 @@
             background: white;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+           
             text-align: center;
             max-width: 400px;
             width: 100%;
@@ -32,6 +32,16 @@
             font-size: 18px;
             color: #333;
             margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .message {
+            font-size: 16px;
+            color: #667eea;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+          
+            line-height: 1.5;
         }
         .time {
             font-size: 24px;
@@ -42,15 +52,34 @@
         .date {
             font-size: 16px;
             color: #666;
+            margin-bottom: 20px;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+        }
+        .button:hover {
+            background: #5568d3;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
     <div class="time-container">
-        <div class="icon">🕐</div>
-        <div class="timezone" id="timezone"></div>
-        <div class="time" id="time"></div>
-        <div class="date" id="date"></div>
+
+
+        <div class="message" id="message"></div>
+        <button class="button" id="nextButton" style="display: none;">Comming Soon</button>
     </div>
 
     <script>
@@ -60,9 +89,58 @@
             const time = now.toLocaleTimeString('ka-GE');
             const date = now.toLocaleDateString('ka-GE');
             
-            document.getElementById('timezone').textContent = timezone;
-            document.getElementById('time').textContent = time;
-            document.getElementById('date').textContent = date;
+  
+            
+            const messageElement = document.getElementById('message');
+            const nextButton = document.getElementById('nextButton');
+            
+            // შეამოწმე სარტყელი
+            if (isAsianTimezone(timezone)) {
+                messageElement.textContent = "ჩვენ ყოველთვის უნდა მივისწრაფოდეთ ევროპისკენ მიუხედავად ჩვენი გეოგრაფიული მდგომარეობისა.";
+                messageElement.style.color = "#666;";
+                nextButton.style.display = "none";
+            } else if (isEuropeanTimezone(timezone)) {
+                messageElement.textContent = "მე ვარ ქართველი და მაშასადამე ვარ ევროპელი";
+                messageElement.style.color = "#4CAF50";
+                nextButton.style.display = "block";
+            } else {
+                messageElement.textContent = "";
+                nextButton.style.display = "none";
+            }
+        }
+
+        function isAsianTimezone(timezone) {
+            const asianTimezones = [
+                'Asia/Tbilisi', 'Asia/Dubai', 'Asia/Qatar', 'Asia/Muscat', 
+                'Asia/Baku', 'Asia/Yerevan', 'Asia/Tehran', 'Asia/Kabul',
+                'Asia/Karachi', 'Asia/Tashkent', 'Asia/Almaty', 'Asia/Bishkek',
+                'Asia/Dushanbe', 'Asia/Ashgabat', 'Asia/Baghdad', 'Asia/Riyadh',
+                'Asia/Kuwait', 'Asia/Bahrain', 'Asia/Amman', 'Asia/Beirut',
+                'Asia/Damascus', 'Asia/Jerusalem', 'Asia/Gaza', 'Asia/Hebron',
+                'Asia/Aden', 'Asia/Kathmandu', 'Asia/Colombo', 'Asia/Dhaka',
+                'Asia/Thimphu', 'Asia/Rangoon', 'Asia/Bangkok', 'Asia/Phnom_Penh',
+                'Asia/Vientiane', 'Asia/Saigon', 'Asia/Ho_Chi_Minh', 'Asia/Jakarta',
+                'Asia/Kuala_Lumpur', 'Asia/Singapore', 'Asia/Manila', 'Asia/Taipei',
+                'Asia/Hong_Kong', 'Asia/Macau', 'Asia/Shanghai', 'Asia/Seoul',
+                'Asia/Tokyo', 'Asia/Ulaanbaatar', 'Asia/Pyongyang'
+            ];
+            return asianTimezones.includes(timezone);
+        }
+
+        function isEuropeanTimezone(timezone) {
+            const europeanTimezones = [
+                'Europe/London', 'Europe/Dublin', 'Europe/Lisbon', 'Europe/Madrid',
+                'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Amsterdam',
+                'Europe/Brussels', 'Europe/Vienna', 'Europe/Prague', 'Europe/Warsaw',
+                'Europe/Budapest', 'Europe/Bucharest', 'Europe/Sofia', 'Europe/Athens',
+                'Europe/Istanbul', 'Europe/Kiev', 'Europe/Minsk', 'Europe/Moscow',
+                'Europe/Helsinki', 'Europe/Stockholm', 'Europe/Oslo', 'Europe/Copenhagen',
+                'Europe/Riga', 'Europe/Tallinn', 'Europe/Vilnius', 'Europe/Zurich',
+                'Europe/Geneva', 'Europe/Luxembourg', 'Europe/Monaco', 'Europe/Andorra',
+                'Europe/San_Marino', 'Europe/Vatican', 'Europe/Belgrade', 'Europe/Zagreb',
+                'Europe/Sarajevo', 'Europe/Skopje', 'Europe/Tirana', 'Europe/Chisinau'
+            ];
+            return europeanTimezones.includes(timezone);
         }
 
         // ინიციალიზაცია
@@ -70,6 +148,11 @@
 
         // პერიოდული განახლება
         setInterval(updateTimeInfo, 1000);
+
+        // ღილაკის მოსმენა
+        document.getElementById('nextButton').addEventListener('click', function() {
+            alert('Coming Soon!');
+        });
     </script>
 </body>
 </html>
