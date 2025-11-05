@@ -1,86 +1,208 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ka">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ტექსტის ფერები</title>
-    <style>
-        body {
-            background-color: white;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        
-        .text-section {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        
-        .visible-text {
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        
-        .invisible-text {
-            background-color: white;
-            color: white; /* ეს ტექსტი არ ჩანს თეთრ ფონზე */
-            border: 1px dashed #ccc;
-        }
-        
-        .highlighted {
-            background-color: #ffeb3b;
-            padding: 5px;
-        }
-        
-        .colorful-text {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>დღის/ღამის რეჟიმის შემომკითხავი</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --accent: #0b66ff;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0f14;
+      --fg: #e6eef8;
+      --accent: #66b2ff;
+    }
+
+    html,body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 90%, var(--accent) 10%));
+      color: var(--fg);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 760px;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 30px rgba(2,8,23,0.15);
+      background: color-mix(in srgb, var(--bg) 95%, #0000 5%);
+      backdrop-filter: blur(6px);
+    }
+
+    h1 { margin: 0 0 8px 0; font-size: 1.4rem; }
+    p { margin: 0 0 12px 0; line-height: 1.45; }
+
+    .message {
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.06);
+      background: color-mix(in srgb, var(--fg) 4%, #0000);
+      font-weight: 600;
+    }
+
+    .controls {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    select, button {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      font-size: 0.95rem;
+      background: transparent;
+      color: var(--fg);
+    }
+
+    .note { margin-top:10px; font-size:0.88rem; color: color-mix(in srgb, var(--fg) 70%, #0000); }
+    @media (prefers-color-scheme: dark) {
+      /* If user hasn't overridden via data-theme, body will still default visually; JS handles actual theme selection */
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>ტექსტის ფერების დემონსტრაცია</h1>
-        
-        <div class="text-section visible-text">
-            <h2>ეს ტექსტი კარგად ჩანს</h2>
-            <p>ეს არის ნორმალური ტექსტი, რომელიც კარგად ჩანს თეთრ ფონზე.</p>
-        </div>
-        
-        <div class="text-section invisible-text">
-            <h2>ეს ტექსტი თეთრია და არ ჩანს</h2>
-            <p>ეს ტექსტი თეთრი ფერისაა თეთრ ფონზე, ამიტომ ის პრაქტიკულად უხილავია. მხოლოდ მის გარშემო არსებული ჩარჩო მიგვანიშნებს, რომ აქ რაღაც ტექსტია.</p>
-        </div>
-        
-        <div class="text-section visible-text">
-            <h2>კიდევ ერთი ხილული ტექსტი</h2>
-            <p>ეს არის ჩვეულებრივი შავი ტექსტი თეთრ ფონზე, რომელიც კარგად იკითხება.</p>
-            <p class="highlighted">ეს ტექსტი გამოკვეთილია ყვითელი ფონით.</p>
-        </div>
-        
-        <div class="text-section">
-            <h2 class="colorful-text">ფერადი გრადიენტის ტექსტი</h2>
-            <p>ეს ტექსტი აქვს ფერადი გრადიენტი და ძალიან კარგად გამოიყურება.</p>
-        </div>
+  <div class="card" role="region" aria-label="დასაკონტროლებელი ბლოკი">
+    <h1>გამოიცანი — დღეა თუ ღამე?</h1>
+    <p>ვებ-გვერდი სცდება სისტემური რეჟიმის შემოწმებას და ამაზე მიბმულად აჩვენებს სხვადასხვა ტექსტს. შეგიძლია გადართო ხელითაც.</p>
+
+    <div id="message" class="message" aria-live="polite">არულობს შემოწმება...</div>
+
+    <div class="controls" aria-hidden="false">
+      <label for="modeSelect">რეჟიმი:</label>
+      <select id="modeSelect" title="არჩევა: Auto = სისტემური ან დრო, Light = დღე, Dark = ღამე">
+        <option value="auto">Auto (სისტემა / დრო)</option>
+        <option value="light">Light (დღე)</option>
+        <option value="dark">Dark (ღამე)</option>
+      </select>
+
+      <button id="resetBtn" type="button" title="უფსკრულამდე დააბრუნე ავტომატურ რეჟიმში">Default (auto)</button>
     </div>
+
+    <div class="note">
+      შენახულია ადვილი გადართვისთვის. სისტემური ცვლილებები (ნაყარი dark/light) დაიჭერს ავტომატურად როცა არის Auto.
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const msgEl = document.getElementById('message');
+      const select = document.getElementById('modeSelect');
+      const resetBtn = document.getElementById('resetBtn');
+      const THEME_KEY = 'siteThemeMode'; // 'auto' | 'dark' | 'light'
+
+      // Detect system preference media query
+      const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+
+      function timeBasedIsDark() {
+        const h = new Date().getHours();
+        // Define night as 18:00 - 05:59
+        return (h >= 18 || h < 6);
+      }
+
+      // Resolve effective theme based on stored preference, system, and time fallback
+      function resolveTheme() {
+        const stored = localStorage.getItem(THEME_KEY) || 'auto';
+        if (stored === 'light' || stored === 'dark') return stored;
+        // auto: prefer system if available, else use time
+        if (mq && typeof mq.matches === 'boolean') {
+          return mq.matches ? 'dark' : 'light';
+        }
+        return timeBasedIsDark() ? 'dark' : 'light';
+      }
+
+      // Update visual theme and message
+      function applyTheme(theme) {
+        // theme: 'dark' or 'light'
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+
+        // Put any localized message you want here:
+        if (theme === 'dark') {
+          msgEl.textContent = 'გამარჯობა — ახლა ღამის რეჟიმია 🌙\nწყვდიადში უფრო მშვიდია.';
+        } else {
+          msgEl.textContent = 'დილა მშვიდობისა — დღეა ☀️\nბნন্দვად არის და ნათელია.';
+        }
+
+        // Also show the reason (system/time/override)
+        const stored = localStorage.getItem(THEME_KEY) || 'auto';
+        let reason = '';
+        if (stored === 'light' || stored === 'dark') reason = ' (მოთითებული შენით)';
+        else if (mq && typeof mq.matches === 'boolean') reason = ' (სისტემური პარამეტრი)';
+        else reason = ' (დროის მიხედვით)';
+        msgEl.textContent += reason;
+      }
+
+      // Initial set-up
+      function init() {
+        // restore selection UI
+        const stored = localStorage.getItem(THEME_KEY) || 'auto';
+        select.value = stored;
+
+        // apply initial theme
+        const theme = resolveTheme();
+        applyTheme(theme);
+      }
+
+      // When system preference changes and user is in Auto, respond
+      if (mq && typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', (e) => {
+          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') {
+            const themeNow = e.matches ? 'dark' : 'light';
+            applyTheme(themeNow);
+          }
+        });
+      } else if (mq && typeof mq.addListener === 'function') {
+        // older browsers
+        mq.addListener((e) => {
+          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') {
+            const themeNow = e.matches ? 'dark' : 'light';
+            applyTheme(themeNow);
+          }
+        });
+      }
+
+      // UI change
+      select.addEventListener('change', () => {
+        const val = select.value;
+        if (val === 'auto') {
+          localStorage.removeItem(THEME_KEY);
+        } else {
+          localStorage.setItem(THEME_KEY, val);
+        }
+        applyTheme(resolveTheme());
+      });
+
+      resetBtn.addEventListener('click', () => {
+        select.value = 'auto';
+        localStorage.removeItem(THEME_KEY);
+        applyTheme(resolveTheme());
+      });
+
+      // If no system support, periodically check time when in auto (to update after midnight etc.)
+      if (!mq) {
+        // check every 5 minutes
+        setInterval(() => {
+          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') {
+            applyTheme(resolveTheme());
+          }
+        }, 5 * 60 * 1000);
+      }
+
+      // Run initial
+      init();
+    })();
+  </script>
 </body>
 </html>
