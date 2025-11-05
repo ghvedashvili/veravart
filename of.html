@@ -1,264 +1,66 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T-Rex თამაში - ოფლაინ რეჟიმი</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f7f7f7;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        .status {
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        
-        .online {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .offline {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        #game-container {
-            margin: 20px 0;
-            display: none;
-        }
-        
-        #next-level-btn {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 20px 0;
-            cursor: pointer;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        #next-level-btn:hover {
-            background-color: #45a049;
-        }
-        
-        .instructions {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            text-align: left;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T-Rex Offline Game</title>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f7f7f7;
+  }
+  #offline-game {
+    width: 600px;
+    height: 150px;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>T-Rex თამაში</h1>
-        
-        <div id="status" class="status online">
-            🔗 თქვენ ინტერნეტთან დაკავშირებული ხართ
-        </div>
-        
-        <div id="game-container">
-            <canvas id="game-canvas" width="600" height="150"></canvas>
-        </div>
-        
-        <button id="next-level-btn">შემდეგი ტური</button>
-        
-        <div class="instructions">
-            <h3>ინსტრუქცია:</h3>
-            <p>თამაში ავტომატურად ჩაირთვება, როდესაც ინტერნეტთან კავშირი გაწყდება.</p>
-            <p>თამაშის დასაწყებად, გადართეთ ტელეფონი ოფლაინ რეჟიმში ან გათიშეთ ინტერნეტი.</p>
-            <p>SPACE ღილაკით გადაახტეთ დინოზავრს დაბრკოლებებს.</p>
-        </div>
-    </div>
 
-    <script>
-        // ქსელის სტატუსის მონიტორინგი
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        
-        function updateOnlineStatus() {
-            const statusElement = document.getElementById('status');
-            const gameContainer = document.getElementById('game-container');
-            const nextLevelBtn = document.getElementById('next-level-btn');
-            
-            if (navigator.onLine) {
-                statusElement.textContent = '🔗 თქვენ ინტერნეტთან დაკავშირებული ხართ';
-                statusElement.className = 'status online';
-                gameContainer.style.display = 'none';
-                nextLevelBtn.style.display = 'none';
-                
-                // თამაშის გაჩერება, თუ მუშაობს
-                if (window.gameRunner && window.gameRunner.isRunning()) {
-                    window.gameRunner.stop();
-                }
-            } else {
-                statusElement.textContent = '📵 თქვენ ოფლაინ რეჟიმში ხართ - თამაში ავტომატურად იწყება!';
-                statusElement.className = 'status offline';
-                gameContainer.style.display = 'block';
-                
-                // თამაშის გაშვება
-                setTimeout(startGame, 500);
-            }
-        }
-        
-        // თამაშის ინიციალიზაცია
-        function startGame() {
-            const canvas = document.getElementById('game-canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // გავასუფთავოთ კანვასი
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // დინოზავრის დახატვა
-            drawDino(ctx);
-            
-            // დაბრკოლებების დახატვა
-            drawObstacles(ctx);
-            
-            // თამაშის ლოგიკის დამატება
-            initGameLogic();
-            
-            // "შემდეგი ტურის" ღილაკის ჩვენება 5 წამის შემდეგ
-            setTimeout(() => {
-                document.getElementById('next-level-btn').style.display = 'inline-block';
-            }, 5000);
-        }
-        
-        function drawDino(ctx) {
-            // დინოზავრის დახატვა
-            ctx.fillStyle = '#2d2d2d';
-            ctx.fillRect(50, 100, 20, 40); // სხეული
-            ctx.fillRect(40, 120, 10, 20); // უკანა ფეხი
-            ctx.fillRect(70, 120, 10, 20); // წინა ფეხი
-            ctx.fillRect(50, 80, 15, 20); // კისერი
-            ctx.fillRect(40, 70, 25, 15); // თავი
-        }
-        
-        function drawObstacles(ctx) {
-            // დაბრკოლებების დახატვა
-            ctx.fillStyle = '#2d2d2d';
-            ctx.fillRect(400, 120, 15, 20); // პატარა კაქტუსი
-            ctx.fillRect(550, 110, 20, 30); // დიდი კაქტუსი
-        }
-        
-        function initGameLogic() {
-            // აქ დავამატებთ თამაშის ძირითად ლოგიკას
-            // მაგალითად, დინოზავრის ნახტომი, დაბრკოლებების მოძრაობა, კოლიზიის შემოწმება
-            
-            // მარტივი ანიმაცია დემონსტრაციისთვის
-            let position = 0;
-            
-            function animate() {
-                const canvas = document.getElementById('game-canvas');
-                const ctx = canvas.getContext('2d');
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // დინოზავრის დახატვა
-                drawDino(ctx);
-                
-                // მოძრავი დაბრკოლებები
-                ctx.fillStyle = '#2d2d2d';
-                ctx.fillRect(400 - position, 120, 15, 20);
-                ctx.fillRect(550 - position, 110, 20, 30);
-                
-                position += 2;
-                
-                if (position < 600) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // თამაშის დასრულება
-                    ctx.fillStyle = '#000';
-                    ctx.font = '20px Arial';
-                    ctx.fillText('თამაში დასრულდა!', 200, 75);
-                }
-            }
-            
-            animate();
-            
-            // სივრცის ღილაკის მოსმენა ნახტომისთვის
-            document.addEventListener('keydown', function(e) {
-                if (e.code === 'Space') {
-                    // ნახტომის ანიმაცია
-                    jumpAnimation();
-                }
-            });
-        }
-        
-        function jumpAnimation() {
-            // მარტივი ნახტომის ანიმაცია
-            const canvas = document.getElementById('game-canvas');
-            const ctx = canvas.getContext('2d');
-            
-            let jumpHeight = 0;
-            let jumping = true;
-            let direction = -1; // -1 ზევით, 1 ქვევით
-            
-            function jump() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // დაბრკოლებების დახატვა
-                drawObstacles(ctx);
-                
-                // დინოზავრის დახატვა ნახტომის პოზიციაზე
-                ctx.fillStyle = '#2d2d2d';
-                ctx.fillRect(50, 100 - jumpHeight, 20, 40); // სხეული
-                ctx.fillRect(40, 120 - jumpHeight, 10, 20); // უკანა ფეხი
-                ctx.fillRect(70, 120 - jumpHeight, 10, 20); // წინა ფეხი
-                ctx.fillRect(50, 80 - jumpHeight, 15, 20); // კისერი
-                ctx.fillRect(40, 70 - jumpHeight, 25, 15); // თავი
-                
-                jumpHeight += direction * 5;
-                
-                if (jumpHeight >= 40) {
-                    direction = 1; // ქვევით
-                }
-                
-                if (jumpHeight <= 0 && direction === 1) {
-                    jumping = false;
-                } else {
-                    requestAnimationFrame(jump);
-                }
-            }
-            
-            if (jumping) {
-                jump();
-            }
-        }
-        
-        // "შემდეგი ტურის" ღილაკის ფუნქციონალი
-        document.getElementById('next-level-btn').addEventListener('click', function() {
-            alert('შემდეგი ტური მალე დაემატება!');
-            // აქ შეგიძლიათ დაამატოთ ფუნქციონალი შემდეგი დონის ჩასართავად
-        });
-        
-        // გვერდის ჩატვირთვისას სტატუსის შემოწმება
-        window.onload = updateOnlineStatus;
-    </script>
+<canvas id="offline-game"></canvas>
+
+<!-- რეალური T-Rex თამაში JS ბიბლიოთეკა -->
+<script src="https://cdn.jsdelivr.net/gh/wayou/t-rex-runner@master/dist/t-rex-runner.min.js"></script>
+<script>
+  const canvas = document.getElementById('offline-game');
+  const runner = new Runner(canvas);
+
+  // თავიდან დინო არ მოძრაობს
+  runner.playing = false;
+  runner.clearCanvas();
+  runner.update();
+
+  // ფუნქცია offline-ზე ჩართვისთვის
+  function goOffline() {
+    if(!runner.playing) {
+      runner.playing = true;
+      runner.play(); // თამაში იწყება ავტომატურად
+    }
+  }
+
+  // ფუნქცია online-ზე გაჩერებისთვის
+  function goOnline() {
+    if(runner.playing) {
+      runner.playing = false;
+      runner.stop();
+      runner.clearCanvas();
+      runner.update();
+    }
+  }
+
+  // Event listeners
+  window.addEventListener('offline', goOffline);
+  window.addEventListener('online', goOnline);
+
+  // თუ თავიდან offline
+  if(!navigator.onLine){
+    goOffline();
+  }
+</script>
+
 </body>
 </html>
