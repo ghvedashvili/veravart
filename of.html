@@ -35,23 +35,31 @@ window.addEventListener('load', () => {
 
   // საწყისი დინოს ჩვენება
   runner.playing = false;
-  runner.tRex.update(0); // დინოს რენდერი ერთხელ
   runner.clearCanvas();
   runner.tRex.draw(runner.canvasCtx);
 
-  let autoInterval;
+  let autoLoop;
 
-  function startAutoRunner() {
-    if(!runner.playing) {
+  function autoStart() {
+    if(!autoLoop){
       runner.playing = true;
-      runner.play();
+      runner.play(); // ბიბლიოთეკის main loop
 
-      autoInterval = setInterval(() => {
+      // ავტომატური tick loop
+      autoLoop = setInterval(() => {
+        const ctx = runner.canvasCtx;
+        runner.clearCanvas();
+        runner.horizon.update(runner.deltaTime, runner.currentSpeed);
+        runner.horizon.draw(ctx);
+        runner.tRex.update(runner.deltaTime);
+        runner.tRex.draw(ctx);
+
+        // ავტომატური jump დაბრკოლებებზე
         const obstacles = runner.horizon.obstacles;
         if(obstacles.length > 0){
           const firstObs = obstacles[0];
-          const obsDistance = firstObs.xPos - runner.tRex.xPos - runner.tRex.width;
-          if(obsDistance < 60 && obsDistance > 0 && !runner.tRex.jumping){
+          const dist = firstObs.xPos - runner.tRex.xPos - runner.tRex.width;
+          if(dist < 60 && dist > 0 && !runner.tRex.jumping){
             runner.tRex.startJump();
           }
         }
@@ -59,21 +67,23 @@ window.addEventListener('load', () => {
     }
   }
 
-  function stopAutoRunner() {
-    if(runner.playing){
+  function autoStop() {
+    if(autoLoop){
+      clearInterval(autoLoop);
+      autoLoop = null;
       runner.playing = false;
-      runner.stop();
       runner.clearCanvas();
-      runner.tRex.draw(runner.canvasCtx); // საწყისი დინოს ჩვენება
-      clearInterval(autoInterval);
+      runner.horizon.clear();
+      runner.tRex.reset();
+      runner.tRex.draw(runner.canvasCtx);
     }
   }
 
-  window.addEventListener('offline', startAutoRunner);
-  window.addEventListener('online', stopAutoRunner);
+  window.addEventListener('offline', autoStart);
+  window.addEventListener('online', autoStop);
 
   if(!navigator.onLine){
-    startAutoRunner();
+    autoStart();
   }
 });
 </script>
