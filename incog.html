@@ -1,11 +1,68 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typewriter Multi-block</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f2f4ff;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .time-container {
+        background: white;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        width: 90%;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .message {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 20px;
+        line-height: 1.6;
+        text-align: left;
+        white-space: pre-wrap;
+    }
+    .message p {
+        margin: 0 0 20px 0;
+    }
+    .button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.3s;
+    }
+    .button:hover {
+        background: #5568d3;
+    }
+</style>
+</head>
+<body>
+<div class="time-container">
+    <div class="message" id="message"></div>
+    <button class="button" id="nextButton" style="display:none;">Coming Soon</button>
+</div>
+
 <script>
-let lastTimezone = null;
+let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+// Typewriter Multi-block-ის ფუნქცია
 function updateTimeInfo() {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (timezone === lastTimezone) return; // თუ არაფერი შეცვლილა, არაფერს აკეთებს
-    lastTimezone = timezone;
-
+    const timezone = currentTimezone;
     const messageElement = document.getElementById('message');
     const nextButton = document.getElementById('nextButton');
 
@@ -28,7 +85,7 @@ function updateTimeInfo() {
     typeParagraphs(messageElement, paragraphs, 0);
 }
 
-// Typewriter ეფექტი აბზაცებისთვის
+// Typewriter ეფექტი
 let typing = false;
 function typeParagraphs(container, paragraphs, index) {
     if (typing) return;
@@ -44,12 +101,11 @@ function typeParagraphs(container, paragraphs, index) {
             if (i < text.length) {
                 p.textContent += text.charAt(i);
                 i++;
-                setTimeout(typeChar, 50); // რეგულირება სიჩქარეზე
+                setTimeout(typeChar, 50);
             } else {
                 callback();
             }
         }
-
         typeChar();
     }
 
@@ -63,10 +119,10 @@ function typeParagraphs(container, paragraphs, index) {
             typing = false;
         }
     }
-
     next();
 }
 
+// Timezone სია
 function isAsianTimezone(timezone) {
     const asianTimezones = [
         'Asia/Tbilisi','Asia/Dubai','Asia/Qatar','Asia/Muscat','Asia/Baku','Asia/Yerevan',
@@ -95,12 +151,24 @@ function isEuropeanTimezone(timezone) {
     return europeanTimezones.includes(timezone);
 }
 
+// Time Zone ცვლილების დამკვირვებელი (requestAnimationFrame)
+function watchTimezoneChange() {
+    const newTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (newTimezone !== currentTimezone) {
+        currentTimezone = newTimezone;
+        updateTimeInfo();
+    }
+    requestAnimationFrame(watchTimezoneChange);
+}
+
 // ინიციალიზაცია
 updateTimeInfo();
-setInterval(updateTimeInfo, 5000); // ყოველი 5 წამში გადაამოწმებს ცვლილებას
+requestAnimationFrame(watchTimezoneChange);
 
 // ღილაკის მოსმენა
 document.getElementById('nextButton').addEventListener('click', function() {
     alert('Coming Soon!');
 });
 </script>
+</body>
+</html>
