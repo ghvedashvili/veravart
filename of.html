@@ -23,26 +23,27 @@
 
 <canvas id="offline-game"></canvas>
 
-<!-- რეალური T-Rex თამაში JS ბიბლიოთეკა -->
 <script src="https://cdn.jsdelivr.net/gh/wayou/t-rex-runner@master/dist/t-rex-runner.min.js"></script>
 <script>
+window.addEventListener('load', () => { // დარწმუნებული ვართ რომ DOM მზადაა
   const canvas = document.getElementById('offline-game');
   const runner = new Runner(canvas);
 
-  // თავიდან დინო არ მოძრაობს
+  // თავიდან დინო უძრავია
+  runner.stop();
   runner.playing = false;
   runner.clearCanvas();
   runner.update();
 
-  // ფუნქცია offline-ზე ჩართვისთვის
+  // Offline ჩართვა
   function goOffline() {
     if(!runner.playing) {
       runner.playing = true;
-      runner.play(); // თამაში იწყება ავტომატურად
+      runner.play(); // თამაში ავტომატურად იწყება
     }
   }
 
-  // ფუნქცია online-ზე გაჩერებისთვის
+  // Online გაჩერება
   function goOnline() {
     if(runner.playing) {
       runner.playing = false;
@@ -52,14 +53,14 @@
     }
   }
 
-  // Event listeners
   window.addEventListener('offline', goOffline);
   window.addEventListener('online', goOnline);
 
-  // თუ თავიდან offline
+  // თავიდან offline თუ უკვე არის
   if(!navigator.onLine){
     goOffline();
   }
+});
 </script>
 
 </body>
