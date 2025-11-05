@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>დროის სარტყელი</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,9 +19,9 @@
             background: white;
             border-radius: 15px;
             padding: 30px;
-           
+           line-height: 2.5;
             text-align: center;
-            max-width: 400px;
+            max-width: 700px;
             width: 100%;
         }
         .icon {
@@ -96,7 +96,11 @@
             
             // შეამოწმე სარტყელი
             if (isAsianTimezone(timezone)) {
-                messageElement.textContent = "ჩვენ ყოველთვის უნდა მივისწრაფოდეთ ევროპისკენ მიუხედავად ჩვენი გეოგრაფიული მდებარეობისა 🌎.";
+  messageElement.innerHTML = `
+                    <span class="message-line">ჩვენ ყოველთვის უნდა მივისწრაფოდეთ ევროპისკენ მიუხედავად ჩვენი გეოგრაფიული მდებარეობისა.</span><br>
+                    <span class="message-line">ჩვენ არ უნდა შეგვეშინდეს ცვლილებების.</span><br>
+                    <span class="message-line">ყველაფერს აქვს მნიშვნელობა მაგრამ დრო უმნიშვნელოვანესია</span>
+                `;
                 messageElement.style.color = "#666;";
                 nextButton.style.display = "none";
             } else if (isEuropeanTimezone(timezone)) {
