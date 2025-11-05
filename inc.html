@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>დღის და ღამის რეჟიმის ამოცნობა</title>
+  <title>სინათლე და სიბნელე 🌗</title>
   <style>
     :root {
-      --bg-light: #ffffff;
+      --bg-light: #fff;
       --bg-dark: #0b0f14;
-      --fg-light: #111111;
+      --fg-light: #111;
       --fg-dark: #e6eef8;
     }
+
     body {
       margin: 0;
       height: 100vh;
@@ -19,59 +20,106 @@
       justify-content: center;
       align-items: center;
       font-family: "Segoe UI", Roboto, sans-serif;
-      transition: background 0.5s, color 0.5s;
       text-align: center;
+      transition: background 0.8s ease, color 0.8s ease;
     }
+
     body.light {
       background: var(--bg-light);
       color: var(--fg-light);
     }
+
     body.dark {
       background: var(--bg-dark);
       color: var(--fg-dark);
     }
+
     h1 {
-      font-size: 2rem;
-      margin: 0 0 10px 0;
+      font-size: 1.8rem;
+      max-width: 600px;
+      line-height: 1.5;
+      margin: 0 20px;
     }
+
     p {
-      font-size: 1.2rem;
+      margin-top: 15px;
       opacity: 0.8;
+      font-size: 1rem;
+    }
+
+    #nextBtn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background: #2b8af7;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.3s ease, background 0.3s ease;
+      display: none;
+    }
+
+    #nextBtn:hover {
+      background: #1668c1;
+      transform: scale(1.05);
+    }
+
+    .emoji {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      transition: transform 0.6s ease;
     }
   </style>
 </head>
 <body>
-  <h1 id="status">მიმდინარეობს შემოწმება...</h1>
-  <p>შეცვალე ტელეფონის რეჟიმი (Light/Dark) და ნახე ცვლილება რეალურ დროში 🌙☀️</p>
+  <div class="emoji" id="emoji">🌗</div>
+  <h1 id="message">ცოდნა სინათლეა ☀️ უცოდინარობა სიბნელე 🌙</h1>
+  <p id="subtext">თუმცა ჩვენს შემთხვევაში იმისთვის რომ ეს ეტაპი დავძლიოთ — ორივე აუცილებელია.</p>
+
+  <button id="nextBtn">👉 შემდეგი ეტაპი</button>
 
   <script>
-    const statusEl = document.getElementById('status');
-    let lastMode = null;
+    const messageEl = document.getElementById('message');
+    const emojiEl = document.getElementById('emoji');
+    const nextBtn = document.getElementById('nextBtn');
 
-    function detectMode() {
-      // თუ ბრაუზერი მხარს უჭერს prefers-color-scheme-ს
-      let darkMode = window.matchMedia &&
-                     window.matchMedia('(prefers-color-scheme: dark)').matches;
-      let mode = darkMode ? 'dark' : 'light';
+    let initialMode = null;
+    let changed = false;
 
-      // მხოლოდ მაშინ განვაახლოთ თუ შეიცვალა
-      if (mode !== lastMode) {
-        lastMode = mode;
-        document.body.className = mode;
-
-        if (mode === 'dark') {
-          statusEl.textContent = '🌙 ახლა ღამის რეჟიმში ხარ — მშვიდად მოიქეცი!';
-        } else {
-          statusEl.textContent = '☀️ ახლა დღის რეჟიმია — ნათელი და მხიარული!';
-        }
-      }
+    // დაადგინე საწყისი რეჟიმი
+    function getCurrentMode() {
+      if (!window.matchMedia) return "light";
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
     }
 
-    // პირველად შეამოწმე
-    detectMode();
+    function detectChange() {
+      const current = getCurrentMode();
+      if (initialMode === null) {
+        initialMode = current; // პირველი რეჟიმი შენახვა
+      } else if (current !== initialMode && !changed) {
+        changed = true;
+        showNextButton();
+      }
 
-    // შემდეგ ყოველ 1 წამში შეამოწმე — იმუშავებს iOS/Android-ზეც
-    setInterval(detectMode, 1000);
+      // ვიზუალური ფონის ცვლილება
+      document.body.className = current;
+      emojiEl.textContent = current === 'dark' ? '🌙' : '☀️';
+    }
+
+    function showNextButton() {
+      nextBtn.style.display = 'inline-block';
+      messageEl.textContent = "შესანიშნავია! შენ უკვე იცი სინათლისა და სიბნელის ძალა 🌗";
+      document.getElementById('subtext').textContent = "ახლა შეგიძლია გადახვიდე შემდეგ ეტაპზე 👇";
+    }
+
+    nextBtn.addEventListener('click', () => {
+      alert("🎉 გილოცავ! მეორე ეტაპი წარმატებით განბრძანდი!");
+    });
+
+    // ამოწმებს ყოველ წამში — მუშაობს მობილურზეც
+    setInterval(detectChange, 1000);
+    detectChange();
   </script>
 </body>
 </html>
