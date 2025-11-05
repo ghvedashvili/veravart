@@ -1,208 +1,77 @@
 <!doctype html>
 <html lang="ka">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>დღის/ღამის რეჟიმის შემომკითხავი</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>დღის და ღამის რეჟიმის ამოცნობა</title>
   <style>
     :root {
-      --bg: #ffffff;
-      --fg: #111111;
-      --accent: #0b66ff;
+      --bg-light: #ffffff;
+      --bg-dark: #0b0f14;
+      --fg-light: #111111;
+      --fg-dark: #e6eef8;
     }
-
-    [data-theme="dark"] {
-      --bg: #0b0f14;
-      --fg: #e6eef8;
-      --accent: #66b2ff;
-    }
-
-    html,body {
-      height: 100%;
+    body {
       margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 90%, var(--accent) 10%));
-      color: var(--fg);
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      box-sizing: border-box;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 760px;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 8px 30px rgba(2,8,23,0.15);
-      background: color-mix(in srgb, var(--bg) 95%, #0000 5%);
-      backdrop-filter: blur(6px);
-    }
-
-    h1 { margin: 0 0 8px 0; font-size: 1.4rem; }
-    p { margin: 0 0 12px 0; line-height: 1.45; }
-
-    .message {
-      padding: 14px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.06);
-      background: color-mix(in srgb, var(--fg) 4%, #0000);
-      font-weight: 600;
-    }
-
-    .controls {
-      margin-top: 14px;
+      height: 100vh;
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      transition: background 0.5s, color 0.5s;
+      text-align: center;
     }
-
-    select, button {
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.08);
-      font-size: 0.95rem;
-      background: transparent;
-      color: var(--fg);
+    body.light {
+      background: var(--bg-light);
+      color: var(--fg-light);
     }
-
-    .note { margin-top:10px; font-size:0.88rem; color: color-mix(in srgb, var(--fg) 70%, #0000); }
-    @media (prefers-color-scheme: dark) {
-      /* If user hasn't overridden via data-theme, body will still default visually; JS handles actual theme selection */
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--fg-dark);
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 10px 0;
+    }
+    p {
+      font-size: 1.2rem;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
-  <div class="card" role="region" aria-label="დასაკონტროლებელი ბლოკი">
-    <h1>გამოიცანი — დღეა თუ ღამე?</h1>
-    <p>ვებ-გვერდი სცდება სისტემური რეჟიმის შემოწმებას და ამაზე მიბმულად აჩვენებს სხვადასხვა ტექსტს. შეგიძლია გადართო ხელითაც.</p>
-
-    <div id="message" class="message" aria-live="polite">არულობს შემოწმება...</div>
-
-    <div class="controls" aria-hidden="false">
-      <label for="modeSelect">რეჟიმი:</label>
-      <select id="modeSelect" title="არჩევა: Auto = სისტემური ან დრო, Light = დღე, Dark = ღამე">
-        <option value="auto">Auto (სისტემა / დრო)</option>
-        <option value="light">Light (დღე)</option>
-        <option value="dark">Dark (ღამე)</option>
-      </select>
-
-      <button id="resetBtn" type="button" title="უფსკრულამდე დააბრუნე ავტომატურ რეჟიმში">Default (auto)</button>
-    </div>
-
-    <div class="note">
-      შენახულია ადვილი გადართვისთვის. სისტემური ცვლილებები (ნაყარი dark/light) დაიჭერს ავტომატურად როცა არის Auto.
-    </div>
-  </div>
+  <h1 id="status">მიმდინარეობს შემოწმება...</h1>
+  <p>შეცვალე ტელეფონის რეჟიმი (Light/Dark) და ნახე ცვლილება რეალურ დროში 🌙☀️</p>
 
   <script>
-    (function () {
-      const msgEl = document.getElementById('message');
-      const select = document.getElementById('modeSelect');
-      const resetBtn = document.getElementById('resetBtn');
-      const THEME_KEY = 'siteThemeMode'; // 'auto' | 'dark' | 'light'
+    const statusEl = document.getElementById('status');
+    let lastMode = null;
 
-      // Detect system preference media query
-      const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    function detectMode() {
+      // თუ ბრაუზერი მხარს უჭერს prefers-color-scheme-ს
+      let darkMode = window.matchMedia &&
+                     window.matchMedia('(prefers-color-scheme: dark)').matches;
+      let mode = darkMode ? 'dark' : 'light';
 
-      function timeBasedIsDark() {
-        const h = new Date().getHours();
-        // Define night as 18:00 - 05:59
-        return (h >= 18 || h < 6);
-      }
+      // მხოლოდ მაშინ განვაახლოთ თუ შეიცვალა
+      if (mode !== lastMode) {
+        lastMode = mode;
+        document.body.className = mode;
 
-      // Resolve effective theme based on stored preference, system, and time fallback
-      function resolveTheme() {
-        const stored = localStorage.getItem(THEME_KEY) || 'auto';
-        if (stored === 'light' || stored === 'dark') return stored;
-        // auto: prefer system if available, else use time
-        if (mq && typeof mq.matches === 'boolean') {
-          return mq.matches ? 'dark' : 'light';
-        }
-        return timeBasedIsDark() ? 'dark' : 'light';
-      }
-
-      // Update visual theme and message
-      function applyTheme(theme) {
-        // theme: 'dark' or 'light'
-        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
-
-        // Put any localized message you want here:
-        if (theme === 'dark') {
-          msgEl.textContent = 'გამარჯობა — ახლა ღამის რეჟიმია 🌙\nწყვდიადში უფრო მშვიდია.';
+        if (mode === 'dark') {
+          statusEl.textContent = '🌙 ახლა ღამის რეჟიმში ხარ — მშვიდად მოიქეცი!';
         } else {
-          msgEl.textContent = 'დილა მშვიდობისა — დღეა ☀️\nბნন্দვად არის და ნათელია.';
+          statusEl.textContent = '☀️ ახლა დღის რეჟიმია — ნათელი და მხიარული!';
         }
-
-        // Also show the reason (system/time/override)
-        const stored = localStorage.getItem(THEME_KEY) || 'auto';
-        let reason = '';
-        if (stored === 'light' || stored === 'dark') reason = ' (მოთითებული შენით)';
-        else if (mq && typeof mq.matches === 'boolean') reason = ' (სისტემური პარამეტრი)';
-        else reason = ' (დროის მიხედვით)';
-        msgEl.textContent += reason;
       }
+    }
 
-      // Initial set-up
-      function init() {
-        // restore selection UI
-        const stored = localStorage.getItem(THEME_KEY) || 'auto';
-        select.value = stored;
+    // პირველად შეამოწმე
+    detectMode();
 
-        // apply initial theme
-        const theme = resolveTheme();
-        applyTheme(theme);
-      }
-
-      // When system preference changes and user is in Auto, respond
-      if (mq && typeof mq.addEventListener === 'function') {
-        mq.addEventListener('change', (e) => {
-          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') {
-            const themeNow = e.matches ? 'dark' : 'light';
-            applyTheme(themeNow);
-          }
-        });
-      } else if (mq && typeof mq.addListener === 'function') {
-        // older browsers
-        mq.addListener((e) => {
-          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') {
-            const themeNow = e.matches ? 'dark' : 'light';
-            applyTheme(themeNow);
-          }
-        });
-      }
-
-      // UI change
-      select.addEventListener('change', () => {
-        const val = select.value;
-        if (val === 'auto') {
-          localStorage.removeItem(THEME_KEY);
-        } else {
-          localStorage.setItem(THEME_KEY, val);
-        }
-        applyTheme(resolveTheme());
-      });
-
-      resetBtn.addEventListener('click', () => {
-        select.value = 'auto';
-        localStorage.removeItem(THEME_KEY);
-        applyTheme(resolveTheme());
-      });
-
-      // If no system support, periodically check time when in auto (to update after midnight etc.)
-      if (!mq) {
-        // check every 5 minutes
-        setInterval(() => {
-          if ((localStorage.getItem(THEME_KEY) || 'auto') === 'auto') {
-            applyTheme(resolveTheme());
-          }
-        }, 5 * 60 * 1000);
-      }
-
-      // Run initial
-      init();
-    })();
+    // შემდეგ ყოველ 1 წამში შეამოწმე — იმუშავებს iOS/Android-ზეც
+    setInterval(detectMode, 1000);
   </script>
 </body>
 </html>
