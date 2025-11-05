@@ -1,79 +1,85 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title></title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(180deg, #f0f0f0, #dcdcdc);
-      transition: background 0.4s, color 0.4s;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Hint Online/Offline</title>
+<style>
+  body {
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(180deg, #f2f2f2, #e0e0e0);
+    font-family: sans-serif;
+    transition: background 0.3s;
+  }
 
-    .box {
-      text-align: center;
-      padding: 30px;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      transition: all 0.4s;
-    }
+  .container {
+    text-align:center;
+  }
 
-    h1 {
-      margin: 0 0 10px 0;
-      font-size: 1.6rem;
-    }
+  h1, p {
+    margin:8px 0;
+    font-size:1.2rem;
+  }
 
-    p {
-      margin: 0;
-      font-size: 1.1rem;
-    }
+  /* Offline body style */
+  .offline {
+    background: #202124;
+  }
 
-    .offline {
-      background: #282c34;
-      color: white;
-    }
+  .offline h1, .offline p { color:#fff; }
 
-    .offline .box {
-      background: #333;
-      color: #fff;
-      transform: scale(1.05);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-    }
-  </style>
+  /* Dino inside text */
+  .dino {
+    width:24px;
+    vertical-align:middle;
+    margin-right:4px;
+  }
+
+</style>
 </head>
 <body>
-  <div class="box" id="statusBox">
-    <h1 id="title">📶 შენ ხარ ონლაინ!</h1>
-    <p id="text">ინტერნეტი მუშაობს ჩვეულებრივ რეჟიმში.</p>
+  <div class="container">
+    <h1 id="title">შენ ხარ ონლაინ!</h1>
+    <p id="text">
+      <!-- Dino SVG in text -->
+      <svg class="dino" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,142L8,142L8,144L0,144L0,142ZM28,142L32,142L32,144L28,144L28,142ZM96,142L104,142L104,144L96,144L96,142ZM80,100L76,100L76,114L72,114L72,120L68,120L68,124L64,124L64,140L68,140L68,144L60,144L60,132L56,132L56,128L52,128L52,132L48,132L48,136L44,136L44,140L48,140L48,144L40,144L40,128L36,128L36,124L32,124L32,120L28,120L28,116L24,116L24,112L20,112L20,88L24,88L24,96L28,96L28,100L32,100L32,104L40,104L40,100L44,100L44,96L50,96L50,92L56,92L56,88L60,88L60,62L64,62L64,58L96,58L96,62L100,62L100,80L80,80L80,84L92,84L92,88L76,88L76,96L84,96L84,104L80,104L80,100ZM82,140L84,140L84,142L82,142L82,140ZM12,136L20,136L20,138L12,138L12,136ZM110,134L116,134L116,136L110,136L110,134ZM0,128L32,128L32,130L0,130L0,128ZM72,128L128,128L128,130L72,130L72,128ZM68,64L68,68L72,68L72,64L68,64Z" stroke="none" fill="#535353"/>
+      </svg>
+      ✈️ 🇰🇵
+    </p>
   </div>
 
-  <script>
-    const title = document.getElementById('title');
-    const text = document.getElementById('text');
-    const box = document.getElementById('statusBox');
+<script>
+const title = document.getElementById('title');
+const text = document.getElementById('text');
 
-    function updateStatus() {
-      if (navigator.onLine) {
-        document.body.classList.remove('offline');
-        title.textContent = "📶 შენ ხარ ონლაინ!";
-        text.textContent = "ინტერნეტი მუშაობს ჩვეულებრივ რეჟიმში.";
-      } else {
-        document.body.classList.add('offline');
-        title.textContent = "🎉 მილოცვა! შენ ახლა ოფლაინ ხარ!";
-        text.textContent = "დროა დაისვენო — შემდეგ ეტაპზე გადადი (რელაქსი 😌)";
-      }
-    }
+function updateStatus(){
+  if(navigator.onLine){
+    document.body.classList.remove('offline');
+    title.textContent = "შენ ხარ ონლაინ!";
+    text.innerHTML = `
+      <svg class="dino" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,142L8,142L8,144L0,144L0,142ZM28,142L32,142L32,144L28,144L28,142ZM96,142L104,142L104,144L96,144L96,142ZM80,100L76,100L76,114L72,114L72,120L68,120L68,124L64,124L64,140L68,140L68,144L60,144L60,132L56,132L56,128L52,128L52,132L48,132L48,136L44,136L44,140L48,140L48,144L40,144L40,128L36,128L36,124L32,124L32,120L28,120L28,116L24,116L24,112L20,112L20,88L24,88L24,96L28,96L28,100L32,100L32,104L40,104L40,100L44,100L44,96L50,96L50,92L56,92L56,88L60,88L60,62L64,62L64,58L96,58L96,62L100,62L100,80L80,80L80,84L92,84L92,88L76,88L76,96L84,96L84,104L80,104L80,100ZM82,140L84,140L84,142L82,142L82,140ZM12,136L20,136L20,138L12,138L12,136ZM110,134L116,134L116,136L110,136L110,134ZM0,128L32,128L32,130L0,130L0,128ZM72,128L128,128L128,130L72,130L72,128ZM68,64L68,68L72,68L72,64L68,64Z" stroke="none" fill="#535353"/>
+      </svg> ✈️ 🇰🇵
+    `;
+  }else{
+    document.body.classList.add('offline');
+    title.textContent = "შენ ხარ ოფლაინ!";
+    text.innerHTML = `
+      <svg class="dino" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,142L8,142L8,144L0,144L0,142ZM28,142L32,142L32,144L28,144L28,142ZM96,142L104,142L104,144L96,144L96,142ZM80,100L76,100L76,114L72,114L72,120L68,120L68,124L64,124L64,140L68,140L68,144L60,144L60,132L56,132L56,128L52,128L52,132L48,132L48,136L44,136L44,140L48,140L48,144L40,144L40,128L36,128L36,124L32,124L32,120L28,120L28,116L24,116L24,112L20,112L20,88L24,88L24,96L28,96L28,100L32,100L32,104L40,104L40,100L44,100L44,96L50,96L50,92L56,92L56,88L60,88L60,62L64,62L64,58L96,58L96,62L100,62L100,80L80,80L80,84L92,84L92,88L76,88L76,96L84,96L84,104L80,104L80,100ZM82,140L84,140L84,142L82,142L82,140ZM12,136L20,136L20,138L12,138L12,136ZM110,134L116,134L116,136L110,136L110,134ZM0,128L32,128L32,130L0,130L0,128ZM72,128L128,128L128,130L72,130L72,128ZM68,64L68,68L72,68L72,64L68,64Z" stroke="none" fill="#fff"/>
+      </svg> ✈️ 🇰🇵
+    `;
+  }
+}
 
-    window.addEventListener('online', updateStatus);
-    window.addEventListener('offline', updateStatus);
-    updateStatus(); // სტარტზე შეამოწმოს სტატუსი
-  </script>
+window.addEventListener('online', updateStatus);
+window.addEventListener('offline', updateStatus);
+updateStatus();
+</script>
 </body>
 </html>
