@@ -1,92 +1,426 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto T-Rex Offline Game</title>
-<style>
-  body {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f7f7f7;
-  }
-  #offline-game {
-    width: 800px;
-    height: 150px;
-    border: 1px solid #ccc;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome Dino Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f7f7f7;
+            overflow: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #535353;
+        }
+    </style>
 </head>
 <body>
-სდდს
-<canvas id="offline-game"></canvas>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="600" height="150"></canvas>
+        <div class="status" id="status">🌐 ონლაინ რეჟიმი</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/gh/wayou/t-rex-runner@master/dist/t-rex-runner.min.js"></script>
-<script>
-window.addEventListener('load', () => {
-  const canvas = document.getElementById('offline-game');
-  const runner = new Runner(canvas, {
-    spriteDef: Runner.spriteDefinition,
-    useTimeTick: true
-  });
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusEl = document.getElementById('status');
 
-  // საწყისი დინოს ჩვენება
-  runner.playing = false;
-  runner.clearCanvas();
-  runner.tRex.draw(runner.canvasCtx);
+        // Game variables
+        let isGameRunning = false;
+        let isGameOver = false;
+        let score = 0;
+        let highScore = 0;
+        let gameSpeed = 6;
+        let frameCount = 0;
+        let groundX = 0;
 
-  let autoLoop;
+        // Dino
+        const dino = {
+            x: 25,
+            y: 0,
+            width: 44,
+            height: 47,
+            velY: 0,
+            jumping: false,
+            ducking: false,
+            gravity: 0.5,
+            jumpPower: -10,
+            groundY: 0
+        };
 
-  function autoStart() {
-    if(!autoLoop){
-      runner.playing = true;
-      runner.play(); // ბიბლიოთეკის main loop
+        // Calculate ground position
+        dino.groundY = canvas.height - 47 - 2;
+        dino.y = dino.groundY;
 
-      // ავტომატური tick loop
-      autoLoop = setInterval(() => {
-        const ctx = runner.canvasCtx;
-        runner.clearCanvas();
-        runner.horizon.update(runner.deltaTime, runner.currentSpeed);
-        runner.horizon.draw(ctx);
-        runner.tRex.update(runner.deltaTime);
-        runner.tRex.draw(ctx);
+        // Obstacles
+        let obstacles = [];
+        let obstacleTimer = 0;
+        let minObstacleGap = 50;
 
-        // ავტომატური jump დაბრკოლებებზე
-        const obstacles = runner.horizon.obstacles;
-        if(obstacles.length > 0){
-          const firstObs = obstacles[0];
-          const dist = firstObs.xPos - runner.tRex.xPos - runner.tRex.width;
-          if(dist < 60 && dist > 0 && !runner.tRex.jumping){
-            runner.tRex.startJump();
-          }
+        // Clouds
+        let clouds = [];
+
+        // Pterodactyls
+        let pteros = [];
+
+        // Initialize clouds
+        for (let i = 0; i < 5; i++) {
+            clouds.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * 50 + 20,
+                width: 46,
+                height: 14
+            });
         }
-      }, 20);
-    }
-  }
 
-  function autoStop() {
-    if(autoLoop){
-      clearInterval(autoLoop);
-      autoLoop = null;
-      runner.playing = false;
-      runner.clearCanvas();
-      runner.horizon.clear();
-      runner.tRex.reset();
-      runner.tRex.draw(runner.canvasCtx);
-    }
-  }
+        // Draw cloud
+        function drawCloud(x, y) {
+            ctx.fillStyle = '#f7f7f7';
+            ctx.strokeStyle = '#d3d3d3';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 7, 0, Math.PI * 2);
+            ctx.arc(x + 10, y - 3, 9, 0, Math.PI * 2);
+            ctx.arc(x + 22, y - 3, 9, 0, Math.PI * 2);
+            ctx.arc(x + 32, y, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        }
 
-  window.addEventListener('offline', autoStart);
-  window.addEventListener('online', autoStop);
+        // Draw dino
+        function drawDino() {
+            ctx.fillStyle = '#535353';
+            
+            const legFrame = Math.floor(frameCount / 6) % 2;
+            
+            // Body
+            ctx.fillRect(dino.x + 6, dino.y + 20, 34, 24);
+            
+            // Tail
+            ctx.fillRect(dino.x, dino.y + 25, 8, 4);
+            ctx.fillRect(dino.x + 2, dino.y + 29, 6, 4);
+            ctx.fillRect(dino.x + 4, dino.y + 33, 4, 4);
+            
+            // Neck
+            ctx.fillRect(dino.x + 32, dino.y + 10, 8, 14);
+            
+            // Head
+            ctx.fillRect(dino.x + 34, dino.y, 12, 12);
+            ctx.fillRect(dino.x + 42, dino.y + 4, 2, 6);
+            
+            // Eye
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(dino.x + 38, dino.y + 4, 3, 3);
+            
+            // Legs
+            ctx.fillStyle = '#535353';
+            if (isGameRunning && !dino.jumping) {
+                if (legFrame === 0) {
+                    ctx.fillRect(dino.x + 12, dino.y + 44, 4, 6);
+                    ctx.fillRect(dino.x + 26, dino.y + 44, 4, 4);
+                } else {
+                    ctx.fillRect(dino.x + 12, dino.y + 44, 4, 4);
+                    ctx.fillRect(dino.x + 26, dino.y + 44, 4, 6);
+                }
+            } else {
+                ctx.fillRect(dino.x + 12, dino.y + 44, 4, 5);
+                ctx.fillRect(dino.x + 26, dino.y + 44, 4, 5);
+            }
+            
+            // Arms
+            ctx.fillRect(dino.x + 32, dino.y + 22, 4, 6);
+        }
 
-  if(!navigator.onLine){
-    autoStart();
-  }
-});
-</script>
+        // Draw ground
+        function drawGround() {
+            ctx.strokeStyle = '#535353';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 2);
+            ctx.lineTo(canvas.width, canvas.height - 2);
+            ctx.stroke();
+            
+            // Ground bumps
+            for (let i = groundX; i < canvas.width; i += 20) {
+                if (Math.floor(i / 20) % 2 === 0) {
+                    ctx.fillStyle = '#535353';
+                    ctx.fillRect(i, canvas.height - 4, 2, 2);
+                }
+            }
+        }
 
+        // Draw cactus
+        function drawCactus(obs) {
+            ctx.fillStyle = '#535353';
+            
+            if (obs.cactusType === 1) {
+                // Small cactus
+                ctx.fillRect(obs.x, obs.y, 8, obs.height);
+                ctx.fillRect(obs.x - 2, obs.y + 5, 4, 8);
+                ctx.fillRect(obs.x + 6, obs.y + 8, 4, 8);
+            } else if (obs.cactusType === 2) {
+                // Large cactus
+                ctx.fillRect(obs.x, obs.y, 10, obs.height);
+                ctx.fillRect(obs.x - 3, obs.y + 10, 5, 12);
+                ctx.fillRect(obs.x + 8, obs.y + 8, 5, 15);
+            } else {
+                // Double small cactus
+                ctx.fillRect(obs.x, obs.y, 8, obs.height);
+                ctx.fillRect(obs.x - 2, obs.y + 5, 4, 8);
+                ctx.fillRect(obs.x + 15, obs.y, 8, obs.height);
+                ctx.fillRect(obs.x + 21, obs.y + 7, 4, 8);
+            }
+        }
+
+        // Update dino
+        function updateDino() {
+            if (dino.jumping) {
+                dino.velY += dino.gravity;
+                dino.y += dino.velY;
+
+                if (dino.y >= dino.groundY) {
+                    dino.y = dino.groundY;
+                    dino.jumping = false;
+                    dino.velY = 0;
+                }
+            }
+        }
+
+        // Auto jump AI
+        function autoJump() {
+            if (!isGameRunning || dino.jumping || isGameOver) return;
+
+            const nearestObstacle = obstacles[0];
+            if (nearestObstacle) {
+                const distance = nearestObstacle.x - (dino.x + dino.width);
+                const jumpDistance = 80 + (gameSpeed * 5);
+                
+                if (distance < jumpDistance && distance > 20) {
+                    dino.jumping = true;
+                    dino.velY = dino.jumpPower;
+                }
+            }
+        }
+
+        // Update obstacles
+        function updateObstacles() {
+            if (!isGameRunning || isGameOver) return;
+
+            obstacleTimer++;
+            
+            const minGap = 80;
+            const maxGap = 150;
+            const randomGap = Math.random() * (maxGap - minGap) + minGap;
+            
+            if (obstacleTimer > randomGap / gameSpeed * 10) {
+                const cactusType = Math.floor(Math.random() * 3) + 1;
+                let width = 8;
+                let height = 33;
+                
+                if (cactusType === 2) {
+                    width = 10;
+                    height = 47;
+                } else if (cactusType === 3) {
+                    width = 28;
+                    height = 33;
+                }
+                
+                obstacles.push({
+                    x: canvas.width,
+                    y: canvas.height - height - 2,
+                    width: width,
+                    height: height,
+                    cactusType: cactusType
+                });
+                obstacleTimer = 0;
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= gameSpeed;
+                
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        // Update clouds
+        function updateClouds() {
+            clouds.forEach(cloud => {
+                if (isGameRunning) {
+                    cloud.x -= gameSpeed * 0.2;
+                }
+                
+                if (cloud.x + cloud.width < 0) {
+                    cloud.x = canvas.width + Math.random() * 100;
+                    cloud.y = Math.random() * 50 + 20;
+                }
+            });
+        }
+
+        // Check collision
+        function checkCollision() {
+            for (let obs of obstacles) {
+                const dinoBox = {
+                    x: dino.x + 4,
+                    y: dino.y + 4,
+                    width: dino.width - 8,
+                    height: dino.height - 8
+                };
+                
+                if (dinoBox.x < obs.x + obs.width - 4 &&
+                    dinoBox.x + dinoBox.width > obs.x + 4 &&
+                    dinoBox.y < obs.y + obs.height - 4 &&
+                    dinoBox.y + dinoBox.height > obs.y + 4) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+
+        // Draw score
+        function drawScore() {
+            ctx.fillStyle = '#535353';
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'right';
+            
+            const scoreStr = Math.floor(score).toString().padStart(5, '0');
+            ctx.fillText(scoreStr, canvas.width - 10, 20);
+            
+            if (highScore > 0) {
+                ctx.fillText('HI ' + Math.floor(highScore).toString().padStart(5, '0'), canvas.width - 80, 20);
+            }
+            
+            if (isGameOver) {
+                ctx.textAlign = 'center';
+                ctx.font = '14px monospace';
+                ctx.fillText('G A M E  O V E R', canvas.width / 2, 40);
+            }
+        }
+
+        // Game over
+        function gameOver() {
+            isGameOver = true;
+            isGameRunning = false;
+            
+            if (score > highScore) {
+                highScore = score;
+            }
+            
+            setTimeout(() => {
+                if (!navigator.onLine) {
+                    resetGame();
+                }
+            }, 1000);
+        }
+
+        // Reset game
+        function resetGame() {
+            obstacles = [];
+            score = 0;
+            gameSpeed = 6;
+            obstacleTimer = 0;
+            frameCount = 0;
+            dino.y = dino.groundY;
+            dino.jumping = false;
+            dino.velY = 0;
+            isGameOver = false;
+            isGameRunning = true;
+        }
+
+        // Game loop
+        function gameLoop() {
+            ctx.fillStyle = '#f7f7f7';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw clouds
+            clouds.forEach(cloud => {
+                drawCloud(cloud.x, cloud.y);
+            });
+            updateClouds();
+            
+            drawGround();
+            
+            if (isGameRunning) {
+                groundX -= gameSpeed;
+                if (groundX < -20) groundX = 0;
+            }
+            
+            drawDino();
+            updateDino();
+            
+            obstacles.forEach(obs => {
+                drawCactus(obs);
+            });
+            updateObstacles();
+            
+            autoJump();
+            checkCollision();
+            
+            if (isGameRunning && !isGameOver) {
+                score += 0.1;
+                frameCount++;
+                
+                if (frameCount % 100 === 0 && gameSpeed < 13) {
+                    gameSpeed += 0.2;
+                }
+            }
+            
+            drawScore();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Network status
+        function updateNetworkStatus() {
+            if (navigator.onLine) {
+                statusEl.innerHTML = '🌐 ონლაინ რეჟიმი';
+                if (isGameRunning) {
+                    isGameRunning = false;
+                    isGameOver = false;
+                    obstacles = [];
+                    score = 0;
+                    gameSpeed = 6;
+                }
+            } else {
+                statusEl.innerHTML = '📴 ოფლაინ რეჟიმი';
+                if (!isGameRunning && !isGameOver) {
+                    resetGame();
+                }
+            }
+        }
+
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        updateNetworkStatus();
+        gameLoop();
+    </script>
 </body>
 </html>
