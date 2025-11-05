@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T-Rex Offline Game</title>
+<title>Auto T-Rex Offline Game</title>
 <style>
   body {
     margin: 0;
@@ -14,8 +14,9 @@
     background-color: #f7f7f7;
   }
   #offline-game {
-    width: 600px;
+    width: 800px;
     height: 150px;
+    border: 1px solid #ccc;
   }
 </style>
 </head>
@@ -25,40 +26,54 @@
 
 <script src="https://cdn.jsdelivr.net/gh/wayou/t-rex-runner@master/dist/t-rex-runner.min.js"></script>
 <script>
-window.addEventListener('load', () => { // დარწმუნებული ვართ რომ DOM მზადაა
+window.addEventListener('load', () => {
   const canvas = document.getElementById('offline-game');
-  const runner = new Runner(canvas);
+  const runner = new Runner(canvas, {
+    spriteDef: Runner.spriteDefinition,
+    useTimeTick: true
+  });
 
-  // თავიდან დინო უძრავია
-  runner.stop();
+  // საწყისი დინოს ჩვენება
   runner.playing = false;
+  runner.tRex.update(0); // დინოს რენდერი ერთხელ
   runner.clearCanvas();
-  runner.update();
+  runner.tRex.draw(runner.canvasCtx);
 
-  // Offline ჩართვა
-  function goOffline() {
+  let autoInterval;
+
+  function startAutoRunner() {
     if(!runner.playing) {
       runner.playing = true;
-      runner.play(); // თამაში ავტომატურად იწყება
+      runner.play();
+
+      autoInterval = setInterval(() => {
+        const obstacles = runner.horizon.obstacles;
+        if(obstacles.length > 0){
+          const firstObs = obstacles[0];
+          const obsDistance = firstObs.xPos - runner.tRex.xPos - runner.tRex.width;
+          if(obsDistance < 60 && obsDistance > 0 && !runner.tRex.jumping){
+            runner.tRex.startJump();
+          }
+        }
+      }, 20);
     }
   }
 
-  // Online გაჩერება
-  function goOnline() {
-    if(runner.playing) {
+  function stopAutoRunner() {
+    if(runner.playing){
       runner.playing = false;
       runner.stop();
       runner.clearCanvas();
-      runner.update();
+      runner.tRex.draw(runner.canvasCtx); // საწყისი დინოს ჩვენება
+      clearInterval(autoInterval);
     }
   }
 
-  window.addEventListener('offline', goOffline);
-  window.addEventListener('online', goOnline);
+  window.addEventListener('offline', startAutoRunner);
+  window.addEventListener('online', stopAutoRunner);
 
-  // თავიდან offline თუ უკვე არის
   if(!navigator.onLine){
-    goOffline();
+    startAutoRunner();
   }
 });
 </script>
