@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
   <meta charset="UTF-8">
-  <title>პენალტების სერია - Kidsmart</title>
+  <title>პენალტების სერია - Inter academy geoegia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <meta name="theme-color" content="#2a2a2a">
@@ -343,13 +343,13 @@
 
     .player-card {
       background-color: #333;
-      padding: 10px;
+      padding: 2px;
       border-radius: 5px;
       cursor: pointer;
       border: 2px solid transparent;
       transition: all 0.2s ease;
       font-size: 16px;
-      width: 120px;
+      width: 100%;
     }
 
     .player-card.selected {
@@ -419,7 +419,7 @@
 <body>
   
   <div id="player-selection-screen">
-    <h2>აირჩიე შენი 5 პენალტისტი (13-დან)</h2>
+    <h2>აირჩიე შენი 5 პენალტისტი</h2>
     <div id="player-list">
       </div>
     <p id="selection-status">არჩეულია 0/5</p>
@@ -521,19 +521,22 @@
 
     // ფეხბურთელების სია
     const allPlayers = [
-      { id: 1, name: 'გიორგი ქვილითაია' },
-      { id: 2, name: 'ხვიჩა კვარაცხელია' },
-      { id: 3, name: 'ბუდუ ზივზივაძე' },
-      { id: 4, name: 'ოთარ კიტეიშვილი' },
-      { id: 5, name: 'გიორგი ჩაკვეტაძე' },
-      { id: 6, name: 'ლევან მჭედლიძე' },
-      { id: 7, name: 'თორნიკე ოქრიაშვილი' },
-      { id: 8, name: 'ჯაბა კანკავა' },
-      { id: 9, name: 'ნიკა კვეკვესკირი' },
-      { id: 10, name: 'საბა ლობჟანიძე' },
-      { id: 11, name: 'გიორგი ქოჩორაშვილი' },
-      { id: 12, name: 'ლუკა ლოჩოშვილი' },
-      { id: 13, name: 'გურამ კაშია' }
+      { id: 1, name: 'იოანე კუხალაშვილი' },
+      { id: 2, name: 'ლუკა დონაძე' },
+      { id: 3, name: 'დანიელ გულედანი)' },
+      { id: 4, name: 'დემეტრე გრძელიშვილი' },
+      { id: 5, name: 'საბა თვაური' },
+      { id: 6, name: 'გიორგი მეგენეიშვილი' },
+      { id: 7, name: 'გიორგი ტვილდიანი' },
+      { id: 8, name: 'სანდრო ლატარაია' },
+      { id: 9, name: 'რეზი მამუდოვი' },
+      { id: 10, name: 'მათე ხარებავა' },
+      { id: 11, name: 'ანდრია შერმადინი' },
+      { id: 12, name: 'ალექსანდრე ღვედაშვილი' },
+      { id: 13, name: 'დანიელ ბაროიანი' },
+      { id: 14, name: 'ერეკლე რუხაია' },
+      { id: 15, name: 'დავით ველიჯანაშვილი' },
+      { id: 16, name: 'გაბრიელ უგრეხელიძე' }
     ];
 
     let selectedPlayers = []; // 5 არჩეული ფეხბურთელი
@@ -606,7 +609,7 @@
       if (isPlayerTurn) {
         // ფეხბურთელის სახელის ჩვენება
         const kicker = selectedPlayers[currentPlayerIndex % selectedPlayers.length];
-        kickerNameDisplay.textContent = `მესროლე: ${kicker.name}`;
+        kickerNameDisplay.textContent = `ურტყავს: ${kicker.name}`;
       } else {
         kickerNameDisplay.textContent = '';
       }
