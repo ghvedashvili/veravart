@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <meta name="theme-color" content="#2a2a2a">
-  <meta name="description" content="პენალტების სერიის თამაში - გამოიწვიე Kidsmart-თან">
+  <meta name="description" content="პენალტების სერიის თამაში - გამოიწვიე საქართველოს ნაკრებს">
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -77,14 +77,8 @@
       left: 50%;
       transform: translateX(-50%);
       top: 5vh;
-      /* რხევის ანიმაცია წავშალე */
       transition: all 0.3s ease;
     }
-
-    /* @keyframes shake {
-      25% { transform: translateX(-50%) rotate(1deg); }
-      75% { transform: translateX(-50%) rotate(-1deg); }
-    } */
 
     .hitbox {
       position: absolute;
@@ -191,7 +185,7 @@
       display: flex;
       justify-content: center;
       color: white;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: bold;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
       z-index: 10;
@@ -202,14 +196,14 @@
       top: 360px;
       text-align: center;
       color: white;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
       z-index: 10;
       padding: 5px 15px;
       border-radius: 20px;
       width: 100%;
-      left: 0;
+   
     }
     
     .penalty-count {
@@ -282,11 +276,13 @@
       text-align: center;
       width: 100%;
       left: 0;
+      /* --- მოთხოვნა 2: Instructions-ის დამალვა --- */
+      display: none; 
     }
 
     #kicker-name {
       position: absolute;
-      top: 430px;
+      top: 400px; /* სტილი შევცვალე 430-დან 400-ზე, რადგან instructions გაქრა */
       color: gold;
       font-size: 17px;
       font-weight: bold;
@@ -342,17 +338,15 @@
     }
 
     .player-card {
-    display: flex;
-    background-color: #333;
-    padding: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.2s 
-ease;
-    font-size: 12px;
-    /* width: 100%; */
-}
+      display: flex;
+      background-color: #333;
+      padding: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      font-size: 12px;
+    }
 
     .player-card.selected {
       border-color: #4CAF50;
@@ -423,7 +417,7 @@ ease;
   <div id="player-selection-screen">
     <h2>აირჩიე შენი 5 პენალტისტი</h2>
     <div id="player-list">
-      </div>
+    </div>
     <p id="selection-status">არჩეულია 0/5</p>
     <button id="start-game-btn" onclick="startGame()" disabled>თამაშის დაწყება</button>
   </div>
@@ -431,10 +425,10 @@ ease;
   <div class="container-fluid game-container" style="display: none;">
     <div class="row">
       <div class="col-12">
-        <div id="total-score" class="total-score">საერთო ანგარიში: მოთამაშე 0 - 0 Kidsmart</div>
+        <div id="total-score" class="total-score">საერთო ანგარიში: Inter academy U8 0 - 0 საქართველო</div>
         <div class="scoreboard">
-          <div id="player-score">მოთამაშე 0:</div>
-          <div id="computer-score">0 Kidsmart</div>
+          <div id="player-score">Inter academy U8 0:</div>
+          <div id="computer-score">0 საქართველო</div>
         </div>
         <div id="turn-indicator" class="turn-indicator">თქვენი პენალტი</div>
         
@@ -507,25 +501,25 @@ ease;
     let playerPenalties = 0;
     let computerPenalties = 0;
     let isPlayerTurn = true;
-    let gameActive = false; // Game starts inactive
+    let gameActive = false;
     const maxPenalties = 5;
     let selectedGoalkeeperPosition = null;
     let isSuddenDeath = false;
 
     // Goalkeeper images (თქვენი ორიგინალური სურათების ლინკები)
     const goalie = [
-      'img/leftdown.png',    // Position 0 - Left down
-      'img/leftup.png',      // Position 1 - Left up
-      'img/centerup.png',    // Position 2 - Center up
-      'img/rightup.png',     // Position 3 - Right up
-      'img/rightdown.png'    // Position 4 - Right down
+      'img/leftdown.png',     // Position 0 - Left down
+      'img/leftup.png',       // Position 1 - Left up
+      'img/centerup.png',     // Position 2 - Center up
+      'img/rightup.png',      // Position 3 - Right up
+      'img/rightdown.png'     // Position 4 - Right down
     ];
 
-    // ფეხბურთელების სია
+    // ფეხბურთელების სია (Inter Academy)
     const allPlayers = [
       { id: 1, name: 'იოანე კუხალაშვილი' },
       { id: 2, name: 'ლუკა დონაძე' },
-      { id: 3, name: 'დანიელ გულედანი)' },
+      { id: 3, name: 'დანიელ გულედანი' },
       { id: 4, name: 'დემეტრე გრძელიშვილი' },
       { id: 5, name: 'საბა თვაური' },
       { id: 6, name: 'გიორგი მეგენეიშვილი' },
@@ -541,12 +535,26 @@ ease;
       { id: 16, name: 'გაბრიელ უგრეხელიძე' }
     ];
 
+    // მეტოქე გუნდი - საქართველოს ნაკრები
+    const georgianNationalTeam = [
+      { id: 101, name: 'ხვიჩა კვარაცხელია' },
+      { id: 102, name: 'გიორგი ჩაკვეტაძე' },
+      { id: 103, name: 'ბუდუ ზივზივაძე' },
+      { id: 104, name: 'გიორგი ქოჩორაშვილი' },
+      { id: 105, name: 'ოთარ კიტეიშვილი' },
+      { id: 106, name: 'ლუკა ლოჩოშვილი' },
+      { id: 107, name: 'საბა ლობჟანიძე' },
+      { id: 108, name: 'ნიკა კვეკვესკირი' },
+      { id: 109, name: 'ლაშა დვალი' }
+    ];
+
     let selectedPlayers = []; // 5 არჩეული ფეხბურთელი
     let currentPlayerIndex = 0; // მიმდინარე ფეხბურთელის ინდექსი selectedPlayers მასივში
+    let currentComputerKickerIndex = 0; // მიმდინარე მეტოქე ფეხბურთელის ინდექსი
 
     // Firebase კონფიგურაცია (შეავსეთ თქვენი მონაცემებით)
     const firebaseConfig = {
-      apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
+      apiKey: "AIzaSyD0z4y5Q7Q5Z3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q3Q",
       authDomain: "newspaperveravart-default-rtdb.firebaseapp.com",
       databaseURL: "https://newspaperveravart-default-rtdb.firebaseio.com",
       projectId: "newspaperveravart",
@@ -568,6 +576,7 @@ ease;
     let offset, gf, b, ooo, yyy, gfcx;
 
     function initGameMeasurements() {
+      // ეს ფუნქცია უნდა გამოვიძახოთ მას შემდეგ, რაც game_field ეკრანზე გამოჩნდება!
       offset = 20;
       gf = game_field.getBoundingClientRect();
       b = ball.getBoundingClientRect();
@@ -587,12 +596,12 @@ ease;
 
     // Update UI elements
     function updateUI() {
-      document.getElementById('player-score').textContent = `მოთამაშე ${playerScore}:`;
-      document.getElementById('computer-score').textContent = `${computerScore} Kidsmart`;
-      document.getElementById('total-score').textContent = `საერთო ანგარიში: მოთამაშე ${totalPlayerWins} - ${totalComputerWins} Kidsmart`;
+      document.getElementById('player-score').textContent = `Inter academy U8 ${playerScore}:`;
+      document.getElementById('computer-score').textContent = `${computerScore} საქართველო`;
+      document.getElementById('total-score').textContent = `საერთო ანგარიში: Inter academy U8 ${totalPlayerWins} - ${totalComputerWins} საქართველო`;
       
       const indicator = document.getElementById('turn-indicator');
-      indicator.textContent = isPlayerTurn ? 'შენი პენალტი' : 'Kidsmart-ის პენალტი';
+      indicator.textContent = isPlayerTurn ? 'Inter academy U8 - ს პენალტი' : 'საქართველოს ნაკრების პენალტი';
       indicator.style.color = isPlayerTurn ? '#4CAF50' : '#F44336';
       
       const penaltyCount = document.getElementById('penalty-count');
@@ -609,11 +618,15 @@ ease;
         : 'აირჩიე მოგერიების კუთხე';
         
       if (isPlayerTurn) {
-        // ფეხბურთელის სახელის ჩვენება
+        // ფეხბურთელის სახელის ჩვენება (შენი გუნდის)
         const kicker = selectedPlayers[currentPlayerIndex % selectedPlayers.length];
         kickerNameDisplay.textContent = `ურტყავს: ${kicker.name}`;
       } else {
-        kickerNameDisplay.textContent = '';
+        // მეტოქე გუნდის ფეხბურთელის სახელის ჩვენება
+        // !!! მნიშვნელოვანია: ვიყენებთ computerPenalties, რადგან currentComputerKickerIndex ჯერ არ განახლებულა.
+        const indexToDisplay = computerPenalties % georgianNationalTeam.length;
+        const kicker = georgianNationalTeam[indexToDisplay];
+        kickerNameDisplay.textContent = `ურტყავს: ${kicker.name}`;
       }
     }
 
@@ -626,21 +639,24 @@ ease;
       });
     }
 
-    // Computer's turn logic
+    // Computer's turn logic (საქართველოს ნაკრების დარტყმა)
     function computerShoot() {
       if (!gameActive) return;
       
+      // 1. თუ მეკარე არ არის არჩეული, აჩვენეთ მოგერიების ზონები
       if (selectedGoalkeeperPosition === null) {
         setHitboxesVisibility(true, true);
         game_field.classList.remove('computer-shot');
         game_field.classList.add('goalkeeper-select');
-        updateUI();
+        // გვარის განახლება ხდება updateUI-ში
+        updateUI(); 
         return;
       }
       
+      // 2. კომპიუტერის დარტყმის კუთხის არჩევა (ავტომატურად)
       const hitboxIndex = Math.floor(Math.random() * 5);
       const hitbox = document.querySelector(`.hitbox[box="${hitboxIndex}"]`);
-      // Adjust target X and Y calculation to avoid using raw clientX/Y
+      
       const goalRect = goal.getBoundingClientRect();
       const targetX = goalRect.left + hitbox.offsetLeft + hitbox.offsetWidth / 2 - ooo - 20;
       const targetY = goalRect.top + hitbox.offsetTop + hitbox.offsetHeight / 2 - yyy - 20;
@@ -648,6 +664,8 @@ ease;
       setHitboxesVisibility(false);
       animateShot(targetX, targetY, selectedGoalkeeperPosition, hitboxIndex, false);
       selectedGoalkeeperPosition = null;
+      
+      // currentComputerKickerIndex-ის გაზრდა ხდება resetAfterShot-ში!
     }
 
     // Animate the penalty shot
@@ -658,7 +676,6 @@ ease;
       
       // Set goalkeeper position
       goal.style.backgroundImage = `url(${goalie[goalieIndex]})`;
-      // მეკარის რხევის ანიმაცია წავშალეთ, ამიტომ არც reset-ია საჭირო: goal.style.animation = 'none';
       
       // Position goalkeeper
       goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
@@ -672,7 +689,6 @@ ease;
 
       // Animate ball
       ball.className = 'kicked';
-      // ball position needs to be relative to game_field
       const ballX = targetX - (gf.width * 0.5) + (ball.offsetWidth / 2);
       const ballY = targetY;
 
@@ -691,7 +707,8 @@ ease;
           failure.className = 'show_result';
         }
         
-        updateUI();
+        // updateUI() აქ არ გვჭირდება, რადგან ქულა განახლდება resetAfterShot-ში
+        // updateUI(); 
 
         setTimeout(() => {
           resetAfterShot(isGoal, isPlayerShot);
@@ -715,7 +732,7 @@ ease;
         });
         
         document.getElementById('total-score').textContent = 
-          `საერთო ანგარიში: მოთამაშე ${totalPlayerWins} - ${totalComputerWins} Kidsmart`;
+          `საერთო ანგარიში: Inter academy U8 ${totalPlayerWins} - ${totalComputerWins} საქართველო`;
       });
     }
 
@@ -734,7 +751,6 @@ ease;
 
     // Check for winner conditions
     function checkForWinner() {
-      // In sudden death, check after each pair of kicks
       if (isSuddenDeath && playerPenalties === computerPenalties && playerPenalties > maxPenalties) {
         if (playerScore > computerScore) {
           return {gameOver: true, winner: 'player'};
@@ -742,11 +758,9 @@ ease;
         if (computerScore > playerScore) {
           return {gameOver: true, winner: 'computer'};
         }
-        // If still tied, continue sudden death
         return {gameOver: false};
       }
       
-      // Check if one team can't be caught in regular time
       if (!isSuddenDeath && playerPenalties <= maxPenalties && computerPenalties <= maxPenalties) {
         const remainingPlayerKicks = maxPenalties - playerPenalties;
         const remainingComputerKicks = maxPenalties - computerPenalties;
@@ -759,7 +773,6 @@ ease;
         }
       }
       
-      // After regular penalties, check if we need sudden death
       if (!isSuddenDeath && playerPenalties >= maxPenalties && computerPenalties >= maxPenalties) {
         if (playerScore !== computerScore) {
           return {
@@ -780,7 +793,6 @@ ease;
     function resetAfterShot(isGoal, isPlayerShot) {
       // Reset game elements
       goal.style.backgroundImage = 'url(https://contentservice.mc.reyrey.net/image_v1.0.0/?id=f4278541-20df-568f-baea-e387ee22937c&638600307412335028)';
-      // goal.style.animation = 'shake .25s linear infinite'; // რხევის ანიმაცია წავშალეთ
       goal.classList.remove('goalie-left', 'goalie-right', 'goalie-center');
       ball.style.left = '';
       ball.style.top = '';
@@ -791,10 +803,11 @@ ease;
       // Update penalties count
       if (isPlayerShot) {
         playerPenalties++;
-        // ფეხბურთელების ინდექსის განახლება
         currentPlayerIndex++;
       } else {
+        // !!! ეს არის გასწორების ადგილი. მეტოქის ინდექსს ვზრდით დარტყმის შემდეგ.
         computerPenalties++;
+        currentComputerKickerIndex++; 
       }
       
       // Check for winner
@@ -807,14 +820,13 @@ ease;
       // Switch turns if game continues
       isPlayerTurn = !isPlayerTurn;
       
-      // In sudden death, only show hitboxes when it's player's turn to shoot
       if (!isSuddenDeath || isPlayerTurn) {
         setHitboxesVisibility(true);
       }
       
       updateUI();
       
-      // Computer's turn logic
+      // Computer's turn logic (ახლა საქართველოს ნაკრების დარტყმის ჯერია)
       if (!isPlayerTurn && (!isSuddenDeath || computerPenalties <= playerPenalties)) {
         setTimeout(computerShoot, 1000);
       }
@@ -829,7 +841,7 @@ ease;
       if (winner === 'player') {
         resultMessage.textContent = 'გილოცავთ, თქვენ გაიმარჯვეთ!';
       } else if (winner === 'computer') {
-        resultMessage.textContent = 'თქვენ დამარცხდით!';
+        resultMessage.textContent = 'თქვენ დამარცხდით! (საქართველოს ნაკრებმა გაიმარჯვა)';
       } else {
         resultMessage.textContent = 'ფრე!';
       }
@@ -837,34 +849,35 @@ ease;
       finalScore.textContent = `ფინალური ანგარიში: ${playerScore} - ${computerScore}`;
       document.getElementById('game-over').style.display = 'flex';
       
-      // შევინახოთ შედეგი Firebase-ში მხოლოდ თუ არის გამარჯვებული
       if (winner === 'player' || winner === 'computer') {
         saveMatchResult(winner);
       }
     }
 
-    // Restart game
+    // Restart game (გასწორებულია)
     function restartGame() {
-      // Reset game state
+      // 1. თამაშის მდგომარეობის ცვლადების განულება
       playerScore = 0;
       computerScore = 0;
       playerPenalties = 0;
       computerPenalties = 0;
       isPlayerTurn = true;
-      gameActive = false; // Back to inactive for selection
+      gameActive = false;
       selectedGoalkeeperPosition = null;
       isSuddenDeath = false;
-      selectedPlayers = [];
       currentPlayerIndex = 0;
+      currentComputerKickerIndex = 0; // მეტოქის ინდექსის გადატვირთვა
       
-      setHitboxesVisibility(true);
-      updateUI();
-      document.getElementById('game-over').style.display = 'none';
+      // 2. UI ელემენტების გადატვირთვა
+      setHitboxesVisibility(true); // ვაჩენთ hitboxes-ს
+      document.getElementById('game-over').style.display = 'none'; // ვმალავთ Game Over ეკრანს
+      gameContainer.style.display = 'none'; // ვმალავთ თამაშის კონტეინერს
+
+      // 3. მოთამაშის არჩევის ეკრანის გამოჩენა და ინიციალიზაცია
+      playerSelectionScreen.style.display = 'flex'; // ვაჩენთ არჩევის ეკრანს
+      initializePlayerSelection(); // ვაძლევთ ფეხბურთელების ხელახლა არჩევის საშუალებას
       
-      // Show player selection screen
-      gameContainer.style.display = 'none';
-      playerSelectionScreen.style.display = 'flex';
-      initializePlayerSelection();
+      updateUI(); // ვაახლებთ ანგარიშს (0:0)
     }
 
     // Handle penalty shot clicks
@@ -876,17 +889,18 @@ ease;
       
       setHitboxesVisibility(false);
       
-      // Goalkeeper selection mode (when Kidsmart shoots)
+      // Goalkeeper selection mode (when Georgia shoots)
       if (!isPlayerTurn) {
         selectedGoalkeeperPosition = Number(el.getAttribute('box'));
         setHitboxesVisibility(false);
+        // ინსტრუქციების დამალვის გამო, ეს სტრიქონი აღარ არის საჭირო: 
+        // document.getElementById('instructions').textContent = 'საქართველოს ნაკრები ურტყამს...';
         setTimeout(computerShoot, 500);
         return;
       }
       
       // Player's shot
       const hitboxIndex = Number(el.getAttribute('box'));
-      // We need to calculate the target coordinates relative to the game_field's origin (ooo, yyy)
       const goalRect = goal.getBoundingClientRect();
       const targetX = goalRect.left + el.offsetLeft + el.offsetWidth / 2 - ooo - 20;
       const targetY = goalRect.top + el.offsetTop + el.offsetHeight / 2 - yyy - 20;
@@ -898,8 +912,8 @@ ease;
 
     // Initialize mouse move for ball trajectory
     function handleMouseMove(e) {
-      if (!isPlayerTurn || !gameActive) return;
-      
+      if (!isPlayerTurn || !gameActive || !b) return;
+
       const x = e.clientX - ooo - offset;
       const y = e.clientY - yyy - offset;
       path.setAttribute('d', `M ${b.x - ooo} ${b.y + offset} C ${gfcx} 250, ${gfcx} 150, ${x} ${y}`);
@@ -909,7 +923,7 @@ ease;
 
     function initializePlayerSelection() {
       playerListContainer.innerHTML = '';
-      selectedPlayers = [];
+      selectedPlayers = []; // ვასუფთავებთ არჩეულ ფეხბურთელებს
       selectionStatus.textContent = 'არჩეულია 0/5';
       startGameBtn.disabled = true;
       startGameBtn.classList.remove('active');
@@ -950,7 +964,7 @@ ease;
       }
     }
 
-    function startGame() {
+    window.startGame = function() {
       if (selectedPlayers.length !== maxPenalties) {
         alert('გთხოვთ, აირჩიოთ ზუსტად 5 ფეხბურთელი.');
         return;
@@ -959,15 +973,18 @@ ease;
       // Hide selection screen and show game
       playerSelectionScreen.style.display = 'none';
       gameContainer.style.display = 'block';
+      
+      // ზომების ინიციალიზაცია კონტეინერის გამოჩენის შემდეგ
+      initGameMeasurements(); 
+      
       gameActive = true;
       currentPlayerIndex = 0;
+      currentComputerKickerIndex = 0;
 
       // Start the game loop
       setHitboxesVisibility(true);
       updateUI();
-      initGameMeasurements();
       
-      // If computer starts (not implemented in original logic, but good practice)
       if (!isPlayerTurn) {
         setTimeout(computerShoot, 1000);
       }
@@ -1059,10 +1076,3 @@ ease;
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
