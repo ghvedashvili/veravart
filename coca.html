@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Coca-Cola 3D Can</title>
+    <title> Coca-Cola </title>
     <style>
         * {
             margin: 0;
@@ -181,10 +181,9 @@
     </style>
 </head>
 <body>
-    <div class="title">Interactive Coca-Cola 3D Can</div>
+    <div class="title"> დაასახელე მწარმოებელი კომპანის patron-ი</div>
     
-    <div class="zoom-level" id="zoomLevel">100%</div>
-    <div class="zoom-hint">Use two fingers to zoom</div>
+  
     
     <div class="coca-cola-container" id="canContainer">
         <div class="coca-cola" id="cocaCola">
@@ -236,14 +235,14 @@
     </div>
     
     <div class="instructions">
-        Drag to rotate | Pinch to zoom
+      
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const canContainer = document.getElementById('canContainer');
             const cocaCola = document.getElementById('cocaCola');
-            const zoomLevel = document.getElementById('zoomLevel');
+        
             
             let isDragging = false;
             let isZooming = false;
@@ -382,7 +381,7 @@
             
             function updateZoom() {
                 canContainer.style.transform = `scale(${currentZoom})`;
-                zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+              
             }
             
             // Initialize
