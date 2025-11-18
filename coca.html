@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Coca-Cola </title>
+    <title>Coca-Cola</title>
     <style>
         * {
             margin: 0;
@@ -49,6 +49,67 @@
             border-radius: 10px;
             font-size: 1.2rem;
             z-index: 10;
+        }
+
+        .answer-container {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            text-align: center;
+        }
+
+        .answer-input {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border: 3px solid white;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            width: 300px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            background: white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .submit-btn {
+            margin-top: 15px;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            background: white;
+            color: #EB191E;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .message {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        .correct {
+            color: #90EE90;
+        }
+
+        .incorrect {
+            color: #FFB6C1;
         }
 
         .coca-cola-container {
@@ -177,13 +238,22 @@
             .title {
                 font-size: 2rem;
             }
+            
+            .answer-input {
+                width: 250px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="title"> დაასახელე მწარმოებელი კომპანის patron-ი</div>
+    <div class="title">დაასახელე მწარმოებელი კომპანის patron-ი</div>
     
-  
+    <div class="answer-container">
+        <input type="text" class="answer-input" id="answerInput" placeholder="ჩაწერეთ პასუხი..." autocomplete="off">
+        <button class="submit-btn" id="submitBtn">შემოწმება</button>
+        <div class="message" id="message"></div>
+    </div>
     
     <div class="coca-cola-container" id="canContainer">
         <div class="coca-cola" id="cocaCola">
@@ -234,15 +304,15 @@
         </div>
     </div>
     
-    <div class="instructions">
-      
-    </div>
+    
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const canContainer = document.getElementById('canContainer');
             const cocaCola = document.getElementById('cocaCola');
-        
+            const answerInput = document.getElementById('answerInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const message = document.getElementById('message');
             
             let isDragging = false;
             let isZooming = false;
@@ -251,9 +321,45 @@
             let currentZoom = 1;
             let initialDistance = null;
 
+            // Correct answers
+            const correctAnswers = ['escobar', 'pablo', 'pablo escobar'];
+
+            // Submit answer function
+            function checkAnswer() {
+                const userAnswer = answerInput.value.trim().toLowerCase();
+                
+                if (correctAnswers.includes(userAnswer)) {
+                    message.textContent = '✅ სწორი პასუხი!';
+                    message.className = 'message correct';
+                    answerInput.style.borderColor = '#90EE90';
+                    answerInput.style.background = 'rgba(144, 238, 144, 0.2)';
+                } else {
+                    message.textContent = '❌ არასწორი პასუხი, სცადეთ თავიდან';
+                    message.className = 'message incorrect';
+                    answerInput.style.borderColor = '#FFB6C1';
+                    answerInput.style.background = 'rgba(255, 182, 193, 0.2)';
+                    
+                    // Clear message after 3 seconds
+                    setTimeout(() => {
+                        message.textContent = '';
+                        answerInput.style.borderColor = 'white';
+                        answerInput.style.background = 'rgba(255, 255, 255, 0.9)';
+                    }, 3000);
+                }
+            }
+
+            // Event listeners for answer submission
+            submitBtn.addEventListener('click', checkAnswer);
+            
+            answerInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+
             // Mouse drag events for rotation
             canContainer.addEventListener('mousedown', function(e) {
-                if (e.touches && e.touches.length >= 2) return; // Ignore if multitouch
+                if (e.touches && e.touches.length >= 2) return;
                 isDragging = true;
                 previousMousePosition = { x: e.clientX, y: e.clientY };
                 canContainer.style.cursor = 'grabbing';
@@ -268,7 +374,6 @@
                 rotation.y += deltaX * 0.5;
                 rotation.x -= deltaY * 0.2;
                 
-                // Limit vertical rotation for better UX
                 rotation.x = Math.max(-60, Math.min(10, rotation.x));
                 
                 updateCanRotation();
@@ -285,12 +390,10 @@
             canContainer.addEventListener('wheel', function(e) {
                 e.preventDefault();
                 if (e.deltaY < 0) {
-                    // Zoom in
                     if (currentZoom < 3) {
                         currentZoom += 0.1;
                     }
                 } else {
-                    // Zoom out
                     if (currentZoom > 0.5) {
                         currentZoom -= 0.1;
                     }
@@ -301,14 +404,12 @@
             // Touch events for mobile devices
             canContainer.addEventListener('touchstart', function(e) {
                 if (e.touches.length === 1) {
-                    // Single touch for rotation
                     isDragging = true;
                     previousMousePosition = { 
                         x: e.touches[0].clientX, 
                         y: e.touches[0].clientY 
                     };
                 } else if (e.touches.length === 2) {
-                    // Two touches for zooming
                     isZooming = true;
                     isDragging = false;
                     initialDistance = getDistance(
@@ -321,14 +422,12 @@
             
             canContainer.addEventListener('touchmove', function(e) {
                 if (e.touches.length === 1 && isDragging && !isZooming) {
-                    // Single touch rotation
                     const deltaX = e.touches[0].clientX - previousMousePosition.x;
                     const deltaY = e.touches[0].clientY - previousMousePosition.y;
                     
                     rotation.y += deltaX * 0.5;
                     rotation.x -= deltaY * 0.2;
                     
-                    // Limit vertical rotation for better UX
                     rotation.x = Math.max(-60, Math.min(10, rotation.x));
                     
                     updateCanRotation();
@@ -338,7 +437,6 @@
                         y: e.touches[0].clientY 
                     };
                 } else if (e.touches.length === 2 && isZooming) {
-                    // Two touch zoom
                     const currentDistance = getDistance(
                         e.touches[0].clientX, e.touches[0].clientY,
                         e.touches[1].clientX, e.touches[1].clientY
@@ -348,7 +446,6 @@
                         const zoomFactor = currentDistance / initialDistance;
                         const newZoom = currentZoom * zoomFactor;
                         
-                        // Limit zoom range
                         if (newZoom >= 0.5 && newZoom <= 3) {
                             currentZoom = newZoom;
                             updateZoom();
@@ -370,7 +467,6 @@
                 }
             });
 
-            // Helper function to calculate distance between two points
             function getDistance(x1, y1, x2, y2) {
                 return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
             }
@@ -381,7 +477,6 @@
             
             function updateZoom() {
                 canContainer.style.transform = `scale(${currentZoom})`;
-              
             }
             
             // Initialize
