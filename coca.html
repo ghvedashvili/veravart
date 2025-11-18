@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Coca-Cola 3D Can</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #EB191E;
+            box-shadow: inset 0 0 1000px 0px #960612;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-family: 'Arial Black', sans-serif;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            text-align: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            font-size: 1.2rem;
+        }
+
+        .coca-cola-container {
+            perspective: 800px;
+            width: 100vw;
+            height: 70vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .coca-cola-container:active {
+            cursor: grabbing;
+        }
+
+        .coca-cola-container * {
+            transform-style: preserve-3d;
+        }
+
+        .coca-cola {
+            transform-origin: center center -51px;
+            transform: rotateX(-20deg);
+            width: 15px;
+            height: 210px;
+            margin: auto;
+            transition: transform 0.1s;
+        }
+
+        .tin {
+            width: 100%;
+            height: 100%;
+            transform: translateX(99.5%) rotateY(17.14deg);
+            transform-origin: left;
+            position: relative;
+            left: 0;
+            top: 0;
+            background-color: #be0709;
+            background-image: url('https://image.ibb.co/cUoAd5/coca_cola_label.jpg');
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            background-color: red;
+        }
+
+        .tin--1 { background-position: 0% top; }
+        .tin--2 { background-position: 5% top; }
+        .tin--3 { background-position: 10% top; }
+        .tin--4 { background-position: 15% top; }
+        .tin--5 { background-position: 20% top; }
+        .tin--6 { background-position: 25% top; }
+        .tin--7 { background-position: 30% top; }
+        .tin--8 { background-position: 35% top; }
+        .tin--9 { background-position: 40% top; }
+        .tin--10 { background-position: 45% top; }
+        .tin--11 { background-position: 50% top; }
+        .tin--12 { background-position: 55% top; }
+        .tin--13 { background-position: 60% top; }
+        .tin--14 { background-position: 65% top; }
+        .tin--15 { background-position: 70% top; }
+        .tin--16 { background-position: 75% top; }
+        .tin--17 { background-position: 80% top; }
+        .tin--18 { background-position: 85% top; }
+        .tin--19 { background-position: 90% top; }
+        .tin--20 { background-position: 95% top; }
+        .tin--21 { background-position: 100% top; }
+
+        .top {
+            background-color: #86919a;
+            background-image: url('https://image.ibb.co/na6wJ5/top_tin.png');
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            transform: rotateX(-90deg) translateX(-50%) translateY(-0%);
+            transform-origin: top;
+            left: 50%;
+            border-radius: 50%;
+        }
+
+        .bottom {
+            box-shadow: 0px 0 39px -5px black;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            top: 100%;
+            transform: rotateX(-90deg) translateX(-50%) translateY(0%);
+            transform-origin: top;
+            left: 50%;
+            border-radius: 50%;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .rotation-display {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">Interactive Coca-Cola 3D Can</div>
+    
+    <div class="coca-cola-container" id="canContainer">
+        <div class="coca-cola" id="cocaCola">
+            <div class="tin tin--1">
+                <div class="top"></div>
+                <div class="bottom"></div>
+                <div class="tin tin--2">
+                    <div class="tin tin--3">
+                        <div class="tin tin--4">
+                            <div class="tin tin--5">
+                                <div class="tin tin--6">
+                                    <div class="tin tin--7">
+                                        <div class="tin tin--8">
+                                            <div class="tin tin--9">
+                                                <div class="tin tin--10">
+                                                    <div class="tin tin--11">
+                                                        <div class="tin tin--12">
+                                                            <div class="tin tin--13">
+                                                                <div class="tin tin--14">
+                                                                    <div class="tin tin--15">
+                                                                        <div class="tin tin--16">
+                                                                            <div class="tin tin--17">
+                                                                                <div class="tin tin--18">
+                                                                                    <div class="tin tin--19">
+                                                                                        <div class="tin tin--20">
+                                                                                            <div class="tin tin--21">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="control-btn" id="resetBtn">Reset View</button>
+        <button class="control-btn" id="autoRotateBtn">Auto Rotate</button>
+    </div>
+    
+    <div class="rotation-display">
+        Rotation: <span id="rotationValue">0°</span>
+    </div>
+    
+    <div class="instructions">
+        Click and drag to rotate the can | Use buttons for additional controls
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canContainer = document.getElementById('canContainer');
+            const cocaCola = document.getElementById('cocaCola');
+            const resetBtn = document.getElementById('resetBtn');
+            const autoRotateBtn = document.getElementById('autoRotateBtn');
+            const rotationValue = document.getElementById('rotationValue');
+            
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let rotation = { x: -20, y: 0 };
+            let isAutoRotating = false;
+            let autoRotationInterval;
+            
+            // Mouse drag events
+            canContainer.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+                canContainer.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                rotation.y += deltaX * 0.5;
+                rotation.x -= deltaY * 0.2;
+                
+                // Limit vertical rotation for better UX
+                rotation.x = Math.max(-60, Math.min(10, rotation.x));
+                
+                updateCanRotation();
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                canContainer.style.cursor = 'grab';
+            });
+            
+            // Touch events for mobile devices
+            canContainer.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                previousMousePosition = { 
+                    x: e.touches[0].clientX, 
+                    y: e.touches[0].clientY 
+                };
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                
+                rotation.y += deltaX * 0.5;
+                rotation.x -= deltaY * 0.2;
+                
+                // Limit vertical rotation for better UX
+                rotation.x = Math.max(-60, Math.min(10, rotation.x));
+                
+                updateCanRotation();
+                
+                previousMousePosition = { 
+                    x: e.touches[0].clientX, 
+                    y: e.touches[0].clientY 
+                };
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                rotation = { x: -20, y: 0 };
+                updateCanRotation();
+                stopAutoRotation();
+            });
+            
+            // Auto rotate button
+            autoRotateBtn.addEventListener('click', function() {
+                if (isAutoRotating) {
+                    stopAutoRotation();
+                } else {
+                    startAutoRotation();
+                }
+            });
+            
+            function updateCanRotation() {
+                cocaCola.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
+                rotationValue.textContent = `${Math.round(rotation.y)}°`;
+            }
+            
+            function startAutoRotation() {
+                isAutoRotating = true;
+                autoRotateBtn.textContent = 'Stop Rotation';
+                
+                autoRotationInterval = setInterval(function() {
+                    rotation.y += 1;
+                    updateCanRotation();
+                }, 30);
+            }
+            
+            function stopAutoRotation() {
+                isAutoRotating = false;
+                autoRotateBtn.textContent = 'Auto Rotate';
+                clearInterval(autoRotationInterval);
+            }
+            
+            // Initialize
+            updateCanRotation();
+        });
+    </script>
+</body>
+</html>
