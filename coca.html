@@ -57,6 +57,8 @@
             align-items: center;
             cursor: grab;
             user-select: none;
+            transform: scale(1);
+            transition: transform 0.3s ease;
         }
 
         .coca-cola-container:active {
@@ -85,7 +87,7 @@
             left: 0;
             top: 0;
             background-color: #be0709;
-            background: url('img/coca-cola-label.png');
+            background-image: url('img/coca-cola-label.png');
             background-repeat: no-repeat;
             background-size: auto 100%;
             background-color: red;
@@ -139,38 +141,50 @@
             border-radius: 50%;
         }
 
-        .controls {
+        .zoom-controls {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
-            gap: 20px;
-            margin-top: 20px;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .control-btn {
+        .zoom-btn {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid white;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             transition: all 0.3s;
         }
 
-        .control-btn:hover {
+        .zoom-btn:hover {
             background: rgba(255, 255, 255, 0.3);
         }
 
-        .rotation-display {
-            margin-top: 15px;
-            font-size: 1.2rem;
+        .zoom-level {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             background: rgba(0, 0, 0, 0.5);
             padding: 5px 15px;
             border-radius: 5px;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
     <div class="title">Interactive Coca-Cola 3D Can</div>
+    
+    <div class="zoom-level" id="zoomLevel">100%</div>
     
     <div class="coca-cola-container" id="canContainer">
         <div class="coca-cola" id="cocaCola">
@@ -221,32 +235,29 @@
         </div>
     </div>
     
-    <div class="controls">
-        <button class="control-btn" id="resetBtn">Reset View</button>
-        <button class="control-btn" id="autoRotateBtn">Auto Rotate</button>
-    </div>
-    
-    <div class="rotation-display">
-        Rotation: <span id="rotationValue">0°</span>
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomIn">+</button>
+        <button class="zoom-btn" id="zoomOut">-</button>
+        <button class="zoom-btn" id="resetZoom">↺</button>
     </div>
     
     <div class="instructions">
-        Click and drag to rotate the can | Use buttons for additional controls
+        Click and drag to rotate the can | Use buttons to zoom
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const canContainer = document.getElementById('canContainer');
             const cocaCola = document.getElementById('cocaCola');
-            const resetBtn = document.getElementById('resetBtn');
-            const autoRotateBtn = document.getElementById('autoRotateBtn');
-            const rotationValue = document.getElementById('rotationValue');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const resetZoomBtn = document.getElementById('resetZoom');
+            const zoomLevel = document.getElementById('zoomLevel');
             
             let isDragging = false;
             let previousMousePosition = { x: 0, y: 0 };
             let rotation = { x: -20, y: 0 };
-            let isAutoRotating = false;
-            let autoRotationInterval;
+            let currentZoom = 1;
             
             // Mouse drag events
             canContainer.addEventListener('mousedown', function(e) {
@@ -313,45 +324,55 @@
                 isDragging = false;
             });
             
-            // Reset button
-            resetBtn.addEventListener('click', function() {
-                rotation = { x: -20, y: 0 };
-                updateCanRotation();
-                stopAutoRotation();
+            // Zoom functionality
+            zoomInBtn.addEventListener('click', function() {
+                if (currentZoom < 3) {
+                    currentZoom += 0.2;
+                    updateZoom();
+                }
             });
             
-            // Auto rotate button
-            autoRotateBtn.addEventListener('click', function() {
-                if (isAutoRotating) {
-                    stopAutoRotation();
-                } else {
-                    startAutoRotation();
+            zoomOutBtn.addEventListener('click', function() {
+                if (currentZoom > 0.5) {
+                    currentZoom -= 0.2;
+                    updateZoom();
                 }
+            });
+            
+            resetZoomBtn.addEventListener('click', function() {
+                currentZoom = 1;
+                updateZoom();
+            });
+            
+            // Mouse wheel zoom
+            canContainer.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    // Zoom in
+                    if (currentZoom < 3) {
+                        currentZoom += 0.1;
+                    }
+                } else {
+                    // Zoom out
+                    if (currentZoom > 0.5) {
+                        currentZoom -= 0.1;
+                    }
+                }
+                updateZoom();
             });
             
             function updateCanRotation() {
                 cocaCola.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
-                rotationValue.textContent = `${Math.round(rotation.y)}°`;
             }
             
-            function startAutoRotation() {
-                isAutoRotating = true;
-                autoRotateBtn.textContent = 'Stop Rotation';
-                
-                autoRotationInterval = setInterval(function() {
-                    rotation.y += 1;
-                    updateCanRotation();
-                }, 30);
-            }
-            
-            function stopAutoRotation() {
-                isAutoRotating = false;
-                autoRotateBtn.textContent = 'Auto Rotate';
-                clearInterval(autoRotationInterval);
+            function updateZoom() {
+                canContainer.style.transform = `scale(${currentZoom})`;
+                zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
             }
             
             // Initialize
             updateCanRotation();
+            updateZoom();
         });
     </script>
 </body>
