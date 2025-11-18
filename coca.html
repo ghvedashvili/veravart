@@ -22,6 +22,7 @@
             align-items: center;
             font-family: Arial, sans-serif;
             color: white;
+            touch-action: none;
         }
 
         .title {
@@ -36,6 +37,7 @@
             font-family: 'Arial Black', sans-serif;
             letter-spacing: 2px;
             margin-bottom: 20px;
+            z-index: 10;
         }
 
         .instructions {
@@ -46,6 +48,7 @@
             background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             font-size: 1.2rem;
+            z-index: 10;
         }
 
         .coca-cola-container {
@@ -58,7 +61,8 @@
             cursor: grab;
             user-select: none;
             transform: scale(1);
-            transition: transform 0.3s ease;
+            transition: transform 0.1s ease;
+            touch-action: none;
         }
 
         .coca-cola-container:active {
@@ -141,43 +145,38 @@
             border-radius: 50%;
         }
 
-        .zoom-controls {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .zoom-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .zoom-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
         .zoom-level {
             position: absolute;
-            top: 20px;
+            top: 80px;
             right: 20px;
             background: rgba(0, 0, 0, 0.5);
             padding: 5px 15px;
             border-radius: 5px;
             font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        .zoom-hint {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            text-align: center;
+            z-index: 10;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .zoom-hint {
+                display: block;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -185,6 +184,7 @@
     <div class="title">Interactive Coca-Cola 3D Can</div>
     
     <div class="zoom-level" id="zoomLevel">100%</div>
+    <div class="zoom-hint">Use two fingers to zoom</div>
     
     <div class="coca-cola-container" id="canContainer">
         <div class="coca-cola" id="cocaCola">
@@ -235,39 +235,33 @@
         </div>
     </div>
     
-    <div class="zoom-controls">
-        <button class="zoom-btn" id="zoomIn">+</button>
-        <button class="zoom-btn" id="zoomOut">-</button>
-        <button class="zoom-btn" id="resetZoom">↺</button>
-    </div>
-    
     <div class="instructions">
-        Click and drag to rotate the can | Use buttons to zoom
+        Drag to rotate | Pinch to zoom
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const canContainer = document.getElementById('canContainer');
             const cocaCola = document.getElementById('cocaCola');
-            const zoomInBtn = document.getElementById('zoomIn');
-            const zoomOutBtn = document.getElementById('zoomOut');
-            const resetZoomBtn = document.getElementById('resetZoom');
             const zoomLevel = document.getElementById('zoomLevel');
             
             let isDragging = false;
+            let isZooming = false;
             let previousMousePosition = { x: 0, y: 0 };
             let rotation = { x: -20, y: 0 };
             let currentZoom = 1;
-            
-            // Mouse drag events
+            let initialDistance = null;
+
+            // Mouse drag events for rotation
             canContainer.addEventListener('mousedown', function(e) {
+                if (e.touches && e.touches.length >= 2) return; // Ignore if multitouch
                 isDragging = true;
                 previousMousePosition = { x: e.clientX, y: e.clientY };
                 canContainer.style.cursor = 'grabbing';
             });
             
             document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
+                if (!isDragging || isZooming) return;
                 
                 const deltaX = e.clientX - previousMousePosition.x;
                 const deltaY = e.clientY - previousMousePosition.y;
@@ -287,64 +281,8 @@
                 isDragging = false;
                 canContainer.style.cursor = 'grab';
             });
-            
-            // Touch events for mobile devices
-            canContainer.addEventListener('touchstart', function(e) {
-                isDragging = true;
-                previousMousePosition = { 
-                    x: e.touches[0].clientX, 
-                    y: e.touches[0].clientY 
-                };
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                
-                const deltaX = e.touches[0].clientX - previousMousePosition.x;
-                const deltaY = e.touches[0].clientY - previousMousePosition.y;
-                
-                rotation.y += deltaX * 0.5;
-                rotation.x -= deltaY * 0.2;
-                
-                // Limit vertical rotation for better UX
-                rotation.x = Math.max(-60, Math.min(10, rotation.x));
-                
-                updateCanRotation();
-                
-                previousMousePosition = { 
-                    x: e.touches[0].clientX, 
-                    y: e.touches[0].clientY 
-                };
-                
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchend', function() {
-                isDragging = false;
-            });
-            
-            // Zoom functionality
-            zoomInBtn.addEventListener('click', function() {
-                if (currentZoom < 3) {
-                    currentZoom += 0.2;
-                    updateZoom();
-                }
-            });
-            
-            zoomOutBtn.addEventListener('click', function() {
-                if (currentZoom > 0.5) {
-                    currentZoom -= 0.2;
-                    updateZoom();
-                }
-            });
-            
-            resetZoomBtn.addEventListener('click', function() {
-                currentZoom = 1;
-                updateZoom();
-            });
-            
-            // Mouse wheel zoom
+
+            // Mouse wheel zoom for desktop
             canContainer.addEventListener('wheel', function(e) {
                 e.preventDefault();
                 if (e.deltaY < 0) {
@@ -360,6 +298,83 @@
                 }
                 updateZoom();
             });
+
+            // Touch events for mobile devices
+            canContainer.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    // Single touch for rotation
+                    isDragging = true;
+                    previousMousePosition = { 
+                        x: e.touches[0].clientX, 
+                        y: e.touches[0].clientY 
+                    };
+                } else if (e.touches.length === 2) {
+                    // Two touches for zooming
+                    isZooming = true;
+                    isDragging = false;
+                    initialDistance = getDistance(
+                        e.touches[0].clientX, e.touches[0].clientY,
+                        e.touches[1].clientX, e.touches[1].clientY
+                    );
+                }
+                e.preventDefault();
+            });
+            
+            canContainer.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 1 && isDragging && !isZooming) {
+                    // Single touch rotation
+                    const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                    const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                    
+                    rotation.y += deltaX * 0.5;
+                    rotation.x -= deltaY * 0.2;
+                    
+                    // Limit vertical rotation for better UX
+                    rotation.x = Math.max(-60, Math.min(10, rotation.x));
+                    
+                    updateCanRotation();
+                    
+                    previousMousePosition = { 
+                        x: e.touches[0].clientX, 
+                        y: e.touches[0].clientY 
+                    };
+                } else if (e.touches.length === 2 && isZooming) {
+                    // Two touch zoom
+                    const currentDistance = getDistance(
+                        e.touches[0].clientX, e.touches[0].clientY,
+                        e.touches[1].clientX, e.touches[1].clientY
+                    );
+                    
+                    if (initialDistance !== null) {
+                        const zoomFactor = currentDistance / initialDistance;
+                        const newZoom = currentZoom * zoomFactor;
+                        
+                        // Limit zoom range
+                        if (newZoom >= 0.5 && newZoom <= 3) {
+                            currentZoom = newZoom;
+                            updateZoom();
+                        }
+                        
+                        initialDistance = currentDistance;
+                    }
+                }
+                e.preventDefault();
+            });
+            
+            canContainer.addEventListener('touchend', function(e) {
+                if (e.touches.length < 2) {
+                    isZooming = false;
+                    initialDistance = null;
+                }
+                if (e.touches.length === 0) {
+                    isDragging = false;
+                }
+            });
+
+            // Helper function to calculate distance between two points
+            function getDistance(x1, y1, x2, y2) {
+                return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            }
             
             function updateCanRotation() {
                 cocaCola.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
