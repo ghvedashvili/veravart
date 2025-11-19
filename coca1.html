@@ -1,490 +1,245 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ka">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coca-Cola</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Screenshot swap demo</title>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #111;
+      --fake-text-color: #b30000;
+    }
 
-        body {
-            background: #EB191E;
-            box-shadow: inset 0 0 1000px 0px #960612;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            color: white;
-            touch-action: none;
-        }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-        .title {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: white;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            font-family: 'Arial Black', sans-serif;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            z-index: 10;
-        }
+    .container{
+      padding:24px;
+      max-width:900px;
+      margin:0 auto;
+    }
 
-        .instructions {
-            position: absolute;
-            bottom: 20px;
-            text-align: center;
-            padding: 10px 20px;
-        
-            border-radius: 10px;
-            font-size: 1.2rem;
-            z-index: 10;
-        }
+    /* --- Visible (normal) content --- */
+    #realContent{
+      border: 2px dashed #ddd;
+      padding: 18px;
+      border-radius: 8px;
+      background: linear-gradient(#fff,#fbfbfb);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
 
-        .answer-container {
-            position: absolute;
-            top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            text-align: center;
-        }
+    /* --- Fake content (shown only for screenshots/print/when detected) --- */
+    #fakeContent{
+      display:none; /* hidden by default */
+      border: 2px solid #f0dede;
+      padding: 18px;
+      border-radius: 8px;
+      background: linear-gradient(#fff8f8,#fff0f0);
+      color: var(--fake-text-color);
+      text-align:center;
+      font-weight:700;
+      font-size: 22px;
+    }
 
-        .answer-input {
-            padding: 12px 20px;
-            font-size: 1.2rem;
-            border: 3px solid white;
-            border-radius: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            width: 300px;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s ease;
-        }
+    /* Small helper: show a visible temporary banner when fake is active */
+    #fakeBanner{
+      display:none;
+      margin-top:12px;
+      padding:8px;
+      background:#fff0f0;
+      border-radius:6px;
+      color:var(--fake-text-color);
+      font-weight:600;
+    }
 
-        .answer-input:focus {
-            background: white;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            transform: scale(1.05);
-        }
+    /* If user prints the page (or when print mode is used), swap content */
+    @media print {
+      #realContent { display: none !important; }
+      #fakeContent { display: block !important; }
+      /* optionally enlarge */
+      #fakeContent { font-size: 28px !important; }
+      /* Avoid printing page chrome */
+      body { background: #fff !important; color:#000 !important; }
+    }
 
-        .submit-btn {
-            margin-top: 15px;
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            background: white;
-            color: #EB191E;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
+    /* Nice demo layout */
+    .title { font-size:28px; margin-bottom:8px; }
+    .note { color:#666; margin-bottom:12px; }
 
-        .submit-btn:hover {
-            background: #f0f0f0;
-            transform: scale(1.05);
-        }
-
-        .message {
-            margin-top: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            min-height: 25px;
-        }
-
-        .correct {
-            color: #90EE90;
-        }
-
-        .incorrect {
-            color: #FFB6C1;
-        }
-
-        .coca-cola-container {
-            perspective: 800px;
-            width: 100vw;
-            height: 70vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: grab;
-            user-select: none;
-            transform: scale(1);
-            transition: transform 0.1s ease;
-            touch-action: none;
-        }
-
-        .coca-cola-container:active {
-            cursor: grabbing;
-        }
-
-        .coca-cola-container * {
-            transform-style: preserve-3d;
-        }
-
-        .coca-cola {
-            transform-origin: center center -51px;
-            transform: rotateX(-20deg);
-            width: 15px;
-            height: 210px;
-            margin: auto;
-            transition: transform 0.1s;
-        }
-
-        .tin {
-            width: 100%;
-            height: 100%;
-            transform: translateX(99.5%) rotateY(17.14deg);
-            transform-origin: left;
-            position: relative;
-            left: 0;
-            top: 0;
-            background-color: #be0709;
-            background-image: url('img/coca-cola-label.png');
-            background-repeat: no-repeat;
-            background-size: auto 100%;
-            background-color: red;
-        }
-
-        .tin--1 { background-position: 0% top; }
-        .tin--2 { background-position: 5% top; }
-        .tin--3 { background-position: 10% top; }
-        .tin--4 { background-position: 15% top; }
-        .tin--5 { background-position: 20% top; }
-        .tin--6 { background-position: 25% top; }
-        .tin--7 { background-position: 30% top; }
-        .tin--8 { background-position: 35% top; }
-        .tin--9 { background-position: 40% top; }
-        .tin--10 { background-position: 45% top; }
-        .tin--11 { background-position: 50% top; }
-        .tin--12 { background-position: 55% top; }
-        .tin--13 { background-position: 60% top; }
-        .tin--14 { background-position: 65% top; }
-        .tin--15 { background-position: 70% top; }
-        .tin--16 { background-position: 75% top; }
-        .tin--17 { background-position: 80% top; }
-        .tin--18 { background-position: 85% top; }
-        .tin--19 { background-position: 90% top; }
-        .tin--20 { background-position: 95% top; }
-        .tin--21 { background-position: 100% top; }
-
-        .top {
-            background-color: #86919a;
-            background-image: url('https://image.ibb.co/na6wJ5/top_tin.png');
-            background-repeat: no-repeat;
-            background-size: auto 100%;
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            transform: rotateX(-90deg) translateX(-50%) translateY(-0%);
-            transform-origin: top;
-            left: 50%;
-            border-radius: 50%;
-        }
-
-        .bottom {
-            box-shadow: 0px 0 39px -5px black;
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            top: 100%;
-            transform: rotateX(-90deg) translateX(-50%) translateY(0%);
-            transform-origin: top;
-            left: 50%;
-            border-radius: 50%;
-        }
-
-        .zoom-level {
-            position: absolute;
-            top: 80px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            z-index: 10;
-        }
-
-        .zoom-hint {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 1rem;
-            text-align: center;
-            z-index: 10;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .zoom-hint {
-                display: block;
-            }
-            
-            .title {
-                font-size: 1.5rem;
-            }
-            
-            .answer-input {
-                width: 250px;
-                font-size: 1rem;
-            }
-        }
-    </style>
+    /* Accessibility: animations off for reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
 </head>
 <body>
-    <div class="title">დაასახელე მწარმოებelი კომპანიის patron-ი</div>
-    
-    <div class="answer-container">
-        <input type="text" class="answer-input" id="answerInput" placeholder="ჩაწერეთ პასუხი..." autocomplete="off">
-        <button class="submit-btn" id="submitBtn">შემოწმება</button>
-        <div class="message" id="message"></div>
-    </div>
-    
-    <div class="coca-cola-container" id="canContainer">
-        <div class="coca-cola" id="cocaCola">
-            <div class="tin tin--1">
-                <div class="top"></div>
-                <div class="bottom"></div>
-                <div class="tin tin--2">
-                    <div class="tin tin--3">
-                        <div class="tin tin--4">
-                            <div class="tin tin--5">
-                                <div class="tin tin--6">
-                                    <div class="tin tin--7">
-                                        <div class="tin tin--8">
-                                            <div class="tin tin--9">
-                                                <div class="tin tin--10">
-                                                    <div class="tin tin--11">
-                                                        <div class="tin tin--12">
-                                                            <div class="tin tin--13">
-                                                                <div class="tin tin--14">
-                                                                    <div class="tin tin--15">
-                                                                        <div class="tin tin--16">
-                                                                            <div class="tin tin--17">
-                                                                                <div class="tin tin--18">
-                                                                                    <div class="tin tin--19">
-                                                                                        <div class="tin tin--20">
-                                                                                            <div class="tin tin--21">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="instructions">
-        
+  <div class="container">
+    <div id="realContent" aria-live="polite">
+      <div class="title">ეს არის ნამდვილი ტექსტი — ეკრანზე ჩანს ჩვეულებრივ</div>
+      <div class="note">ამრიგად მომხმარებელი ხედავს ამ ტექსტს. სქრინშოტის/პრინტის დროს შესაძლოა სხვა ტექსტი ჩანდეს — თუ გვერდის სკრიპტი/ბრაუზერი ამას დაუშვებს.</div>
+
+      <p>
+        ნიმუში: მომხმარებლის საკონტენტი, ინფორმაციები, ფორმები — ყველაფერი ნორმალურად. ქვემოთ მოცემულია ღილაკები ტესტირებისათვის.
+      </p>
+
+      <button id="testRevealBtn">ტესტურად დაუცე სქრინშოტისას შემოთხრენა (თვალით)</button>
+      <button id="testPrintBtn" onclick="window.print()">პრინტ-მოდით ნახვა (სინჯისათვის)</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const canContainer = document.getElementById('canContainer');
-            const cocaCola = document.getElementById('cocaCola');
-            const answerInput = document.getElementById('answerInput');
-            const submitBtn = document.getElementById('submitBtn');
-            const message = document.getElementById('message');
-            
-            let isDragging = false;
-            let isZooming = false;
-            let previousMousePosition = { x: 0, y: 0 };
-            let rotation = { x: -20, y: 180 };
-            let currentZoom = 1;
-            let initialDistance = null;
+    <div id="fakeContent" role="status" aria-hidden="true">
+      <!-- აქ მიიტანე სქრინშოტისთვის გათვლილი ტექსტი -->
+      სურათის ფარული ტექსტი — Copyright Valeri 2025
+    </div>
 
-            // Correct answers
-            const correctAnswers = ['escobar', 'pablo', 'pablo escobar'];
+    <div id="fakeBanner">სქრინშოტი დაფიქსირდა — სხვა ტექსტი ჩართულია</div>
 
-            // Submit answer function
-            function checkAnswer() {
-                const userAnswer = answerInput.value.trim().toLowerCase();
-                
-                if (correctAnswers.includes(userAnswer)) {
-                    message.textContent = '✅ სწორი პასუხი!';
-                    message.className = 'message correct';
-                    answerInput.style.borderColor = '#90EE90';
-                    answerInput.style.background = 'rgba(144, 238, 144, 0.2)';
-                } else {
-                    message.textContent = '❌ არასწორი პასუხი, სცადეთ თავიდან';
-                    message.className = 'message incorrect';
-                    answerInput.style.borderColor = '#FFB6C1';
-                    answerInput.style.background = 'rgba(255, 182, 193, 0.2)';
-                    
-                    // Clear message after 3 seconds
-                    setTimeout(() => {
-                        message.textContent = '';
-                        answerInput.style.borderColor = 'white';
-                        answerInput.style.background = 'rgba(255, 255, 255, 0.9)';
-                    }, 3000);
-                }
-            }
+    <hr style="margin:18px 0">
 
-            // Event listeners for answer submission
-            submitBtn.addEventListener('click', checkAnswer);
-            
-            answerInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    checkAnswer();
-                }
-            });
+    <div style="font-size:13px;color:#666">
+      შენიშვნა: ეს სკრიპტი ცდილობს დააფიქსიროს PrintScreen ღილაკი, სქრინშოტის კლავიატურის აქტი და iPhone-ის კონკრეტული ფრეიმ-გაფერხების ნიშნები. შედეგი მოწყობილობაზე განსხვავებული შეიძლება იყოს — ამიტომ რეკომენდირებულია შესამოწმებლად სხვადასხვა მოწყობილობებზე ტესტირება.
+    </div>
+  </div>
 
-            // Mouse drag events for rotation
-            canContainer.addEventListener('mousedown', function(e) {
-                if (e.touches && e.touches.length >= 2) return;
-                isDragging = true;
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-                canContainer.style.cursor = 'grabbing';
-            });
-            
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging || isZooming) return;
-                
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
-                
-                rotation.y += deltaX * 0.5;
-                rotation.x -= deltaY * 0.2;
-                
-                rotation.x = Math.max(-60, Math.min(10, rotation.x));
-                
-                updateCanRotation();
-                
-                previousMousePosition = { x: e.clientX, y: e.clientY };
-            });
-            
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-                canContainer.style.cursor = 'grab';
-            });
+  <script>
+    (function(){
+      const real = document.getElementById('realContent');
+      const fake = document.getElementById('fakeContent');
+      const banner = document.getElementById('fakeBanner');
+      const testRevealBtn = document.getElementById('testRevealBtn');
 
-            // Mouse wheel zoom for desktop
-            canContainer.addEventListener('wheel', function(e) {
-                e.preventDefault();
-                if (e.deltaY < 0) {
-                    if (currentZoom < 3) {
-                        currentZoom += 0.1;
-                    }
-                } else {
-                    if (currentZoom > 0.5) {
-                        currentZoom -= 0.1;
-                    }
-                }
-                updateZoom();
-            });
+      let revealTimeout = null;
+      const REVEAL_MS = 1400; // რამდენი მ industriya შეიცვლება სეკ.
+      const COOLDOWN_MS = 2500; // როდის დაუბრუნდება ნორმალურ მდგომარეობას
 
-            // Touch events for mobile devices
-            canContainer.addEventListener('touchstart', function(e) {
-                if (e.touches.length === 1) {
-                    isDragging = true;
-                    previousMousePosition = { 
-                        x: e.touches[0].clientX, 
-                        y: e.touches[0].clientY 
-                    };
-                } else if (e.touches.length === 2) {
-                    isZooming = true;
-                    isDragging = false;
-                    initialDistance = getDistance(
-                        e.touches[0].clientX, e.touches[0].clientY,
-                        e.touches[1].clientX, e.touches[1].clientY
-                    );
-                }
-                e.preventDefault();
-            });
-            
-            canContainer.addEventListener('touchmove', function(e) {
-                if (e.touches.length === 1 && isDragging && !isZooming) {
-                    const deltaX = e.touches[0].clientX - previousMousePosition.x;
-                    const deltaY = e.touches[0].clientY - previousMousePosition.y;
-                    
-                    rotation.y += deltaX * 0.5;
-                    rotation.x -= deltaY * 0.2;
-                    
-                    rotation.x = Math.max(-60, Math.min(10, rotation.x));
-                    
-                    updateCanRotation();
-                    
-                    previousMousePosition = { 
-                        x: e.touches[0].clientX, 
-                        y: e.touches[0].clientY 
-                    };
-                } else if (e.touches.length === 2 && isZooming) {
-                    const currentDistance = getDistance(
-                        e.touches[0].clientX, e.touches[0].clientY,
-                        e.touches[1].clientX, e.touches[1].clientY
-                    );
-                    
-                    if (initialDistance !== null) {
-                        const zoomFactor = currentDistance / initialDistance;
-                        const newZoom = currentZoom * zoomFactor;
-                        
-                        if (newZoom >= 0.5 && newZoom <= 3) {
-                            currentZoom = newZoom;
-                            updateZoom();
-                        }
-                        
-                        initialDistance = currentDistance;
-                    }
-                }
-                e.preventDefault();
-            });
-            
-            canContainer.addEventListener('touchend', function(e) {
-                if (e.touches.length < 2) {
-                    isZooming = false;
-                    initialDistance = null;
-                }
-                if (e.touches.length === 0) {
-                    isDragging = false;
-                }
-            });
+      function revealFake(reason = 'detected') {
+        // If already showing, extend timeout
+        if (revealTimeout) {
+          clearTimeout(revealTimeout);
+        }
 
-            function getDistance(x1, y1, x2, y2) {
-                return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-            }
-            
-            function updateCanRotation() {
-                cocaCola.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`;
-            }
-            
-            function updateZoom() {
-                canContainer.style.transform = `scale(${currentZoom})`;
-            }
-            
-            // Initialize
-            updateCanRotation();
-            updateZoom();
-        });
-    </script>
+        // swap visibility
+        real.style.display = 'none';
+        fake.style.display = 'block';
+        banner.style.display = 'block';
+        fake.setAttribute('aria-hidden','false');
+
+        // schedule revert
+        revealTimeout = setTimeout(() => {
+          fake.style.display = 'none';
+          real.style.display = '';
+          banner.style.display = 'none';
+          fake.setAttribute('aria-hidden','true');
+          revealTimeout = null;
+        }, COOLDOWN_MS);
+        console.log('Screenshot swap: revealed because ->', reason, '-', new Date().toISOString());
+      }
+
+      // --- Manual test button (for demo) ---
+      testRevealBtn.addEventListener('click', function(){
+        revealFake('manual-test');
+      });
+
+      // --- Detect PrintScreen key (Windows / desktop) ---
+      // Note: detection of PrintScreen via keyup/keydown works in many desktop browsers.
+      window.addEventListener('keyup', function(e){
+        try {
+          const key = e.key || e.code || '';
+          // common identifiers: "PrintScreen", "PrintScrn"
+          if (key === 'PrintScreen' || key === 'PrintScrn' || key === 'Print') {
+            revealFake('PrintScreen-key');
+          }
+        } catch (err) {
+          // ignore
+        }
+      });
+
+      // Also try keydown (some browsers report on keydown)
+      window.addEventListener('keydown', function(e){
+        try {
+          const key = e.key || e.code || '';
+          if (key === 'PrintScreen' || key === 'PrintScrn' || key === 'Print') {
+            revealFake('PrintScreen-keydown');
+          }
+        } catch (err) {}
+      });
+
+      // --- Detect clipboard change (rare) ---
+      // On Windows, pressing PrintScreen sometimes places image into clipboard.
+      // We can try to listen to "paste" event to detect if an image was pasted (user action).
+      window.addEventListener('paste', function(e){
+        const items = (e.clipboardData && e.clipboardData.items) || [];
+        for (let i=0;i<items.length;i++){
+          if (items[i].type && items[i].type.indexOf('image') !== -1) {
+            revealFake('paste-image');
+            break;
+          }
+        }
+      });
+
+      // --- Visibility / focus trick (for some mobile screenshots) ---
+      // On iOS, when user takes a screenshot, sometimes the RAF loop is interrupted (frame gap)
+      // We measure animation frame time differences to infer a screenshot.
+      let lastRAF = performance.now();
+      let rafCounter = 0;
+      const GAP_THRESHOLD = 120; // ms threshold — tuned empirically (device-dependent)
+
+      function rafDetect(now){
+        const diff = now - lastRAF;
+        // if diff is large, it's suspicious (could be screenshot / system modal)
+        if (diff > GAP_THRESHOLD) {
+          // On many iPhones, taking a screenshot causes a short pause/hiccup in RAF
+          revealFake('raf-gap-'+Math.round(diff));
+        }
+        lastRAF = now;
+        rafCounter++;
+        requestAnimationFrame(rafDetect);
+      }
+      requestAnimationFrame(rafDetect);
+
+      // --- Visibility change: user might switch apps / UI overlays appear on screenshot ---
+      document.addEventListener('visibilitychange', function(){
+        if (document.hidden) {
+          // page hidden -> briefly show fake on return (best-effort)
+          // We don't forcibly show immediately (to avoid false positives)
+          console.log('visibilitychange:hidden ->', new Date().toISOString());
+        } else {
+          // when coming back into view, we might briefly show banner
+          // (no strong detection here)
+        }
+      });
+
+      // --- Extra: when printing via keyboard (Ctrl+P or Cmd+P), browsers often open print preview.
+      window.addEventListener('beforeprint', function(){
+        // Print preview about to open => swap to fake so print preview/pdfs capture fake.
+        revealFake('beforeprint');
+      });
+      window.addEventListener('afterprint', function(){
+        // after print — revert happens inside revealFake's timeout; ensure it's hidden
+        console.log('afterprint', new Date().toISOString());
+      });
+
+      // --- Safety: don't spam console when running in background; keep low-impact ---
+      // (already implemented: revealFake debounces with timeouts)
+
+      // --- Optional: expose function for custom text replacement by other scripts ---
+      window.__screenshotSwap = {
+        revealFake,
+        setFakeText: function(htmlOrText){
+          if (typeof htmlOrText === 'string') {
+            fake.innerHTML = htmlOrText;
+          }
+        }
+      };
+
+      // Example: set fake text dynamically (uncomment to test)
+      // window.__screenshotSwap.setFakeText('პირადი: გათვალისწინებული ტექსტი — ' + new Date().toLocaleString());
+    })();
+  </script>
 </body>
 </html>
