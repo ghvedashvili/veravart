@@ -1,367 +1,506 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>პრეფერანსი – მიზერი</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: Arial, sans-serif;
-      background: #065535;
-      color: white;
-      text-align: center;
-      padding: 10px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    h1 { 
-      margin-bottom: 10px;
-      font-size: 2.5em;
-    }
-    
-    p {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-    }
-    
-    #game {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      flex-grow: 1;
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 0;
-    }
-    
-    .top-row {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      margin-bottom: 30px;
-    }
-    
-    .hand {
-      padding: 10px;
-      border: 3px solid #fff;
-      border-radius: 12px;
-      background: rgba(0,0,0,0.4);
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .east-west {
-      width: 45%;
-    }
-    
-    .hand h2 {
-      font-size: 1.8em;
-      margin-bottom: 15px;
-    }
-    
-    .cards {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      align-items: center;
-      flex-grow: 1;
-    }
-    
-    .card {
-      padding: 1px 1px;
-      background: #fff;
-      color: black;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1.4em;
-      min-width: 30px;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    }
-    
-    .card.red { color: darkred; }
-    .card.disabled { 
-      opacity: 0.4; 
-      cursor: not-allowed;
-      transform: none !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-    }
-    
-    #board {
-      margin: 30px auto;
-      padding: 25px;
-      background: rgba(0,0,0,0.6);
-      border-radius: 15px;
-      width: 80%;
-      border: 2px solid gold;
-    }
-    
-    #board h2 {
-      font-size: 2em;
-      margin-bottom: 15px;
-      color: gold;
-    }
-    
-    #trick {
-      font-size: 1.6em;
-      min-height: 40px;
-    }
-    
-    .south-hand {
-      width: 80%;
-      margin-top: 30px;
-    }
-    
-    #status {
-      margin-top: 20px;
-      font-size: 1.8em;
-      font-weight: bold;
-    }
-    
-    #score {
-      margin-top: 10px;
-      font-size: 1.5em;
-      color: #ffeb3b;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>პრეფერანსი – მიზერი</title>
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    #east {
-      order: 2;
-    }
-    
-    #west {
-      order: 1;
-    }
-    
-    #south {
-      order: 3;
-    }
-  </style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #065535, #00331e); 
+            color: #f0f0f0;
+            text-align: center;
+            padding: 8px; /* Reduced padding */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            /* Removed min-width, allowing body to shrink */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        h1 { 
+            margin-bottom: 5px;
+            font-size: 1.8em; /* Reduced size */
+            color: #ffeb3b;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        p {
+            font-size: 0.9em; /* Reduced size */
+            margin-bottom: 8px;
+        }
+
+        /* Game Layout */
+        #game {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 900px; 
+            margin: 0 auto;
+            gap: 10px; /* Reduced gap */
+        }
+
+        /* FLEX CONTAINER FOR WEST - BOARD - EAST */
+        .middle-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; 
+            width: 100%;
+            margin: 10px 0; /* Reduced margin */
+        }
+
+        .hand {
+            padding: 5px; /* Reduced padding */
+            border: 2px solid #aaa;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Styles for side hands (West and East) - Vertical Orientation is permanent */
+        #west, #east {
+           /* width: 25%;  Slightly increased percentage to take space */
+            min-width: 80px; /* Reduced minimum width */
+            height: 380px; /* Reduced height */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        #west .cards, #east .cards {
+            flex-direction: column; /* VERTICAL STACKING */
+            flex-wrap: nowrap;
+            gap: 1px; /* Tighter gap */
+        }
+        
+        #south {
+            width: 100%;
+        }
+
+        .hand h2 {
+            font-size: 1em; /* Reduced size */
+            margin-bottom: 5px;
+            color: #f9f9f9;
+        }
+
+        /* Cards in hand (for horizontal display on South) */
+        #south .cards {
+            flex-direction: row; 
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        /* Card Styling (significantly reduced for mobile fit) */
+        .card {
+            width: 25px; /* Reduced size */
+            height: 30px; /* Reduced size */
+            padding: 0;
+            background: #fff;
+            color: black;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.7rem; /* Reduced font size */
+            line-height: 35px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+            position: relative;
+            user-select: none;
+            cursor: default;
+        }
+        
+        .card span {
+            display: block;
+            line-height: normal;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .card.red { color: darkred; }
+        .card.black { color: black; }
+
+        /* Highlighting playable cards */
+        .card.playable {
+            cursor: pointer;
+           
+        }
+        
+        /* Hover effect for vertical hands (West/East) shifts horizontally */
+        #west .card.playable, #east .card.playable {
+            transform: translateX(2px); /* Smaller shift */
+        }
+
+        #west .card.playable:hover, #east .card.playable:hover {
+            transform: translateX(4px) scale(1.05);
+        }
+
+        /* Hover effect for horizontal hand (South) shifts vertically */
+        #south .card.playable:hover {
+            transform: translateY(-4px) scale(1.05);
+        }
+        
+        .card.disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+            border: 1px solid #ccc;
+        }
+        
+        /* Board/Table Styling (Central Placement) */
+        #board {
+            padding: 10px; /* Reduced padding */
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            width: 50%; 
+            min-height: 200px; /* Reduced height */
+            margin: 0 5px; /* Reduced margin for space */
+            border: 2px solid #ffeb3b;
+            box-shadow: inset 0 0 10px rgba(255, 255, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+margin-top: 80px;
+        }
+        
+        #board h2 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #ffeb3b;
+        }
+
+        #trick {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px; /* Reduced gap */
+            min-height: 45px;
+            color: #fff;
+            flex-wrap: wrap; 
+        }
+        
+        #trick .card {
+            width: 30px !important; /* Reduced size */
+            height: 45px !important; /* Reduced size */
+            line-height: 45px !important;
+            font-size: 0.8em !important;
+        }
+        
+        #trick > div {
+            font-size: 0.8em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Status and Score */
+        #status {
+            margin-top: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #f9f9f9;
+        }
+
+        #score {
+            margin-top: 5px;
+            font-size: 1em;
+            color: #ffeb3b;
+            margin-bottom: 15px;
+        }
+
+        /* Current player highlight */
+        .current-player {
+            
+            border-color: green !important;
+        }
+    </style>
 </head>
 <body>
-  <h1>პრეფერანსი – მიზერი</h1>
-  <p>მოთამაშე აკონტროლებს East+West. მხოლოდ South (ქვედა) თამაშობს ავტომატურად.</p>
+    <h1>♠️ South – მიზერი ♦️</h1>
+    <p> თამაშს იწყებს - East</p>
 
-  <div id="game">
-    <div class="top-row">
-      <div class="hand east-west" id="west">
-        <h2>West - დასავლეთი</h2>
-        <div class="cards" id="west-cards"></div>
-      </div>
+    <div id="game">
+        <div class="middle-section">
+            
+            <div class="hand" id="west">
+                <h2>West</h2>
+                <div class="cards" id="west-cards"></div>
+            </div>
 
-      <div class="hand east-west" id="east">
-        <h2>East - აღმოსავლეთი</h2>
-        <div class="cards" id="east-cards"></div>
-      </div>
+            <div id="board">
+                <h2>Board</h2>
+                <div id="trick">არცერთი კარტი არ დევს</div>
+            </div>
+
+            <div class="hand" id="east">
+                <h2>East</h2>
+                <div class="cards" id="east-cards"></div>
+            </div>
+        </div>
+
+        <div class="hand" id="south">
+            <h2>South</h2>
+            <div class="cards" id="south-cards"></div>
+        </div>
     </div>
 
-    <div id="board">
-      <h2>Board</h2>
-      <p id="trick">არცერთი კარტი არ დევს</p>
-    </div>
+    <div id="status">თამაში დაიწყო!</div>
+    <div id="score">South-ის წაღებული დარიგება: 0</div>
 
-    <div class="hand south-hand" id="south">
-      <h2>South - სამხრეთი (AI)</h2>
-      <div class="cards" id="south-cards"></div>
-    </div>
-  </div>
+    <script>
+        let west = ["Q♠","K♦","Q♦","J♦","10♦","K♣","Q♣","J♥","10♥","9♥"];
+        let east = ["A♠","K♠","J♠","10♠","A♦","7♦","A♣","10♣","A♥","7♥"];
+        let south = ["9♠","8♠","7♠","9♦","8♦","J♣","9♣","8♣","7♣","8♥"];
 
-  <div id="status">თამაში დაიწყო!</div>
-  <div id="score">South-ის ქონკურები: 0</div>
+        let board = [];
+        let southTricks = 0;
+        let turn = "east";
 
-  <script>
-    let west = ["Q♠","K♦","Q♦","J♦","10♦","K♣","Q♣","J♥","10♥","9♥"];
-    let east = ["A♠","K♠","J♠","10♠","A♦","A♣","A♥","7♦","10♣","7♥"];
-    let south = ["9♠","8♠","7♠","J♣","9♣","8♣","7♣","9♦","8♦","8♥"];
-
-    let board = [];
-    let southTricks = 0;
-    let turn = "east";
-
-    function renderHands() {
-      render("west-cards", west, "west");
-      render("east-cards", east, "east");
-      render("south-cards", south, "south", false);
-    }
-
-    function render(id, hand, who, clickable=true) {
-      let div = document.getElementById(id);
-      div.innerHTML = "";
-      hand.forEach((c,i)=>{
-        let span = document.createElement("div");
-        span.className = "card" + (c.includes("♥")||c.includes("♦") ? " red":"");
-        span.textContent = c;
-        
-        if (clickable && who===turn && who!=="south") {
-          if (isCardAllowed(who, c)) {
-            span.onclick = ()=> playCard(who,i);
-          } else {
-            span.classList.add("disabled");
-          }
+        function renderHands() {
+            render("west-cards", west, "west", true);
+            render("east-cards", east, "east", true);
+            render("south-cards", south, "south", false); 
+            updatePlayerHighlight();
         }
-        div.appendChild(span);
-      });
-    }
 
-    function isCardAllowed(player, card) {
-      if (board.length === 0) {
-        return true;
-      }
-      
-      const leadSuit = board[0].card.slice(-1);
-      const cardSuit = card.slice(-1);
-      
-      if (cardSuit === leadSuit) {
-        return true;
-      }
-      
-      const playerHand = player === "west" ? west : east;
-      const hasLeadSuit = playerHand.some(c => c.slice(-1) === leadSuit);
-      
-      return !hasLeadSuit;
-    }
+        function render(id, hand, who, clickable=true) {
+            let div = document.getElementById(id);
+            div.innerHTML = "";
+            hand.forEach((c,i)=>{
+                let span = document.createElement("div");
+                
+                const suit = c.slice(-1);
+                const rankValue = c.slice(0, -1);
+                span.innerHTML = `<span>${rankValue}${suit}</span>`; 
+                span.className = "card" + (suit==="♥"||suit==="♦" ? " red":" black");
 
-    function playCard(who,index) {
-      let card;
-      if (who==="west") {
-        card = west.splice(index,1)[0];
-      } else if (who==="east") {
-        card = east.splice(index,1)[0];
-      }
-      board.push({player:who,card});
-      updateBoard();
-      nextTurn();
-    }
+                if (who==="west" || who==="east") {
+                    if (isCardAllowed(who, c)) {
+                        span.classList.add("playable");
+                        span.onclick = ()=> playCard(who,i);
+                        span.style.transform = `translateX(2px)`; 
+                    } else if (who===turn) {
+                        span.classList.add("disabled");
+                    }
+                }
+                
+                if (who === "south") {
+                    span.classList.remove("disabled");
+                    span.onclick = null;
+                }
 
-    function southMove() {
-      let chosen;
-      
-      if (board.length === 0) {
-        const suitCounts = {};
-        south.forEach(c => {
-          const suit = c.slice(-1);
-          suitCounts[suit] = (suitCounts[suit] || []).concat(c);
-        });
-        
-        let longestSuit = Object.keys(suitCounts).reduce((a,b) => 
-          suitCounts[a].length > suitCounts[b].length ? a : b
-        );
-        
-        chosen = suitCounts[longestSuit].reduce((a,b)=>rank(a)<rank(b)?a:b);
-      } else {
-        const leadSuit = board[0].card.slice(-1);
-        const sameSuit = south.filter(c=>c.slice(-1)===leadSuit);
-        
-        if (sameSuit.length > 0) {
-          const highestInTrick = getHighestCardInTrick();
-          const cardsBelowHighest = sameSuit.filter(c => rank(c) < rank(highestInTrick));
-          
-          if (cardsBelowHighest.length > 0) {
-            chosen = cardsBelowHighest.reduce((a,b)=>rank(a)>rank(b)?a:b);
-          } else {
-            chosen = sameSuit.reduce((a,b)=>rank(a)<rank(b)?a:b);
-          }
-        } else {
-          const suitCounts = {};
-          south.forEach(c => {
-            const suit = c.slice(-1);
-            suitCounts[suit] = (suitCounts[suit] || []).concat(c);
-          });
-          
-          let shortestSuit = Object.keys(suitCounts).reduce((a,b) => 
-            suitCounts[a].length < suitCounts[b].length ? a : b
-          );
-          
-          chosen = suitCounts[shortestSuit].reduce((a,b)=>rank(a)>rank(b)?a:b);
+                div.appendChild(span);
+            });
         }
-      }
-      
-      south = south.filter(c=>c!==chosen);
-      board.push({player:"south",card:chosen});
-      updateBoard();
-      nextTurn();
-    }
 
-    function getHighestCardInTrick() {
-      const leadSuit = board[0].card.slice(-1);
-      const sameSuitCards = board.filter(t => t.card.slice(-1) === leadSuit);
-      if (sameSuitCards.length === 0) return board[0].card;
-      return sameSuitCards.reduce((a, b) => rank(a.card) > rank(b.card) ? a : b).card;
-    }
+        function updatePlayerHighlight() {
+            document.getElementById("west").classList.remove("current-player");
+            document.getElementById("east").classList.remove("current-player");
+            document.getElementById("south").classList.remove("current-player");
+            
+            if (turn === "west" || turn === "east" || turn === "south") {
+                document.getElementById(turn).classList.add("current-player");
+            }
+        }
 
-    function nextTurn() {
-      if (board.length===3) {
-        setTimeout(finishTrick,800);
-        return;
-      }
-      if (turn==="east") turn="south";
-      else if (turn==="south") turn="west";
-      else if (turn==="west") turn="east";
-      if (turn==="south") setTimeout(southMove,600);
-      renderHands();
-    }
+        function isCardAllowed(player, card) {
+            if (player !== turn) return false;
+            if (board.length === 0) {
+                return true;
+            }
+            
+            const leadSuit = board[0].card.slice(-1);
+            const cardSuit = card.slice(-1);
+            
+            if (cardSuit === leadSuit) {
+                return true;
+            }
+            
+            const playerHand = player === "west" ? west : east;
+            const hasLeadSuit = playerHand.some(c => c.slice(-1) === leadSuit);
+            
+            return !hasLeadSuit;
+        }
 
-    function finishTrick() {
-      let winner = winnerOfTrick(board);
-      document.getElementById("status").textContent = "ტური მოიგო: "+winner;
-      if (winner==="south") southTricks++;
-      document.getElementById("score").textContent = "South-ის ქონკურები: " + southTricks;
-      board=[];
-      updateBoard();
-      renderHands();
-      if (west.length===0 && east.length===0 && south.length===0) {
-        endGame();
-      } else {
-        turn=winner;
-        if (turn==="south") setTimeout(southMove,600);
+        function playCard(who,index) {
+            let card;
+            if (who==="west") {
+                card = west.splice(index,1)[0];
+            } else if (who==="east") {
+                card = east.splice(index,1)[0];
+            }
+            board.push({player:who,card});
+            updateBoard();
+            nextTurn();
+        }
+
+        function southMove() {
+            let chosen;
+            
+            if (board.length === 0) {
+                const suitCounts = {};
+                south.forEach(c => {
+                    const suit = c.slice(-1);
+                    suitCounts[suit] = (suitCounts[suit] || []).concat(c);
+                });
+                
+                let longestSuit = Object.keys(suitCounts).reduce((a,b) => 
+                    suitCounts[a].length > suitCounts[b].length ? a : b
+                );
+                
+                chosen = suitCounts[longestSuit].reduce((a,b)=>rank(a)<rank(b)?a:b); 
+            } else {
+                const leadSuit = board[0].card.slice(-1);
+                const sameSuit = south.filter(c=>c.slice(-1)===leadSuit);
+                
+                if (sameSuit.length > 0) {
+                    const highestRankInTrick = rank(getHighestCardInTrick());
+                    const cardsBelowHighest = sameSuit.filter(c => rank(c) < highestRankInTrick);
+                    
+                    if (cardsBelowHighest.length > 0) {
+                        chosen = cardsBelowHighest.reduce((a,b)=>rank(a)>rank(b)?a:b);
+                    } else {
+                        chosen = sameSuit.reduce((a,b)=>rank(a)<rank(b)?a:b);
+                    }
+                } else {
+                    const suitCounts = {};
+                    south.forEach(c => {
+                        const suit = c.slice(-1);
+                        suitCounts[suit] = (suitCounts[suit] || []).concat(c);
+                    });
+                    
+                    let shortestSuit = Object.keys(suitCounts).reduce((a,b) => 
+                        suitCounts[a].length < suitCounts[b].length ? a : b
+                    );
+                    
+                    chosen = suitCounts[shortestSuit].reduce((a,b)=>rank(a)>rank(b)?a:b);
+                }
+            }
+            
+            south = south.filter(c=>c!==chosen);
+            board.push({player:"south",card:chosen});
+            updateBoard();
+            nextTurn();
+        }
+
+        function getHighestCardInTrick() {
+            const leadSuit = board[0].card.slice(-1);
+            const sameSuitCards = board.filter(t => t.card.slice(-1) === leadSuit); 
+            
+            if (sameSuitCards.length === 0) return board[0].card; 
+            
+            return sameSuitCards.reduce((a, b) => rank(a.card) > rank(b.card) ? a : b).card;
+        }
+
+        function nextTurn() {
+            if (board.length===3) {
+                setTimeout(finishTrick,1000); 
+                return;
+            }
+            if (turn==="east") turn="south";
+            else if (turn==="south") turn="west";
+            else if (turn==="west") turn="east";
+            
+            if (turn==="south") {
+                document.getElementById("status").textContent = "South-ის სვლაა...";
+                setTimeout(southMove,800); 
+            } else {
+                document.getElementById("status").textContent = (turn==="east" ? "East" : "West") + "-ის სვლაა!";
+            }
+            renderHands();
+        }
+
+        function finishTrick() {
+            let winner = winnerOfTrick(board);
+            document.getElementById("status").textContent = "ტური მოიგო: "+winner;
+            
+            if (winner==="south") southTricks++; 
+            document.getElementById("score").textContent = "South-ის წაღებული დარიგება: " + southTricks;
+            
+            board=[];
+            updateBoard();
+
+            if (west.length===0) {
+                endGame();
+            } else {
+                turn=winner; 
+                if (turn==="south") {
+                    document.getElementById("status").textContent = "South-ის სვლაა...";
+                    setTimeout(southMove,800); 
+                } else {
+                    document.getElementById("status").textContent = (turn==="east" ? "East" : "West") + "-ის სვლაა!";
+                }
+                renderHands();
+            }
+        }
+
+        function updateBoard() {
+            document.getElementById("trick").innerHTML = board.map(b=>{
+                const suit = b.card.slice(-1);
+                const rankValue = b.card.slice(0, -1);
+                const colorClass = (suit==="♥"||suit==="♦" ? " red":" black");
+                return `
+                    <div>
+                        ${b.player}: 
+                        <div class='card ${colorClass}'>
+                            <span>${rankValue}${suit}</span>
+                        </div>
+                    </div>
+                `;
+            }).join(" ") || "არცერთი კარტი არ დევს";
+            renderHands();
+        }
+
+        function rank(card) {
+            let order = {"7":1,"8":2,"9":3,"10":4,"J":5,"Q":6,"K":7,"A":8}; 
+            const rankKey = card.replace(/[^0-9JQKA]/g,""); 
+            return order[rankKey];
+        }
+
+        function winnerOfTrick(trick) {
+            let leadSuit = trick[0].card.slice(-1);
+            let valid = trick.filter(t=>t.card.slice(-1)===leadSuit); 
+            
+            if (valid.length === 0) {
+                 return trick[0].player;
+            }
+
+            let winner = valid.reduce((a,b)=>rank(a.card)>rank(b.card)?a:b); 
+            return winner.player;
+        }
+
+        function endGame() {
+            if (southTricks===0) {
+                document.getElementById("status").textContent = "AI-მ (South) მოიგო! **მიზერი შესრულდა** ✅";
+                document.getElementById("status").style.color = "#00f000";
+            } else {
+                document.getElementById("status").textContent = "მოთამაშემ მოიგო! AI აიღო **"+southTricks+" დარიგება** ❌";
+                document.getElementById("status").style.color = "red";
+            }
+        }
+
         renderHands();
-      }
-    }
-
-    function updateBoard() {
-      document.getElementById("trick").textContent = board.map(b=>b.player+": "+b.card).join(" | ") || "არცერთი კარტი არ დევს";
-      renderHands();
-    }
-
-    function rank(card) {
-      let order = {"7":1,"8":2,"9":3,"10":4,"J":5,"Q":6,"K":7,"A":8};
-      return order[card.replace(/[^0-9JQKA]/g,"")];
-    }
-
-    function winnerOfTrick(trick) {
-      let leadSuit = trick[0].card.slice(-1);
-      let valid = trick.filter(t=>t.card.slice(-1)===leadSuit);
-      let winner = valid.reduce((a,b)=>rank(a.card)>rank(b.card)?a:b);
-      return winner.player;
-    }
-
-    function endGame() {
-      if (southTricks===0) {
-        document.getElementById("status").textContent = "AI-მ (South) მოიგო! მიზერი შესრულდა ✅";
-      } else {
-        document.getElementById("status").textContent = "მოთამაშემ მოიგო! AI აიღო "+southTricks+" ქონკური ❌";
-      }
-    }
-
-    renderHands();
-  </script>
+    </script>
 </body>
 </html>
