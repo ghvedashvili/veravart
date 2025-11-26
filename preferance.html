@@ -17,24 +17,23 @@
             background: linear-gradient(to bottom, #065535, #00331e); 
             color: #f0f0f0;
             text-align: center;
-            padding: 8px; /* Reduced padding */
+            padding: 8px; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center; 
-            /* Removed min-width, allowing body to shrink */
-            overflow-x: hidden; /* Prevent horizontal scrolling */
+            overflow-x: hidden; 
         }
 
         h1 { 
             margin-bottom: 5px;
-            font-size: 1.8em; /* Reduced size */
+            font-size: 1.8em; 
             color: #ffeb3b;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
         }
 
         p {
-            font-size: 0.9em; /* Reduced size */
+            font-size: 0.9em; 
             margin-bottom: 8px;
         }
 
@@ -45,7 +44,7 @@
             width: 100%;
             max-width: 900px; 
             margin: 0 auto;
-            gap: 10px; /* Reduced gap */
+            gap: 10px; 
         }
 
         /* FLEX CONTAINER FOR WEST - BOARD - EAST */
@@ -54,34 +53,64 @@
             justify-content: space-between;
             align-items: flex-start; 
             width: 100%;
-            margin: 10px 0; /* Reduced margin */
+            margin: 10px 0; 
         }
 
         .hand {
-            padding: 5px; /* Reduced padding */
+            padding: 3px; 
             border: 2px solid #aaa;
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.3);
             min-height: 80px;
             display: flex;
             flex-direction: column;
+            flex-grow: 1; 
         }
 
-        /* Styles for side hands (West and East) - Vertical Orientation is permanent */
+        /* MODIFIED WEST/EAST STYLES (COMPACT) */
         #west, #east {
-           /* width: 25%;  Slightly increased percentage to take space */
-            min-width: 80px; /* Reduced minimum width */
-            height: 380px; /* Reduced height */
+            min-width: 100px; 
+            max-width: 30%; 
+            min-height: 140px; 
+            height: auto; 
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: flex-start;
+            padding-top: 5px;
+        }
+        
+        #west {
+            align-items: flex-end; 
+        }
+        
+        #east {
+            align-items: flex-start; 
         }
 
+        /* Card Groups Container */
         #west .cards, #east .cards {
-            flex-direction: column; /* VERTICAL STACKING */
+            display: flex;
+            flex-direction: column; 
+            gap: 3px; 
+            width: auto; 
+        }
+        
+        /* Style for the suit group container (Horizontal card row) */
+        .suit-group {
+            display: flex;
+            flex-direction: row; 
             flex-wrap: nowrap;
-            gap: 1px; /* Tighter gap */
+            gap: 2px; 
+            padding: 1px 0;
+            border-radius: 3px;
+        }
+
+        #west .suit-group {
+            justify-content: flex-end; 
+        }
+        
+        #east .suit-group {
+            justify-content: flex-start; 
         }
         
         #south {
@@ -89,7 +118,7 @@
         }
 
         .hand h2 {
-            font-size: 1em; /* Reduced size */
+            font-size: 1em; 
             margin-bottom: 5px;
             color: #f9f9f9;
         }
@@ -99,25 +128,25 @@
             flex-direction: row; 
             flex-wrap: wrap;
             gap: 3px;
+            justify-content: center;
+            align-items: flex-start;
         }
 
         .cards {
             display: flex;
-            justify-content: center;
-            align-items: center;
             flex-grow: 1;
         }
 
-        /* Card Styling (significantly reduced for mobile fit) */
+        /* Card Styling */
         .card {
-            width: 25px; /* Reduced size */
-            height: 30px; /* Reduced size */
+            width: 25px; 
+            height: 30px; 
             padding: 0;
             background: #fff;
             color: black;
             border-radius: 3px;
             font-weight: bold;
-            font-size: 0.6rem; /* Reduced font size */
+            font-size: 0.6rem; 
             line-height: 35px;
             text-align: center;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -142,16 +171,11 @@
         /* Highlighting playable cards */
         .card.playable {
             cursor: pointer;
-           
         }
         
-        /* Hover effect for vertical hands (West/East) shifts horizontally */
-        #west .card.playable, #east .card.playable {
-            transform: translateX(2px); /* Smaller shift */
-        }
-
+        /* Hover effect for side hands (West/East) shifts vertically */
         #west .card.playable:hover, #east .card.playable:hover {
-            transform: translateX(4px) scale(1.05);
+            transform: translateY(-2px) scale(1.05); 
         }
 
         /* Hover effect for horizontal hand (South) shifts vertically */
@@ -169,19 +193,19 @@
         
         /* Board/Table Styling (Central Placement) */
         #board {
-            padding: 10px; /* Reduced padding */
+            padding: 10px; 
             background: rgba(0, 0, 0, 0.5);
             border-radius: 12px;
-            width: 50%; 
-            min-height: 200px; /* Reduced height */
-            margin: 0 5px; /* Reduced margin for space */
+            width: 35%; 
+            min-height: 150px; 
+            margin: 0 3px; 
             border: 2px solid #ffeb3b;
             box-shadow: inset 0 0 10px rgba(255, 255, 0, 0.4);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-margin-top: 80px;
+            margin-top: 15px;
         }
         
         #board h2 {
@@ -194,15 +218,15 @@ margin-top: 80px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            gap: 10px; /* Reduced gap */
+            gap: 5px; 
             min-height: 45px;
             color: #fff;
             flex-wrap: wrap; 
         }
         
         #trick .card {
-            width: 30px !important; /* Reduced size */
-            height: 45px !important; /* Reduced size */
+            width: 30px !important; 
+            height: 45px !important; 
             line-height: 45px !important;
             font-size: 0.8em !important;
         }
@@ -231,8 +255,39 @@ margin-top: 80px;
 
         /* Current player highlight */
         .current-player {
-            
             border-color: green !important;
+        }
+
+        /* MODIFIED MEDIA QUERY - Keeps horizontal layout */
+        @media (max-width: 600px) {
+            .middle-section {
+                flex-wrap: nowrap;
+                justify-content: space-around;
+                align-items: flex-start;
+            }
+
+            #west, #east {
+                min-width: 80px; 
+                max-width: 30%; 
+                min-height: 130px;
+            }
+
+            #board {
+                width: 40%; 
+                margin: 0 2px;
+                min-height: 130px;
+                margin-top: 15px; 
+            }
+            
+            #south .cards {
+                gap: 2px; 
+            }
+
+             .card {
+                width: 22px; 
+                height: 28px; 
+                font-size: 0.55rem; 
+            }
         }
     </style>
 </head>
@@ -244,7 +299,7 @@ margin-top: 80px;
         <div class="middle-section">
             
             <div class="hand" id="west">
-                <h2>West</h2>
+                <h2>West (თქვენი სვლა)</h2>
                 <div class="cards" id="west-cards"></div>
             </div>
 
@@ -254,13 +309,13 @@ margin-top: 80px;
             </div>
 
             <div class="hand" id="east">
-                <h2>East</h2>
+                <h2>East (თქვენი სვლა)</h2>
                 <div class="cards" id="east-cards"></div>
             </div>
         </div>
 
         <div class="hand" id="south">
-            <h2>South</h2>
+            <h2>South (AI)</h2>
             <div class="cards" id="south-cards"></div>
         </div>
     </div>
@@ -277,41 +332,113 @@ margin-top: 80px;
         let southTricks = 0;
         let turn = "east";
 
-        function renderHands() {
-            render("west-cards", west, "west", true);
-            render("east-cards", east, "east", true);
-            render("south-cards", south, "south", false); 
-            updatePlayerHighlight();
+        // Helper function to get suit order for sorting
+        function getSuitOrder(card) {
+            const s = suit(card);
+            switch (s) {
+                case "♠": return 1;
+                case "♥": return 2;
+                case "♦": return 3;
+                case "♣": return 4;
+                default: return 5;
+            }
         }
 
-        function render(id, hand, who, clickable=true) {
+        // Helper function to get card rank
+        function rank(card) {
+            let order = {"7":1,"8":2,"9":3,"10":4,"J":5,"Q":6,"K":7,"A":8}; 
+            const rankKey = card.replace(/[^0-9JQKA]/g,""); 
+            return order[rankKey];
+        }
+
+        // Helper function to get card suit
+        function suit(card) {
+            return card.slice(-1);
+        }
+
+        // Helper function to sort cards by rank within the hand
+        function sortHand(hand) {
+            return hand.sort((a, b) => {
+                const suitOrderA = getSuitOrder(a);
+                const suitOrderB = getSuitOrder(b);
+
+                if (suitOrderA !== suitOrderB) {
+                    return suitOrderA - suitOrderB;
+                }
+                return rank(b) - rank(a); // Descending rank within suit
+            });
+        }
+        
+        function renderHands() {
+            render("west-cards", sortHand(west), "west");
+            render("east-cards", sortHand(east), "east");
+            render("south-cards", sortHand(south), "south"); 
+            updatePlayerHighlight();
+        }
+        
+        function render(id, hand, who) {
             let div = document.getElementById(id);
             div.innerHTML = "";
-            hand.forEach((c,i)=>{
-                let span = document.createElement("div");
-                
-                const suit = c.slice(-1);
-                const rankValue = c.slice(0, -1);
-                span.innerHTML = `<span>${rankValue}${suit}</span>`; 
-                span.className = "card" + (suit==="♥"||suit==="♦" ? " red":" black");
-
-                if (who==="west" || who==="east") {
-                    if (isCardAllowed(who, c)) {
-                        span.classList.add("playable");
-                        span.onclick = ()=> playCard(who,i);
-                        span.style.transform = `translateX(2px)`; 
-                    } else if (who===turn) {
-                        span.classList.add("disabled");
-                    }
+            
+            // Group cards by suit
+            const suitGroups = hand.reduce((groups, card) => {
+                const s = suit(card);
+                if (!groups[s]) {
+                    groups[s] = [];
                 }
-                
-                if (who === "south") {
-                    span.classList.remove("disabled");
-                    span.onclick = null;
-                }
+                groups[s].push(card);
+                return groups;
+            }, {});
+            
+            // Determine suit order for display
+            const orderedSuits = ["♠", "♥", "♦", "♣"].filter(s => suitGroups[s] && suitGroups[s].length > 0);
+            
+            if (who === "south") {
+                 // For South (horizontal layout)
+                 const allCards = orderedSuits.flatMap(s => suitGroups[s]);
+                 allCards.forEach((c) => {
+                    const cardElement = createCardElement(c, who);
+                    div.appendChild(cardElement);
+                });
+            } else {
+                 // For West/East (vertical suit groups)
+                orderedSuits.forEach(s => {
+                    const groupDiv = document.createElement("div");
+                    groupDiv.className = "suit-group";
+                    
+                    suitGroups[s].forEach((c) => {
+                        const cardElement = createCardElement(c, who);
+                        groupDiv.appendChild(cardElement);
+                    });
+                    
+                    div.appendChild(groupDiv);
+                });
+            }
+        }
+        
+        function createCardElement(c, who) {
+            let span = document.createElement("div");
+            
+            const s = suit(c);
+            const rankValue = c.slice(0, -1);
+            span.innerHTML = `<span>${rankValue}${s}</span>`; 
+            span.className = "card" + (s==="♥"||s==="♦" ? " red":" black");
 
-                div.appendChild(span);
-            });
+            // Enable clicking for player-controlled hands (West and East) only if it's their turn
+            if (who==="west" || who==="east") {
+                if (isCardAllowed(who, c)) {
+                    span.classList.add("playable");
+                    span.onclick = ()=> playCardByValue(who, c); 
+                } else if (who===turn) {
+                    span.classList.add("disabled");
+                }
+            }
+            
+            if (who === "south") {
+                span.classList.remove("disabled");
+                span.onclick = null;
+            }
+            return span;
         }
 
         function updatePlayerHighlight() {
@@ -330,87 +457,388 @@ margin-top: 80px;
                 return true;
             }
             
-            const leadSuit = board[0].card.slice(-1);
-            const cardSuit = card.slice(-1);
+            const leadSuit = suit(board[0].card);
+            const cardSuit = suit(card);
             
             if (cardSuit === leadSuit) {
                 return true;
             }
             
             const playerHand = player === "west" ? west : east;
-            const hasLeadSuit = playerHand.some(c => c.slice(-1) === leadSuit);
+            const hasLeadSuit = playerHand.some(c => suit(c) === leadSuit);
             
             return !hasLeadSuit;
         }
 
-        function playCard(who,index) {
+        function playCardByValue(who, cardValue) {
             let card;
+            let hand;
+            
             if (who==="west") {
-                card = west.splice(index,1)[0];
+                hand = west;
             } else if (who==="east") {
-                card = east.splice(index,1)[0];
+                hand = east;
+            } else {
+                return; 
             }
-            board.push({player:who,card});
-            updateBoard();
-            nextTurn();
+            
+            const index = hand.indexOf(cardValue);
+            if (index > -1) {
+                card = hand.splice(index,1)[0];
+            } else {
+                return;
+            }
+            
+            if (card) {
+                board.push({player:who,card});
+                updateBoard();
+                nextTurn();
+            }
         }
 
-        function southMove() {
-            let chosen;
+        // Helper: Get suits present in a hand
+        function getHandSuitCounts(hand) {
+            const suitCounts = {};
+            hand.forEach(c => {
+                const s = suit(c);
+                if (!suitCounts[s]) suitCounts[s] = [];
+                suitCounts[s].push(c);
+            });
+            return suitCounts;
+        }
+
+        // Helper: Check if West or East has a card higher than given card in the card's suit
+        function opponentHasHigher(card) {
+            const currentSuit = suit(card);
+            const cardRank = rank(card);
             
-            if (board.length === 0) {
-                const suitCounts = {};
-                south.forEach(c => {
-                    const suit = c.slice(-1);
-                    suitCounts[suit] = (suitCounts[suit] || []).concat(c);
-                });
-                
-                let longestSuit = Object.keys(suitCounts).reduce((a,b) => 
-                    suitCounts[a].length > suitCounts[b].length ? a : b
-                );
-                
-                chosen = suitCounts[longestSuit].reduce((a,b)=>rank(a)<rank(b)?a:b); 
+            const westSuit = west.filter(c => suit(c) === currentSuit);
+            const eastSuit = east.filter(c => suit(c) === currentSuit);
+
+            const allOpponentCards = [...westSuit, ...eastSuit];
+            
+            // Check if any opponent card in that suit is strictly higher
+            return allOpponentCards.some(c => rank(c) > cardRank);
+        }
+
+        // Helper: Check if a card is a guaranteed winner in its suit based on all open hands
+        function isGuaranteedWinner(card) {
+            return !opponentHasHigher(card);
+        }
+
+        // ************ UNIVERSAL MISERE AI WITH DEEP ANALYSIS ************
+        
+        // Simulate what happens if South plays a specific card
+        function simulateCardPlay(card, currentBoard, currentSouth, currentWest, currentEast) {
+            const cardSuit = suit(card);
+            const cardRank = rank(card);
+            
+            // If this is a lead
+            if (currentBoard.length === 0) {
+                return analyzeLeadCard(card, currentSouth, currentWest, currentEast);
+            }
+            
+            // If following a trick
+            const leadSuit = suit(currentBoard[0].card);
+            
+            if (cardSuit === leadSuit) {
+                // Following suit
+                return analyzeFollowCard(card, currentBoard, currentSouth, currentWest, currentEast);
             } else {
-                const leadSuit = board[0].card.slice(-1);
-                const sameSuit = south.filter(c=>c.slice(-1)===leadSuit);
+                // Discarding (void in lead suit)
+                return analyzeDiscardCard(card, currentSouth, currentWest, currentEast);
+            }
+        }
+        
+        // Analyze leading a card
+        function analyzeLeadCard(card, currentSouth, currentWest, currentEast) {
+            const cardSuit = suit(card);
+            const cardRank = rank(card);
+            let dangerScore = 0;
+            
+            const southSuits = getHandSuitCounts(currentSouth);
+            const suitLength = (southSuits[cardSuit] || []).length;
+            
+            // 1. Guaranteed winner is VERY bad
+            if (isGuaranteedWinner(card)) {
+                dangerScore += 1000;
+            }
+            
+            // 2. Check opponents' holdings
+            const westSuitCards = currentWest.filter(c => suit(c) === cardSuit);
+            const eastSuitCards = currentEast.filter(c => suit(c) === cardSuit);
+            
+            // 3. Prefer long suits (more escape cards)
+            dangerScore -= suitLength * 20;
+            
+            // 4. Higher cards are more dangerous
+            dangerScore += cardRank * 15;
+            
+            // 5. If opponent is void, very dangerous
+            if (westSuitCards.length === 0 || eastSuitCards.length === 0) {
+                dangerScore += 200;
+            }
+            
+            // 6. Middle cards from long suits are good bait
+            if (suitLength >= 3 && cardRank >= 2 && cardRank <= 4) {
+                dangerScore -= 40;
+            }
+            
+            return dangerScore;
+        }
+        
+        // Analyze following a card
+        function analyzeFollowCard(card, currentBoard, currentSouth, currentWest, currentEast) {
+            const leadSuit = suit(currentBoard[0].card);
+            const cardRank = rank(card);
+            let dangerScore = 0;
+            
+            const currentHighest = getHighestCardInTrickFromBoard(currentBoard);
+            const currentHighestRank = rank(currentHighest);
+            
+            const southSuits = getHandSuitCounts(currentSouth);
+            const sameSuitCards = southSuits[leadSuit] || [];
+            
+            // Determine position
+            const isSecondPosition = currentBoard.length === 1;
+            const isThirdPosition = currentBoard.length === 2;
+            
+            if (cardRank < currentHighestRank) {
+                // Safe card (won't win)
                 
-                if (sameSuit.length > 0) {
-                    const highestRankInTrick = rank(getHighestCardInTrick());
-                    const cardsBelowHighest = sameSuit.filter(c => rank(c) < highestRankInTrick);
-                    
-                    if (cardsBelowHighest.length > 0) {
-                        chosen = cardsBelowHighest.reduce((a,b)=>rank(a)>rank(b)?a:b);
-                    } else {
-                        chosen = sameSuit.reduce((a,b)=>rank(a)<rank(b)?a:b);
-                    }
+                if (isSecondPosition) {
+                    // Second position: play higher safe card to force third player
+                    const safenessBonus = cardRank * 5; // Higher safe cards get bonus
+                    dangerScore -= safenessBonus;
                 } else {
-                    const suitCounts = {};
-                    south.forEach(c => {
-                        const suit = c.slice(-1);
-                        suitCounts[suit] = (suitCounts[suit] || []).concat(c);
-                    });
+                    // Third position: trick is decided, play high safe card
+                    dangerScore -= cardRank * 3;
+                }
+                
+            } else {
+                // Dangerous card (will win or equals highest)
+                
+                if (isSecondPosition) {
+                    // CRITICAL: Check if third player can overtake us
+                    const firstPlayer = currentBoard[0].player;
+                    const thirdPlayer = firstPlayer === "west" ? "east" : "west";
+                    const thirdPlayerHand = thirdPlayer === "west" ? currentWest : currentEast;
+                    const thirdPlayerSuit = thirdPlayerHand.filter(c => suit(c) === leadSuit);
                     
-                    let shortestSuit = Object.keys(suitCounts).reduce((a,b) => 
-                        suitCounts[a].length < suitCounts[b].length ? a : b
-                    );
+                    const canOvertake = thirdPlayerSuit.some(c => rank(c) > cardRank);
                     
-                    chosen = suitCounts[shortestSuit].reduce((a,b)=>rank(a)>rank(b)?a:b);
+                    if (canOvertake) {
+                        // Third player can save us - play minimal winner
+                        const minimality = (8 - cardRank) * 30; // Lower cards better
+                        dangerScore -= minimality;
+                        
+                        // But check: will third player WANT to overtake?
+                        // In misere, players want to AVOID winning
+                        // So third player will overtake if they have higher cards
+                        const maxThirdPlayerCard = Math.max(...thirdPlayerSuit.map(c => rank(c)));
+                        if (maxThirdPlayerCard > cardRank + 1) {
+                            // Third player has much higher cards, will likely overtake
+                            dangerScore -= 50;
+                        }
+                    } else {
+                        // We will definitely win - very bad
+                        dangerScore += 500;
+                        dangerScore += cardRank * 20; // Higher winners even worse
+                    }
+                    
+                } else {
+                    // Third position: we will win the trick
+                    dangerScore += 400;
+                    dangerScore += cardRank * 15;
                 }
             }
             
-            south = south.filter(c=>c!==chosen);
-            board.push({player:"south",card:chosen});
-            updateBoard();
-            nextTurn();
+            // Check if this leaves us in a bad position in this suit
+            const remainingInSuit = sameSuitCards.filter(c => c !== card);
+            if (remainingInSuit.length > 0) {
+                const lowestRemaining = Math.min(...remainingInSuit.map(c => rank(c)));
+                
+                // Check if we'll be forced to win later with remaining cards
+                const westSuitCards = currentWest.filter(c => suit(c) === leadSuit);
+                const eastSuitCards = currentEast.filter(c => suit(c) === leadSuit);
+                const allOpponentCards = [...westSuitCards, ...eastSuitCards];
+                
+                if (allOpponentCards.length > 0) {
+                    const maxOpponent = Math.max(...allOpponentCards.map(c => rank(c)));
+                    
+                    if (lowestRemaining > maxOpponent) {
+                        // We'll be forced to win later!
+                        dangerScore += 200;
+                    }
+                }
+            }
+            
+            return dangerScore;
+        }
+        
+        // Analyze discarding a card (void in lead suit)
+        function analyzeDiscardCard(card, currentSouth, currentWest, currentEast) {
+            const cardSuit = suit(card);
+            const cardRank = rank(card);
+            let dangerScore = 0;
+            
+            const southSuits = getHandSuitCounts(currentSouth);
+            const suitLength = (southSuits[cardSuit] || []).length;
+            
+            // 1. Guaranteed winners MUST go first (highest priority)
+            if (isGuaranteedWinner(card)) {
+                return -10000 - (cardRank * 100); // Extremely negative = good to discard
+            }
+            
+            // 2. Analyze suit vulnerability (CRITICAL FOR SQUEEZE SITUATIONS)
+            const westSuitCards = currentWest.filter(c => suit(c) === cardSuit);
+            const eastSuitCards = currentEast.filter(c => suit(c) === cardSuit);
+            const southSuitCards = southSuits[cardSuit] || [];
+            
+            const opponentsWithSuit = (westSuitCards.length > 0 ? 1 : 0) + (eastSuitCards.length > 0 ? 1 : 0);
+            
+            // 3. SINGLETON - always great to discard (except if it's our only exit card)
+            if (suitLength === 1) {
+                // Check if other suits are safe
+                let hasOtherSafeSuits = false;
+                for (const s in southSuits) {
+                    if (s !== cardSuit && southSuits[s].length >= 2) {
+                        hasOtherSafeSuits = true;
+                        break;
+                    }
+                }
+                
+                if (hasOtherSafeSuits) {
+                    return -5000 - (cardRank * 50); // Very good to discard
+                } else {
+                    return -2000 - (cardRank * 30); // Still good but less priority
+                }
+            }
+            
+            // 4. DOUBLETON - CRITICAL ANALYSIS
+            if (suitLength === 2) {
+                if (opponentsWithSuit === 2) {
+                    // Both opponents have this suit - DANGER ZONE
+                    
+                    const allOpponentCards = [...westSuitCards, ...eastSuitCards];
+                    const highestOpponent = Math.max(...allOpponentCards.map(c => rank(c)));
+                    const ourLowest = Math.min(...southSuitCards.map(c => rank(c)));
+                    const ourHighest = Math.max(...southSuitCards.map(c => rank(c)));
+                    
+                    if (ourLowest > highestOpponent) {
+                        // TRAPPED! Both our cards will win
+                        // We MUST start discarding from this suit NOW
+                        if (cardRank === ourHighest) {
+                            return -8000; // MUST discard the higher one
+                        } else {
+                            return +5000; // NEVER discard the lower one yet
+                        }
+                    } else {
+                        // Not trapped yet, but dangerous
+                        // Prefer to discard the higher card to be safe
+                        if (cardRank === ourHighest) {
+                            return -3000; // Good to discard higher card
+                        } else {
+                            return +2000; // Keep the lower card for now
+                        }
+                    }
+                } else {
+                    // Only 0-1 opponent has this suit - less dangerous
+                    return -1000 - (cardRank * 20);
+                }
+            }
+            
+            // 5. LONG SUITS (3+) - need to keep for exit cards
+            if (suitLength >= 3) {
+                // Long suits are valuable - penalize discarding from them
+                dangerScore += 2000;
+                
+                // But if it's a very high card (A, K, Q), still consider
+                if (cardRank >= 6) {
+                    dangerScore -= 800;
+                }
+                
+                return dangerScore;
+            }
+            
+            // 6. General preference: high cards are more dangerous
+            dangerScore += cardRank * 50;
+            
+            return dangerScore;
+        }
+        
+        // Helper for simulation
+        function getHighestCardInTrickFromBoard(board) {
+            const leadSuit = suit(board[0].card);
+            let currentWinner = board[0];
+            
+            for (let i = 1; i < board.length; i++) {
+                const currentCard = board[i];
+                if (suit(currentCard.card) === leadSuit) {
+                    if (rank(currentCard.card) > rank(currentWinner.card)) {
+                        currentWinner = currentCard;
+                    }
+                }
+            }
+            return currentWinner.card;
+        }
+
+        function southMove() {
+            let bestCard = null;
+            let lowestDanger = Infinity;
+            
+            // First, filter only legal cards
+            let legalCards = [];
+            
+            if (board.length === 0) {
+                // Leading - all cards are legal
+                legalCards = [...south];
+            } else {
+                // Following - must follow suit if possible
+                const leadSuit = suit(board[0].card);
+                const sameSuitCards = south.filter(c => suit(c) === leadSuit);
+                
+                if (sameSuitCards.length > 0) {
+                    // Must follow suit
+                    legalCards = sameSuitCards;
+                } else {
+                    // Void in lead suit - can discard any card
+                    legalCards = [...south];
+                }
+            }
+            
+            // Evaluate every legal card
+            for (const card of legalCards) {
+                const danger = simulateCardPlay(card, board, south, west, east);
+                
+                if (danger < lowestDanger) {
+                    lowestDanger = danger;
+                    bestCard = card;
+                }
+            }
+            
+            // Play the chosen card
+            if (bestCard) {
+                south = south.filter(c => c !== bestCard);
+                board.push({player: "south", card: bestCard});
+                updateBoard();
+                nextTurn();
+            }
         }
 
         function getHighestCardInTrick() {
-            const leadSuit = board[0].card.slice(-1);
-            const sameSuitCards = board.filter(t => t.card.slice(-1) === leadSuit); 
+            const leadSuit = suit(board[0].card);
+            let currentWinner = board[0];
             
-            if (sameSuitCards.length === 0) return board[0].card; 
-            
-            return sameSuitCards.reduce((a, b) => rank(a.card) > rank(b.card) ? a : b).card;
+            for (let i = 1; i < board.length; i++) {
+                const currentCard = board[i];
+                if (suit(currentCard.card) === leadSuit) {
+                    if (rank(currentCard.card) > rank(currentWinner.card)) {
+                        currentWinner = currentCard;
+                    }
+                }
+            }
+            return currentWinner.card;
         }
 
         function nextTurn() {
@@ -418,6 +846,8 @@ margin-top: 80px;
                 setTimeout(finishTrick,1000); 
                 return;
             }
+            
+            // Determine whose turn is next
             if (turn==="east") turn="south";
             else if (turn==="south") turn="west";
             else if (turn==="west") turn="east";
@@ -426,7 +856,8 @@ margin-top: 80px;
                 document.getElementById("status").textContent = "South-ის სვლაა...";
                 setTimeout(southMove,800); 
             } else {
-                document.getElementById("status").textContent = (turn==="east" ? "East" : "West") + "-ის სვლაა!";
+                // West/East are now controlled by the player (clicking on playable cards)
+                document.getElementById("status").textContent = (turn==="east" ? "East" : "West") + "-ის სვლაა! აირჩიეთ კარტი.";
             }
             renderHands();
         }
@@ -449,7 +880,7 @@ margin-top: 80px;
                     document.getElementById("status").textContent = "South-ის სვლაა...";
                     setTimeout(southMove,800); 
                 } else {
-                    document.getElementById("status").textContent = (turn==="east" ? "East" : "West") + "-ის სვლაა!";
+                    document.getElementById("status").textContent = (turn==="east" ? "East" : "West") + "-ის სვლაა! აირჩიეთ კარტი.";
                 }
                 renderHands();
             }
@@ -457,14 +888,14 @@ margin-top: 80px;
 
         function updateBoard() {
             document.getElementById("trick").innerHTML = board.map(b=>{
-                const suit = b.card.slice(-1);
+                const s = suit(b.card);
                 const rankValue = b.card.slice(0, -1);
-                const colorClass = (suit==="♥"||suit==="♦" ? " red":" black");
+                const colorClass = (s==="♥"||s==="♦" ? " red":" black");
                 return `
                     <div>
                         ${b.player}: 
                         <div class='card ${colorClass}'>
-                            <span>${rankValue}${suit}</span>
+                            <span>${rankValue}${s}</span>
                         </div>
                     </div>
                 `;
@@ -472,15 +903,9 @@ margin-top: 80px;
             renderHands();
         }
 
-        function rank(card) {
-            let order = {"7":1,"8":2,"9":3,"10":4,"J":5,"Q":6,"K":7,"A":8}; 
-            const rankKey = card.replace(/[^0-9JQKA]/g,""); 
-            return order[rankKey];
-        }
-
         function winnerOfTrick(trick) {
-            let leadSuit = trick[0].card.slice(-1);
-            let valid = trick.filter(t=>t.card.slice(-1)===leadSuit); 
+            let leadSuit = suit(trick[0].card);
+            let valid = trick.filter(t=>suit(t.card)===leadSuit); 
             
             if (valid.length === 0) {
                  return trick[0].player;
@@ -504,4 +929,3 @@ margin-top: 80px;
     </script>
 </body>
 </html>
-
