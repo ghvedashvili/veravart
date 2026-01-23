@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Scramble Intro with Start Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Goldman&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #212121;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Goldman', monospace;
+            flex-direction: column;
+            padding: 20px;
+            cursor: pointer;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .text-change {
+            font-family: 'Goldman', monospace;
+            font-weight: normal;
+            font-size: 2.2rem;
+            color: #c8c8c8;
+            filter: drop-shadow(0 0 0.3em rgba(200,200,200,0.3));
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .symbol-label {
+            color: #888;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .dud {
+            color: rgba(255, 50, 50, 0.9);
+            
+        }
+        
+        .start-game {
+            
+        }
+        
+        .info {
+            color: #888;
+            margin-top: 40px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .text-change {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-change" id="main-text"></div>
+        <div class="symbol-label" id="symbol-label"></div>
+    </div>
+
+    <script>
+        class TextScramble {
+            constructor(el) {
+                this.el = el;
+                this.update = this.update.bind(this);
+            }
+            
+            setText(newText, symbolSet, isStartGame = false) {
+                const oldText = this.el.innerText;
+                const length = Math.max(oldText.length, newText.length);
+                const promise = new Promise(resolve => this.resolve = resolve);
+                this.queue = [];
+                this.symbolSet = symbolSet;
+                this.isStartGame = isStartGame;
+                
+                for (let i = 0; i < length; i++) {
+                    const from = oldText[i] || '';
+                    const to = newText[i] || '';
+                    const start = Math.floor(Math.random() * 50);
+                    const end = start + Math.floor(Math.random() * 50);
+                    this.queue.push({ from, to, start, end });
+                }
+                
+                cancelAnimationFrame(this.frameRequest);
+                this.frame = 0;
+                this.update();
+                return promise;
+            }
+            
+            update() {
+                let output = '';
+                let complete = 0;
+                
+                for (let i = 0, n = this.queue.length; i < n; i++) {
+                    let { from, to, start, end, char } = this.queue[i];
+                    
+                    if (this.frame >= end) {
+                        complete++;
+                        if (this.isStartGame) {
+                            output += `<span class="start-game">${to}</span>`;
+                        } else {
+                            output += to;
+                        }
+                    } else if (this.frame >= start) {
+                        if (!char || Math.random() < 0.28) {
+                            char = this.randomChar();
+                            this.queue[i].char = char;
+                        }
+                        output += `<span class="dud">${char}</span>`;
+                    } else {
+                        output += from;
+                    }
+                }
+                
+                this.el.innerHTML = output;
+                
+                if (complete === this.queue.length) {
+                    this.resolve();
+                } else {
+                    this.frameRequest = requestAnimationFrame(this.update);
+                    this.frame++;
+                }
+            }
+            
+            randomChar() {
+                return this.symbolSet[Math.floor(Math.random() * this.symbolSet.length)];
+            }
+        }
+
+        // Symbol sets
+        const brailleSymbols = '⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿';
+        const cardSymbols = '♠♣♥♦♤♧♡♢';
+        const chessSymbols = '♔♕♖♗♘♙♚♛♜♝♞♟';
+        const morseSymbols = '•-';
+        const mathSymbols = '±×÷≈≠≤≥∞√∆∂∫∑∏∈∉';
+        
+        
+        
+        const runeSymbols = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛋᛏᛒᛖᛗᛚᛜᛞ';
+		const asianSymbols = 'あいうえおかきくけこさしすせそたちつてとなにぬねのアイウエオカキクケコ';
+        const arrowSymbols = '←↑→↓↔↕⇐⇑⇒⇓⇔➔➜➤➝';
+
+        
+        // Combine all symbols for the Start Game animation
+        const allSymbols = brailleSymbols + cardSymbols + chessSymbols + morseSymbols + mathSymbols;
+
+        // Sequence of texts with their symbol sets and labels
+        const sequence = [
+            {
+                text: "Veravart Games",
+                symbols: brailleSymbols,
+                label: "Game created by"
+            },
+            {
+                text: "Valeri Ghvedashvili", 
+                symbols: cardSymbols,
+                label: "Author of the idea"
+            },
+            {
+                text: "David Ghvedashvili",
+                symbols: chessSymbols,
+                label: "Producer"
+            },
+            {
+                text: "Teona Kacharava",
+                symbols: morseSymbols, 
+                label: "Bug Hunter"
+            },
+            {
+                text: "Mishka Pankvelashvili",
+                symbols: mathSymbols,
+                label: "Game Technical Support"
+            },
+            {
+                text: "Valeri Ghvedashvili",
+                symbols: runeSymbols,
+                label: "Creative Director"
+            },
+            {
+                text: "giorgi ozbetelashvili",
+                symbols: asianSymbols,
+                label: "Voiceover"
+            },
+            {
+                text: "Achiko Kolbaia",
+                symbols: arrowSymbols,
+                label: "Game Designer"
+            },
+            {
+                text: "Coming Soon...",
+                symbols: allSymbols,
+                label: "Are you ready?",
+                isStartGame: true
+            }
+        ];
+
+        const mainText = document.getElementById('main-text');
+        const symbolLabel = document.getElementById('symbol-label');
+        const scrambler = new TextScramble(mainText);
+
+        let currentIndex = 0;
+        let sequenceCompleted = false;
+
+        function playSequence() {
+            if (currentIndex >= sequence.length) {
+                sequenceCompleted = true;
+                return;
+            }
+
+            const currentItem = sequence[currentIndex];
+            
+            // Update label
+            symbolLabel.textContent = currentItem.label;
+            
+            // Animate text
+            scrambler.setText(currentItem.text, currentItem.symbols, currentItem.isStartGame).then(() => {
+                if (currentItem.isStartGame) {
+                    // For Start Game, wait for click instead of automatic transition
+                    sequenceCompleted = true;
+                } else {
+                    // Wait 2 seconds, then clear and move to next
+                    setTimeout(() => {
+                        scrambler.setText("", currentItem.symbols).then(() => {
+                            currentIndex++;
+                            setTimeout(playSequence, 500);
+                        });
+                    }, 2000);
+                }
+            });
+        }
+
+        // Click event on the whole body to start the game
+        document.body.addEventListener('click', function() {
+            if (sequenceCompleted) {
+                // Add scramble effect before starting the game
+                scrambler.setText("", allSymbols, true).then(() => {
+                    setTimeout(() => {
+                        alert('Game started!');
+                        // Add your actual game start logic here
+                        // For example: window.location.href = 'game.html';
+                    }, 1500);
+                });
+            }
+        });
+
+        // Start the sequence after 2 seconds initial delay
+        setTimeout(playSequence, 2000);
+    </script>
+</body>
+</html>
