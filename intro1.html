@@ -179,24 +179,24 @@
                 label: "Author of the idea"
             },
             {
-                text: "David Ghvedashvili",
+                text: "Koba Chokoshvili",
                 symbols: chessSymbols,
                 label: "Producer"
             },
             {
-                text: "Teona Kacharava",
+                text: "Giorgi Dadiani",
                 symbols: morseSymbols, 
                 label: "Bug Hunter"
             },
             {
-                text: "Mishka Pankvelashvili",
+                text: "Sashka Jabadari",
                 symbols: mathSymbols,
                 label: "Game Technical Support"
             },
             {
-                text: "Valeri Ghvedashvili",
+                text: "Vito tsivtsivadze",
                 symbols: runeSymbols,
-                label: "Creative Director"
+                label: "PR Manager"
             },
             {
                 text: "giorgi ozbetelashvili",
@@ -207,6 +207,11 @@
                 text: "Achiko Kolbaia",
                 symbols: arrowSymbols,
                 label: "Game Designer"
+            },
+            {
+                text: "Lasha Shavelashvili",
+                symbols: brailleSymbols,
+                label: "System Observer"
             },
             {
                 text: "Coming Soon...",
@@ -244,9 +249,9 @@
                     setTimeout(() => {
                         scrambler.setText("", currentItem.symbols).then(() => {
                             currentIndex++;
-                            setTimeout(playSequence, 750);
+                            setTimeout(playSequence, 500);
                         });
-                    }, 3000);
+                    }, 2000);
                 }
             });
         }
