@@ -367,7 +367,7 @@
                 id: 18,
                 text: "Nickname უნდა შეიცავდეს ტემპერატურას (-375°C-დან 10000°C-მდე ან °F)",
                 check: (pwd) => {
-                    const tempRegex = /-?\d{1,5}°[CF]/;
+                    const tempRegex = /-?\d{1,5}(°|º|o|O)[CF]/;
                     const match = pwd.match(tempRegex);
                     if (!match) return false;
                     return true;
