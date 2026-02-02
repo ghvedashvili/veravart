@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>vIP Card</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg1:#444;
+    --bg2:#222;
+    --accent:#fff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:var(--bg2);
+    font-family:'Source Code Pro', monospace;
+    color:#fff;
+}
+
+.card {
+    width:360px;
+    height:200px;
+    padding:20px;
+    border-radius:14px;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+}
+
+.header {
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.6px;
+}
+
+.header span:last-child {
+    color:var(--accent);
+}
+
+.ip-inputs {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+}
+
+.ip-input {
+    background:transparent;
+    border:none;
+    border-bottom:2px solid var(--accent);
+    color:var(--accent);
+    text-align:center;
+    font-size:22px;
+    font-family:inherit;
+    outline:none;
+}
+
+.ip-input::placeholder {
+    color:rgba(255,255,255,.6);
+}
+
+.ip-input:focus {
+    text-shadow:0 0 8px var(--accent);
+}
+
+.dot {
+    margin:0 6px;
+    opacity:.7;
+}
+
+.footer {
+    font-size:11px;
+    display:flex;
+    justify-content:space-between;
+    opacity:.85;
+}
+
+.system-message {
+    margin-top:16px;
+    text-align:center;
+    font-size:14px;
+    min-height:18px;
+    opacity:0;
+    transition:.3s;
+}
+
+.system-message.success {
+    color:var(--accent);
+    opacity:1;
+}
+
+.system-message.error {
+    color:#ff7676;
+    opacity:1;
+}
+
+/* ===== LOADER ===== */
+.loader {
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:10;
+}
+
+.spinner {
+    width:36px;
+    height:36px;
+    border:3px solid rgba(255,255,255,.2);
+    border-top:3px solid var(--accent);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+.loader-text {
+    margin-top:12px;
+    font-size:12px;
+    letter-spacing:1px;
+    opacity:.7;
+}
+
+@keyframes spin {
+    to { transform:rotate(360deg); }
+}
+</style>
+</head>
+
+<body>
+
+<div style="position:relative;">
+    <!-- LOADER -->
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">detecting network...</div>
+    </div>
+
+    <div class="card">
+        <div class="header">
+            <span id="ispName">NETWORK</span>
+            <span>LOW ERROR</span>
+        </div>
+
+        <div class="ip-inputs">
+            <input class="ip-input" id="p1">
+            <span class="dot">.</span>
+            <input class="ip-input" id="p2">
+            <span class="dot">.</span>
+            <input class="ip-input" id="p3">
+            <span class="dot">.</span>
+            <input class="ip-input" id="p4">
+        </div>
+
+        <div class="footer">
+            <div id="realIP">loading...</div>
+            <div>access</div>
+        </div>
+    </div>
+
+    <div id="msg" class="system-message"></div>
+</div>
+
+<script>
+const inputs = [p1, p2, p3, p4];
+const loader = document.getElementById('loader');
+
+async function getNetworkData() {
+    const r = await fetch('https://ipapi.co/json/');
+    const data = await r.json();
+
+    realIP.textContent = data.ip;
+    ispName.textContent = data.org || 'UNKNOWN';
+
+    setupInputs(data.ip);
+    applyTheme(data.org || '');
+
+    // loader fade out
+    loader.style.opacity = '0';
+    setTimeout(() => loader.remove(), 400);
+}
+
+function applyTheme(isp) {
+    const root = document.documentElement;
+    isp = isp.toLowerCase();
+
+    if (isp.includes('magti')) {
+        root.style.setProperty('--bg1', '#E53935');
+        root.style.setProperty('--bg2', '#B71C1C');
+        root.style.setProperty('--accent', '#FFC107');
+    }
+    else if (isp.includes('silk')) {
+        root.style.setProperty('--bg1', '#1E88E5');
+        root.style.setProperty('--bg2', '#0D47A1');
+        root.style.setProperty('--accent', '#90CAF9');
+    }
+    else if (isp.includes('cellfie') || isp.includes('beeline')) {
+        root.style.setProperty('--bg1', '#43A047');
+        root.style.setProperty('--bg2', '#1B5E20');
+        root.style.setProperty('--accent', '#B9F6CA');
+    }
+    else if (isp.includes('caucasus') || isp.includes('sky')) {
+        root.style.setProperty('--bg1', '#7E57C2');
+        root.style.setProperty('--bg2', '#4527A0');
+        root.style.setProperty('--accent', '#D1C4E9');
+    }
+    else {
+        root.style.setProperty('--bg1', '#555');
+        root.style.setProperty('--bg2', '#222');
+        root.style.setProperty('--accent', '#ccc');
+    }
+}
+
+function setupInputs(ip) {
+    const parts = ip.split('.');
+    parts.forEach((part, i) => {
+        inputs[i].style.width = `${part.length * 16}px`;
+        inputs[i].maxLength = part.length;
+        inputs[i].placeholder = '*'.repeat(part.length);
+    });
+}
+
+inputs.forEach((input, i) => {
+    input.addEventListener('input', () => {
+        input.value = input.value.replace(/\D/g,'');
+        if (input.value.length === input.maxLength && inputs[i+1]) {
+            inputs[i+1].focus();
+        }
+        checkIP();
+    });
+});
+
+function checkIP() {
+    const entered = inputs.map(i => i.value).join('.');
+    const msg = document.getElementById('msg');
+
+    if (entered.length < realIP.textContent.length) return;
+
+    if (entered === realIP.textContent) {
+        msg.textContent = '✔ ACCESS GRANTED';
+        msg.className = 'system-message success';
+    } else {
+        msg.textContent = '✖ LOW ERROR';
+        msg.className = 'system-message error';
+    }
+}
+
+getNetworkData();
+</script>
+
+</body>
+</html>
