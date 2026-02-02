@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>vIP Card</title>
+<title>Card</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500;700&display=swap" rel="stylesheet">
@@ -37,6 +37,7 @@ body {
     flex-direction:column;
     justify-content:space-between;
     position:relative;
+    overflow:hidden;
 }
 
 .header {
@@ -52,37 +53,28 @@ body {
     justify-content:center;
     align-items:center;
     font-size:22px;
+    max-width:100%;
+    overflow:hidden;
+    flex-wrap:nowrap;
 }
 
 .ip-input {
     background:transparent;
     border:none;
-   
     color:var(--accent);
     text-align:center;
     font-size:22px;
     font-family:inherit;
     outline:none;
+    width:32px;
+    min-width:32px;
+    transition:width .2s ease;
 }
 
 .ip-input::placeholder {
     color:rgba(255,255,255,.6);
 }
-.card {
-    overflow: hidden;
-}
 
-.ip-inputs {
-    max-width: 100%;
-    overflow: hidden;
-    flex-wrap: nowrap;
-}
-
-.ip-input {
-    width: 32px;
-    min-width: 32px;
-    transition: width .2s ease;
-}
 .dot {
     margin:0 6px;
     opacity:.7;
@@ -150,7 +142,7 @@ body {
     <div class="card">
         <div class="header">
             <span id="ispName">NETWORK</span>
-            <span>LOW ERROR</span>
+            <span>vIP card</span>
         </div>
 
         <div class="ip-inputs">
@@ -164,8 +156,8 @@ body {
         </div>
 
         <div class="footer">
-            <div id="realIP">loading...</div>
-            <div>access</div>
+            <div id="realIP">CARDHOLDER <br> Nickname </div>
+            <div>NET</div>
         </div>
     </div>
 
@@ -182,16 +174,10 @@ init();
 async function init() {
     try {
         const ip = await getIPOnly();
-        realIP.textContent = ip;
+        realIP.dataset.ip = ip; // რეალური IP დამალულია
         setupInputs(ip);
 
-        let isp;
-        if (cachedISP) {
-            isp = cachedISP;
-        } else {
-            isp = await getISPAndCache(ip);
-        }
-
+        let isp = cachedISP || await getISPAndCache(ip);
         ispName.textContent = isp;
         applyTheme(isp);
 
@@ -264,15 +250,17 @@ inputs.forEach((input, i) => {
 });
 
 function checkIP() {
+    const real = realIP.dataset.ip;
     const entered = inputs.map(i => i.value).join('.');
-    if (entered.length < realIP.textContent.length) return;
 
-    msg.textContent = entered === realIP.textContent
+    if (!real || entered.length < real.length) return;
+
+    msg.textContent = entered === real
         ? '✔ ACCESS GRANTED'
         : '✖ LOW ERROR';
 
     msg.className = 'system-message ' +
-        (entered === realIP.textContent ? 'success' : 'error');
+        (entered === real ? 'success' : 'error');
 }
 </script>
 
