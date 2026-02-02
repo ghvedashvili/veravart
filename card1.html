@@ -57,7 +57,7 @@ body {
 .ip-input {
     background:transparent;
     border:none;
-    border-bottom:2px solid var(--accent);
+   
     color:var(--accent);
     text-align:center;
     font-size:22px;
@@ -68,7 +68,21 @@ body {
 .ip-input::placeholder {
     color:rgba(255,255,255,.6);
 }
+.card {
+    overflow: hidden;
+}
 
+.ip-inputs {
+    max-width: 100%;
+    overflow: hidden;
+    flex-wrap: nowrap;
+}
+
+.ip-input {
+    width: 32px;
+    min-width: 32px;
+    transition: width .2s ease;
+}
 .dot {
     margin:0 6px;
     opacity:.7;
