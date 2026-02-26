@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>FIREMAN - Braille Dominoes</title>
+<style>
+html {
+    height: 100%;
+}
+body {
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-image: linear-gradient(#800000, #8B0000);
+    margin: 50px;
+    text-align: center;
+}
+.domino {
+  border-radius: 15px;
+  background-color: #FFF8DC;
+  display: inline-block;
+  box-shadow: inset 3px 5px 10px 1px #F5F5DC;
+}
+.line {
+  width: 80px;
+  height: 6px;
+  margin: 0 auto;
+  background-color: #000;
+  border-radius: 5px;
+}
+.upper, .lower {
+  width: 75px;
+  height: 75px;
+  display: inline-block;
+  margin: 15px 12px;
+}
+.dots {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+}
+.dot {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: #000;
+}
+.row {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+}
+.row:nth-child(2) {
+  justify-content: center;
+}
+
+/*
+  ბრაილის 6 პოზიცია ← ორიგინალ 3-row grid-ში:
+
+  row1 (მარცხ. სვეტი):  dot1=pos1(ზედა), dot2=pos2(შუა), dot3=pos3(ქვედა)
+  row2 (შუა სვეტი):     ბრაილში არ გამოიყენება → ყოველთვის opacity:0
+  row3 (მარჯვ. სვეტი): dot1=pos4(ზედა), dot2=pos5(შუა), dot3=pos6(ქვედა)
+
+  ასოები (Grade 1 Braille):
+  F = 1,2,4   |  I = 2,4     |  R = 1,2,3,5
+  E = 1,5     |  M = 1,3,4   |  A = 1       |  N = 1,3,4,5
+*/
+
+/* ყველა dot-ი hidden */
+.br-f .dot, .br-i .dot, .br-r .dot,
+.br-e .dot, .br-m .dot, .br-a .dot,
+.br-n .dot, .br-blank .dot { opacity: 0; }
+
+/* F = 1,2,4 */
+.br-f .row:nth-child(1) .dot:nth-child(1) { opacity: 1; }
+.br-f .row:nth-child(1) .dot:nth-child(2) { opacity: 1; }
+.br-f .row:nth-child(3) .dot:nth-child(1) { opacity: 1; }
+
+/* I = 2,4 */
+.br-i .row:nth-child(1) .dot:nth-child(2) { opacity: 1; }
+.br-i .row:nth-child(3) .dot:nth-child(1) { opacity: 1; }
+
+/* R = 1,2,3,5 */
+.br-r .row:nth-child(1) .dot:nth-child(1) { opacity: 1; }
+.br-r .row:nth-child(1) .dot:nth-child(2) { opacity: 1; }
+.br-r .row:nth-child(1) .dot:nth-child(3) { opacity: 1; }
+.br-r .row:nth-child(3) .dot:nth-child(2) { opacity: 1; }
+
+/* E = 1,5 */
+.br-e .row:nth-child(1) .dot:nth-child(1) { opacity: 1; }
+.br-e .row:nth-child(3) .dot:nth-child(2) { opacity: 1; }
+
+/* M = 1,3,4 */
+.br-m .row:nth-child(1) .dot:nth-child(1) { opacity: 1; }
+.br-m .row:nth-child(1) .dot:nth-child(3) { opacity: 1; }
+.br-m .row:nth-child(3) .dot:nth-child(1) { opacity: 1; }
+
+/* A = 1 */
+.br-a .row:nth-child(1) .dot:nth-child(1) { opacity: 1; }
+
+/* N = 1,3,4,5 */
+.br-n .row:nth-child(1) .dot:nth-child(1) { opacity: 1; }
+.br-n .row:nth-child(1) .dot:nth-child(3) { opacity: 1; }
+.br-n .row:nth-child(3) .dot:nth-child(1) { opacity: 1; }
+.br-n .row:nth-child(3) .dot:nth-child(2) { opacity: 1; }
+
+.domino-wrap {
+  display: inline-block;
+  margin: 0 10px;
+  vertical-align: top;
+}
+/* ======= ორიგინალი დომინო კლასები ======= */
+/* Zero */
+.zero .dot { opacity: 0; }
+/* One */
+.one .dot { opacity: 0; }
+.one .row:nth-child(2) .dot { opacity: 1; }
+/* Two */
+.two .dot { opacity: 0; }
+.two .row:nth-child(1) .dot:nth-child(1),
+.two .row:nth-child(3) .dot:nth-child(3) { opacity: 1; }
+/* Three */
+.three .dot { opacity: 0; }
+.three .row:nth-child(1) .dot:nth-child(1),
+.three .row:nth-child(2) .dot:nth-child(1),
+.three .row:nth-child(3) .dot:nth-child(3) { opacity: 1; }
+/* Four */
+.four .row:nth-child(1) .dot:nth-child(2),
+.four .row:nth-child(2) .dot:nth-child(1),
+.four .row:nth-child(3) .dot:nth-child(2) { opacity: 0; }
+/* Five */
+.five .row:nth-child(1) .dot:nth-child(2),
+.five .row:nth-child(3) .dot:nth-child(2) { opacity: 0; }
+/* Six */
+.six .row:nth-child(2) .dot { opacity: 0; }
+</style>
+</head>
+<body>
+
+<!-- მარცხენა ჩვეულებრივი დომინო 1 -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper four">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower six">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- მარცხენა ჩვეულებრივი დომინო 2 (გადმოტანილი მარჯვნიდან) -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper two">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower five">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ბრაილი: F / M -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper br-f">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower br-m">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ბრაილი: I / A -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper br-i">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower br-a">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ბრაილი: R / N -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper br-r">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower br-n">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ბრაილი: E / ცარიელი -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper br-e">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower br-blank">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- მარჯვენა ჩვეულებრივი დომინო -->
+<div class="domino-wrap">
+  <div class="domino">
+    <div class="upper six">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+    <div class="line"></div>
+    <div class="lower three">
+      <div class="dots">
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div></div>
+        <div class="row"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
