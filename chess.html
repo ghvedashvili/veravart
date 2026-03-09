@@ -1502,6 +1502,62 @@ window.addEventListener('load', function(){
   console.info(document.querySelectorAll("div").length + " DIVs used!");
 });
 
+// ===== ZOOM (wheel + pinch) =====
+(function(){
+  var currentScale = null; // will be set on load
+
+  function getScale(){
+    if(currentScale === null){
+      currentScale = parseFloat(scale.value) || 0.6;
+    }
+    return currentScale;
+  }
+
+  function setScale(s){
+    s = Math.max(0.1, Math.min(3.0, s));
+    currentScale = s;
+    document.documentElement.style.setProperty('--s', s);
+    scale.value = s.toFixed(3);
+    scale.nextElementSibling.innerHTML = s.toFixed(3);
+  }
+
+  // Mouse wheel
+  document.addEventListener('wheel', function(e){
+    if(e.target.closest('#controls')) return;
+    e.preventDefault();
+    var delta = e.deltaY > 0 ? -0.05 : 0.05;
+    setScale(getScale() + delta);
+  }, {passive: false});
+
+  // Pinch-to-zoom (touch)
+  var lastPinchDist = null;
+
+  function getPinchDist(touches){
+    var dx = touches[0].clientX - touches[1].clientX;
+    var dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length === 2){
+      lastPinchDist = getPinchDist(e.touches);
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchmove', function(e){
+    if(e.touches.length === 2 && lastPinchDist !== null){
+      var dist = getPinchDist(e.touches);
+      var ratio = dist / lastPinchDist;
+      lastPinchDist = dist;
+      setScale(getScale() * ratio);
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchend', function(e){
+    if(e.touches.length < 2) lastPinchDist = null;
+  }, {passive: true});
+})();
+
 // ===== DRAG ROTATION (mouse + touch) =====
 (function(){
   var rotX = 45;   // fixed tilt
@@ -1548,13 +1604,15 @@ window.addEventListener('load', function(){
   document.addEventListener('mouseup', onEnd);
   document.addEventListener('mouseleave', onEnd);
 
-  // Touch
+  // Touch (1 finger = rotate, 2 fingers = pinch handled separately)
   document.addEventListener('touchstart', function(e){
     if(e.target.closest('#controls')) return;
+    if(e.touches.length !== 1) { onEnd(); return; }
     var t = e.touches[0];
     onStart(t.clientX, t.clientY);
   }, {passive: true});
   document.addEventListener('touchmove', function(e){
+    if(e.touches.length !== 1) { onEnd(); return; }
     var t = e.touches[0];
     onMove(t.clientX, t.clientY);
   }, {passive: true});
