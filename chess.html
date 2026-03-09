@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>3D Chess - Masked Edition 😷</title>
 <style>
+:root {
+  --x: 45deg;
+  --y: 0deg;
+  --z: -40deg;
+  --tx: 0px;
+  --ty: 0px;
+  --tz: 0px;
+  --p: 3705px;
+  --s: 0.6;
+}
+
 html, body{
 padding:0;
 margin:0;
@@ -14,6 +25,8 @@ font-family:"Arial", sans-serif;
 font-size:10px;
 width:100vw;
 height:100vh;
+max-width:100vw;
+overflow:hidden;
 display:block;
 scrollbar-color:#F86F0C rgb(200,200,200);
 scrollbar-width:thin;
@@ -228,8 +241,8 @@ transition:all ease 0.7s;overflow:hidden;
 }
 
 .coordinates::after{content:" HGFEDCBA ";}
-.coordinates_::before, .coordinates_::after{content:" 12345678 ";letter-spacing:84px;}
-.coordinates_::after{content:" 87654321 ";}
+.coordinates_::before, .coordinates_::after{content:" 87654321 ";letter-spacing:84px;}
+.coordinates_::after{content:" 12345678 ";}
 .coordinates::before, .coordinates_::before{top:0;}
 .coordinates::after, .coordinates_::after{bottom:80px;transform:rotate(180deg) translateY(var(--max-area));}
 
@@ -646,81 +659,23 @@ position:absolute;left:0;top:0;display:block;transform-style:preserve-3d;
 }
 
 /* ===== CONTROLS ===== */
-#controls{
-position:fixed;left:0px;top:0px;
-background-color:black;display:block;padding:4px 0;
-color:white;transition-property:top,transform;
-transition-duration:0.64s;
-transition-timing-function:cubic-bezier(.17,.84,.44,1);
---controls-active:linear-gradient(0deg, rgba(0,100,200,0.4), rgba(0,100,200,0.4));
---controls-active-warn:linear-gradient(0deg, rgba(217,54,0,0.4), rgba(217,54,0,0.4));
-}
 
-button.board-borders::before{content:"Hide ";}
-.noborders button.board-borders::before{content:"Show ";}
+.noborders 
 button.anim-boost::before{content:"Reduce ";}
 .noanimations button.anim-boost::before{content:"Enable ";}
-.noborders #controls button.board-borders{background-image:var(--controls-active);}
-.highlighted #controls button.piece-highlighter{background-image:var(--controls-active);}
-.noanimations #controls button.anim-boost{background-image:var(--controls-active-warn);}
-.noscroll #controls button.body-scroll{background-image:var(--controls-active-warn);}
-.rotating #controls button.spin360{background-image:var(--controls-active);}
 
-button.body-scroll::before{content:"Disable ";}
-.noscroll button.body-scroll::before{content:"Enable ";}
+.noscroll 
 
-#controls .title{position:relative;padding:6px 8px;display:block;margin:2px 0;}
-
-#controls button{
-display:inline-block;background:rgba(255,255,255,0.1);
-color:white;border:0;position:relative;font-size:10px;
-padding:6px 14px;margin:2px auto;width:48%;outline-offset:-4px;
-}
-
-#controls button.ehide::before{content:"Hide ";}
-#controls button:hover{background:rgba(255,255,255,0.2);}
-#controls button:active{background:rgba(255,255,255,0.15);}
-#controls.hide{top:34px;transform:translateY(-100%);}
-#controls.hide button.ehide{background-image:var(--controls-active);}
-#controls.hide button.ehide::before{content:"Show ";}
-
-label{display:block;padding:4px 8px;}
-label > span{display:inline-block;color:white;width:20px;height:12px;line-height:12px;position:relative;left:0px;top:-2px;opacity:0.7;}
-label:hover > span{opacity:1;}
-label > span:last-child{width:50px;text-align:right;}
-
-input[type="range"]{
--webkit-appearance:none;appearance:none;padding:0;margin:0;overflow:hidden;
-width:200px;height:12px;background:rgb(20,20,20);
-}
-
-@media screen and (-webkit-min-device-pixel-ratio:0){
-input[type='range']::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:12px;cursor:ew-resize;background:#434343;}
-input[type='range']:hover::-webkit-slider-thumb{background:rgb(0,110,210);}
-input[type='range']:active::-webkit-slider-thumb{background:rgb(0,160,255);}
 input[type='range']:hover, input[type='range']:active{background:rgb(30,30,30);}
 }
-
-input[type="range"]::-moz-range-thumb{appearance:none;width:15px;height:12px;background:rgb(0,100,200);border:0;border-radius:0;cursor:ew-resize;}
-input[type="range"]:hover::-moz-range-thumb{background:rgb(0,110,210);}
-input[type="range"]::-moz-range-thumb:hover, input[type="range"]::-moz-range-thumb:active{background:rgb(0,160,255);}
-input[type="range"]::-moz-range-progress{height:12px;background:rgb(0,40,80);}
-input[type="range"]:hover::-moz-range-progress{background:rgb(0,50,100);}
 
 /* ===== MOBILE ===== */
 body { touch-action: none; user-select: none; -webkit-user-select: none; }
 .uniform { cursor: grab; }
 .uniform:active { cursor: grabbing; }
 
-@media (max-width: 767px) {
-  #controls { font-size: 9px; }
-  #controls button { padding: 5px 8px; font-size: 9px; }
-  input[type="range"] { width: 140px; }
 }
-@media (max-width: 479px) {
-  #controls button { width: 46%; padding: 4px 6px; }
-  input[type="range"] { width: 110px; }
-  label > span:last-child { width: 40px; }
+
 }
 </style>
 </head>
@@ -1433,82 +1388,30 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
 </DIV>
 </DIV>
 
-<SPAN id="controls" class="hide">
-<span class="title">Rotation</span>
-<label><span title="Horizontal Rotation ↔">X</span><input type="range" id="y_axis" min="-180" max="180" value="0" onchange="apply(this, '--y', 'deg')" oninput="apply(this, '--y', 'deg')" step="0.1"/><span></span></label>
-<label><span title="Vertical Rotation ↕">Y</span><input type="range" id="x_axis" min="-180" max="180" value="45" onchange="apply(this, '--x', 'deg')" oninput="apply(this, '--x', 'deg')" step="0.1"/><span></span></label>
-<label><span title="Rotation ↔ ↕">Z</span><input type="range" id="z_axis" min="-180" max="180" value="-40" onchange="apply(this, '--z', 'deg')" oninput="apply(this, '--z', 'deg')" step="0.1"/><span></span></label>
-<span class="title">Transform</span>
-<label><span title="Translate X">X</span><input type="range" id="ty_axis" min="-2000" max="2000" value="0" onchange="apply(this, '--ty', 'px')" oninput="apply(this, '--ty', 'px')" step="1"/><span></span></label>
-<label><span title="Translate Y">Y</span><input type="range" id="tz_axis" min="-2000" max="2000" value="215" onchange="apply(this, '--tz', 'px')" oninput="apply(this, '--tz', 'px')" step="1"/><span></span></label>
-<label><span title="Translate Z">Z</span><input type="range" id="tx_axis" min="-2000" max="1000" value="0" onchange="apply(this, '--tx', 'px')" oninput="apply(this, '--tx', 'px')" step="1"/><span></span></label>
-<label><span title="Scale">S</span><input type="range" id="scale" min="0.1" max="2" value="0.6" onchange="apply(this, '--s')" oninput="apply(this, '--s')" step="0.1"/><span></span></label>
-<label><span title="Perspective">P</span><input type="range" id="perspective" min="1000" max="8000" value="3705" onchange="apply(this, '--p', 'px')" oninput="apply(this, '--p', 'px')" step="1"/><span></span></label>
-<br>
-<center>
-<button class="board-borders" onclick="document.documentElement.classList.toggle('noborders')">Borders</button>
-<button class="piece-highlighter" onclick="document.documentElement.classList.toggle('highlighted')">Highlight Pieces</button>
-<br>
-<button class="anim-boost" onclick="document.documentElement.classList.toggle('noanimations')">Animations</button>
-<button class="body-scroll" onclick="document.documentElement.classList.toggle('noscroll')">Scroll</button>
-</center>
-</SPAN>
-
 <script>
-function apply(i,o,u){
-  var output;
-  if(u){output = i.value + (u + '')}
-  else{output = Number(i.value)}
-  document.documentElement.style.setProperty(o, output);
-  i.nextElementSibling.innerHTML = output;
-}
-
+// ===== INIT =====
 window.addEventListener('load', function(){
-  setTimeout(function(){
-    // Mobile-responsive scale & perspective
-    var vw = window.innerWidth;
+  var vw = window.innerWidth;
+  var root = document.documentElement;
+  if(vw < 1024){
     var vh = window.innerHeight;
-    var isMobile = vw < 1024;
-
-    if(isMobile){
-      // Board full width = block-size(100px) * 8 = 800px + borders(160px) = 960px
-      // We want it to fit inside the screen with some padding
-      var boardPx = 960;
-      var padding = 0.82; // use 82% of screen width
-      var autoScale = (vw * padding) / boardPx;
-      autoScale = Math.min(autoScale, 0.55); // cap so it's not too big on tablets
-
-      scale.value       = autoScale.toFixed(3);
-      // Center: translate values all 0 so flexbox centers it
-      tx_axis.value     = '0';
-      ty_axis.value     = '0';
-      tz_axis.value     = '0';
-      perspective.value = Math.round(3705 * autoScale / 0.6);
-    }
-    // else desktop — keep slider defaults
-
-    apply(x_axis, '--x', 'deg');
-    apply(y_axis, '--y', 'deg');
-    apply(z_axis, '--z', 'deg');
-    apply(tx_axis, '--tx', 'px');
-    apply(ty_axis, '--ty', 'px');
-    apply(tz_axis, '--tz', 'px');
-    apply(perspective, '--p', 'px');
-    apply(scale, '--s');
-    setTimeout(function(){
-      document.documentElement.classList.add("scalable");
-    }, 1000);
-  }, 1000);
-  console.info(document.querySelectorAll("div").length + " DIVs used!");
+    // board is 960px wide at scale=1, but 3D perspective makes it appear wider
+    // use min of width/height fit, leave 10% padding
+    var autoScale = Math.min((vw * 0.78) / 960, (vh * 0.72) / 960, 0.55);
+    root.style.setProperty('--s', autoScale.toFixed(3));
+    root.style.setProperty('--p', Math.round(3705 * autoScale / 0.6) + 'px');
+  }
+  setTimeout(function(){ root.classList.add('scalable'); }, 1000);
 });
 
 // ===== ZOOM (wheel + pinch) =====
 (function(){
-  var currentScale = null; // will be set on load
+  var currentScale = null;
 
   function getScale(){
     if(currentScale === null){
-      currentScale = parseFloat(scale.value) || 0.6;
+      var cs = getComputedStyle(document.documentElement).getPropertyValue('--s');
+      currentScale = parseFloat(cs) || 0.6;
     }
     return currentScale;
   }
@@ -1517,19 +1420,14 @@ window.addEventListener('load', function(){
     s = Math.max(0.1, Math.min(3.0, s));
     currentScale = s;
     document.documentElement.style.setProperty('--s', s);
-    scale.value = s.toFixed(3);
-    scale.nextElementSibling.innerHTML = s.toFixed(3);
   }
 
-  // Mouse wheel
   document.addEventListener('wheel', function(e){
-    if(e.target.closest('#controls')) return;
     e.preventDefault();
     var delta = e.deltaY > 0 ? -0.05 : 0.05;
     setScale(getScale() + delta);
   }, {passive: false});
 
-  // Pinch-to-zoom (touch)
   var lastPinchDist = null;
 
   function getPinchDist(touches){
@@ -1539,17 +1437,14 @@ window.addEventListener('load', function(){
   }
 
   document.addEventListener('touchstart', function(e){
-    if(e.touches.length === 2){
-      lastPinchDist = getPinchDist(e.touches);
-    }
+    if(e.touches.length === 2) lastPinchDist = getPinchDist(e.touches);
   }, {passive: true});
 
   document.addEventListener('touchmove', function(e){
     if(e.touches.length === 2 && lastPinchDist !== null){
       var dist = getPinchDist(e.touches);
-      var ratio = dist / lastPinchDist;
+      setScale(getScale() * (dist / lastPinchDist));
       lastPinchDist = dist;
-      setScale(getScale() * ratio);
     }
   }, {passive: true});
 
@@ -1560,8 +1455,8 @@ window.addEventListener('load', function(){
 
 // ===== DRAG ROTATION (mouse + touch) =====
 (function(){
-  var rotX = 45;   // fixed tilt
-  var rotZ = -40;  // horizontal spin around board center
+  var rotX = 45;
+  var rotZ = -40;
   var dragging = false;
   var lastX = 0, lastY = 0;
   var sensitivity = 0.5;
@@ -1569,7 +1464,6 @@ window.addEventListener('load', function(){
   function setRotation(){
     document.documentElement.style.setProperty('--x', rotX + 'deg');
     document.documentElement.style.setProperty('--z', rotZ + 'deg');
-    if(z_axis){ z_axis.value = Math.max(-180, Math.min(180, ((rotZ % 360) + 360) % 360 > 180 ? ((rotZ % 360) + 360) % 360 - 360 : ((rotZ % 360) + 360) % 360)); z_axis.nextElementSibling.innerHTML = rotZ.toFixed(1)+'deg'; }
   }
 
   function onStart(x, y){
@@ -1584,7 +1478,7 @@ window.addEventListener('load', function(){
     var dx = x - lastX;
     lastX = x;
     lastY = y;
-    rotZ += dx * sensitivity;
+    rotZ -= dx * sensitivity;
     setRotation();
   }
 
@@ -1593,29 +1487,21 @@ window.addEventListener('load', function(){
     document.documentElement.classList.remove('noanimations');
   }
 
-  // Mouse
-  document.addEventListener('mousedown', function(e){
-    if(e.target.closest('#controls')) return;
-    onStart(e.clientX, e.clientY);
-  });
-  document.addEventListener('mousemove', function(e){
-    onMove(e.clientX, e.clientY);
-  });
+  document.addEventListener('mousedown', function(e){ onStart(e.clientX, e.clientY); });
+  document.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
   document.addEventListener('mouseup', onEnd);
   document.addEventListener('mouseleave', onEnd);
 
-  // Touch (1 finger = rotate, 2 fingers = pinch handled separately)
   document.addEventListener('touchstart', function(e){
-    if(e.target.closest('#controls')) return;
     if(e.touches.length !== 1) { onEnd(); return; }
-    var t = e.touches[0];
-    onStart(t.clientX, t.clientY);
+    onStart(e.touches[0].clientX, e.touches[0].clientY);
   }, {passive: true});
+
   document.addEventListener('touchmove', function(e){
     if(e.touches.length !== 1) { onEnd(); return; }
-    var t = e.touches[0];
-    onMove(t.clientX, t.clientY);
+    onMove(e.touches[0].clientX, e.touches[0].clientY);
   }, {passive: true});
+
   document.addEventListener('touchend', onEnd);
   document.addEventListener('touchcancel', onEnd);
 })();
