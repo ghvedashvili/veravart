@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Vodafone WiFi Scene</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
@@ -12,12 +12,7 @@ body{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
   font-family:'Share Tech Mono',monospace;overflow:hidden;position:relative;
 }
-body::after{
-  content:'';position:fixed;bottom:0;left:0;right:0;height:38%;
-  background:repeating-linear-gradient(92deg,transparent 0px,rgba(255,200,100,0.015) 1px,transparent 2px,transparent 18px),
-    linear-gradient(180deg,#2a1c0a 0%,#1e1408 60%,#150f05 100%);
-  border-top:1px solid #4a3010;box-shadow:0 -4px 40px rgba(0,0,0,0.8);z-index:0;
-}
+
 body::before{
   content:'';position:fixed;top:0;left:0;right:0;height:50%;
   background:radial-gradient(ellipse at 50% -20%,rgba(255,220,120,0.08) 0%,transparent 70%);
