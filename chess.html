@@ -40,10 +40,8 @@ display:flex;
 align-items:center;
 justify-content:center;
 overflow:visible;
-transition:transform ease 1s;
+/* PERF: removed transition on scale — JS handles it directly */
 }
-
-.noborders .object3d{top:80px;}
 
 .object3d{
 top:0px;
@@ -52,10 +50,13 @@ transform:perspective(var(--p, 1000px)) rotateX(var(--x, 0deg)) rotateY(var(--y,
 --path-max-rotate:calc(360deg + var(--z, 0deg));
 transform-style:preserve-3d;
 margin:auto;
-transition:all ease 1s;
-transition-property:top, transform;
+/* PERF: transition only on non-drag properties */
+transition:top ease 1s;
+/* PERF: promote to GPU layer */
+will-change: transform;
 }
 
+/* PERF: .noanimations kills transitions during drag */
 .noanimations .piece,
 .noanimations .object3d,
 .noanimations .uniform,
@@ -272,11 +273,9 @@ left:calc(var(--block-size) * min(var(--h), 7));
 bottom:calc(var(--block-size) * min(var(--v), 7));
 width:var(--block-size);height:var(--block-size);
 transform:rotate(0deg);transform-style:preserve-3d;
-transition:background-color ease 0.5s;
+/* PERF: no transition on pieces by default */
 --A-color:#DBA162;--B-color:#B38554;
 }
-
-.highlighted .piece{background-color:rgba(0,100,220,0.6);}
 
 .piece > .reusable-rect{
 position:absolute;left:50%;top:50%;
@@ -520,7 +519,7 @@ position:absolute;left:0;top:0;display:block;transform-style:preserve-3d;
 .reusable-trapezoid .trapeside2{width:var(--width);height:var(--height);transform:rotateX(90deg);transform-origin:0% 0%;}
 .reusable-trapezoid .trapeside4{width:var(--width);height:var(--height);transform:rotateX(90deg) translateZ(calc(var(--length) * -1));transform-origin:0% 0%;}
 
-/* ===== MEDICAL MASK ===== */
+/* ===== MEDICAL MASK — shared via <use> ===== */
 .mask-container {
   position: absolute;
   left: 50%;
@@ -621,7 +620,6 @@ position:absolute;left:0;top:0;display:block;transform-style:preserve-3d;
   border: 1.5px solid #5ab5e0;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) translateZ(calc(var(--strap-len, 26px) * -1));
 }
 
 .PAWN   .strap-knot { transform: translate(-50%, -50%) translateZ(-22px); }
@@ -631,7 +629,7 @@ position:absolute;left:0;top:0;display:block;transform-style:preserve-3d;
 .QUEEN  .strap-knot { transform: translate(-50%, -50%) translateZ(-26px); }
 .KING   .strap-knot { transform: translate(-50%, -50%) translateZ(-26px); }
 
-/* ===== FALLEN PIECES — outside board, flat on surface ===== */
+/* ===== FALLEN PIECES ===== */
 .piece-fallen {
   position: absolute;
   width: var(--block-size);
@@ -645,41 +643,55 @@ position:absolute;left:0;top:0;display:block;transform-style:preserve-3d;
   --x-axis-left-color:#BF9D7A;--x-axis-right-color:#b38554;
   --y-axis-top-color:#FEC485;--y-axis-bottom-color:#FEC485;
 }
-/* Rook fallen outside H column — right of board */
 .piece-fallen.fallen-rook {
   left: 960px;
   bottom: 680px;
   transform: rotateX(90deg) rotateZ(70deg);
 }
-/* Horse fallen outside B8 — above board, left area */
 .piece-fallen.fallen-horse {
   left: 60px;
   bottom: 1000px;
   transform: rotateX(90deg) rotateZ(-110deg);
 }
 
-/* ===== CONTROLS ===== */
-
-.noborders 
-button.anim-boost::before{content:"Reduce ";}
-.noanimations button.anim-boost::before{content:"Enable ";}
-
-.noscroll 
-
-input[type='range']:hover, input[type='range']:active{background:rgb(30,30,30);}
-}
-
-/* ===== MOBILE ===== */
 body { touch-action: none; user-select: none; -webkit-user-select: none; }
 .uniform { cursor: grab; }
 .uniform:active { cursor: grabbing; }
-
-}
-
-}
 </style>
 </head>
 <body>
+
+<!-- PERF: shared SVG defs — mask drawn once, referenced everywhere via <use> -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden;">
+  <defs>
+    <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#c8ecfa"/>
+      <stop offset="45%"  stop-color="#5ab5e0"/>
+      <stop offset="100%" stop-color="#2a85b5"/>
+    </linearGradient>
+    <g id="mask-face">
+      <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
+      <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5"
+            fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
+      <line x1="-13" y1="-1" x2="13" y2="-1"
+            stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="-13" y1="4"  x2="13" y2="4"
+            stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- PERF: mask-wrap HTML template — cloned by JS, no inline repetition -->
+<template id="mask-tpl">
+  <div class="mask-container"><div class="mask-wrap">
+    <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26">
+      <use href="#mask-face"/>
+    </svg>
+    <div class="strap strap-top"></div>
+    <div class="strap strap-bot"></div>
+    <div class="strap-knot"></div>
+  </div></div>
+</template>
 
 <DIV class="uniform">
 <DIV class="object3d chess-defaults">
@@ -697,24 +709,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="piece-head"><div class="reusable-trapezoid"><div class="trapesides trapeside1"></div><div class="trapesides trapeside2"></div><div class="trapesides trapeside3"></div><div class="trapesides trapeside4"></div><div class="trapesides trapeside5"></div></div></div>
       <div class="reusable-rect piece-diamond"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-hood"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece KING" style="--v:7;--h:3;">
@@ -724,24 +718,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="piece-head"><div class="reusable-trapezoid"><div class="trapesides trapeside1"></div><div class="trapesides trapeside2"></div><div class="trapesides trapeside3"></div><div class="trapesides trapeside4"></div><div class="trapesides trapeside5"></div></div></div>
       <div class="reusable-rect piece-diamond"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-hood"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BISHOP" style="--v:7;--h:2;">
@@ -750,24 +726,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="piece-crown"><div class="ccside ccside1"></div><div class="ccside ccside2"></div><div class="ccside ccside3"></div><div class="ccside ccside4"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BISHOP" style="--v:7;--h:5;">
@@ -776,27 +734,7 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="piece-crown"><div class="ccside ccside1"></div><div class="ccside ccside2"></div><div class="ccside ccside3"></div><div class="ccside ccside4"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
-
-    <!-- White HORSE B8 — removed from board (fallen outside) -->
 
     <div class="piece HORSE" style="--v:7;--h:6;">
       <div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div>
@@ -804,24 +742,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-tilt1"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-tilt2"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-tilt3"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece ROOK" style="--v:7;--h:0;">
@@ -830,173 +750,17 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div><div class="reusable-rect piece-head-left"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head-right"><div class="sides side1"></div><div class="sides side2"></div></div></div>
       <div class="reusable-rect piece-head-center"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
-    <!-- White ROOK H8 — removed from board (fallen outside) -->
-
     <!-- White Pawns -->
-    <div class="piece PAWN" style="--v:6;--h:0;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:1;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:2;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:3;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:4;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:5;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:6;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece PAWN" style="--v:6;--h:7;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:0;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:1;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:2;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:3;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:4;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:5;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:6;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece PAWN" style="--v:6;--h:7;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
 
     <!-- ==================== BLACK PIECES ==================== -->
     <div class="piece BLACK QUEEN" style="--v:0;--h:4;">
@@ -1006,24 +770,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="piece-head"><div class="reusable-trapezoid"><div class="trapesides trapeside1"></div><div class="trapesides trapeside2"></div><div class="trapesides trapeside3"></div><div class="trapesides trapeside4"></div><div class="trapesides trapeside5"></div></div></div>
       <div class="reusable-rect piece-diamond"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-hood"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK KING" style="--v:0;--h:3;">
@@ -1033,24 +779,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="piece-head"><div class="reusable-trapezoid"><div class="trapesides trapeside1"></div><div class="trapesides trapeside2"></div><div class="trapesides trapeside3"></div><div class="trapesides trapeside4"></div><div class="trapesides trapeside5"></div></div></div>
       <div class="reusable-rect piece-diamond"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-hood"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK BISHOP" style="--v:0;--h:2;">
@@ -1059,24 +787,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="piece-crown"><div class="ccside ccside1"></div><div class="ccside ccside2"></div><div class="ccside ccside3"></div><div class="ccside ccside4"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK BISHOP" style="--v:0;--h:5;">
@@ -1085,24 +795,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="piece-crown"><div class="ccside ccside1"></div><div class="ccside ccside2"></div><div class="ccside ccside3"></div><div class="ccside ccside4"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK HORSE" style="--v:0;--h:1;">
@@ -1111,24 +803,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-tilt1"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-tilt2"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-tilt3"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK HORSE" style="--v:0;--h:6;">
@@ -1137,24 +811,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-tilt1"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-tilt2"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-tilt3"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK ROOK" style="--v:0;--h:0;">
@@ -1163,24 +819,6 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div><div class="reusable-rect piece-head-left"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head-right"><div class="sides side1"></div><div class="sides side2"></div></div></div>
       <div class="reusable-rect piece-head-center"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <div class="piece BLACK ROOK" style="--v:0;--h:7;">
@@ -1189,192 +827,31 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div><div class="reusable-rect piece-head-left"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head-right"><div class="sides side1"></div><div class="sides side2"></div></div></div>
       <div class="reusable-rect piece-head-center"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div>
     </div>
 
     <!-- Black Pawns -->
-    <div class="piece BLACK PAWN" style="--v:1;--h:0;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:1;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:2;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:3;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:4;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:5;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:6;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
-    <div class="piece BLACK PAWN" style="--v:1;--h:7;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div><div class="mask-container"><div class="mask-wrap">
-  <svg class="mask-svg" width="36" height="26" viewBox="-18 -13 36 26" xmlns="http://www.w3.org/2000/svg">
-    <rect x="-8" y="-14" width="16" height="5" rx="2" fill="#0d5a7a" opacity="0.85"/>
-    <rect x="-15" y="-9" width="30" height="19" rx="4" ry="5" fill="url(#mu)" stroke="#1a7ab5" stroke-width="1.5"/>
-    <line x1="-13" y1="-1" x2="13" y2="-1" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="-13" y1="4"  x2="13" y2="4"  stroke="rgba(255,255,255,0.3)"  stroke-width="1"   stroke-linecap="round"/>
-    <defs>
-      <linearGradient id="mu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#c8ecfa"/>
-        <stop offset="45%"  stop-color="#5ab5e0"/>
-        <stop offset="100%" stop-color="#2a85b5"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  <div class="strap strap-top"></div>
-  <div class="strap strap-bot"></div>
-  <div class="strap-knot"></div>
-</div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:0;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:1;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:2;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:3;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:4;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:5;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:6;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
+    <div class="piece BLACK PAWN" style="--v:1;--h:7;"><div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div></div></div>
 
     </DIV>
     <DIV class="coordinates"></DIV>
     <DIV class="coordinates_"></DIV>
 
-    <!-- ===== FALLEN PIECES outside board ===== -->
-
-    <!-- White ROOK — fallen right of H8 -->
+    <!-- FALLEN PIECES -->
     <div class="piece-fallen ROOK fallen-rook">
       <div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-thick"><div class="sides side1"></div><div class="sides side2"></div></div>
-      <div class="reusable-rect piece-head">
-        <div class="sides side1"></div><div class="sides side2"></div>
-        <div class="reusable-rect piece-head-left"><div class="sides side1"></div><div class="sides side2"></div></div>
-        <div class="reusable-rect piece-head-right"><div class="sides side1"></div><div class="sides side2"></div></div>
-      </div>
+      <div class="reusable-rect piece-head"><div class="sides side1"></div><div class="sides side2"></div><div class="reusable-rect piece-head-left"><div class="sides side1"></div><div class="sides side2"></div></div><div class="reusable-rect piece-head-right"><div class="sides side1"></div><div class="sides side2"></div></div></div>
       <div class="reusable-rect piece-head-center"><div class="sides side1"></div><div class="sides side2"></div></div>
     </div>
 
-    <!-- White HORSE — fallen above B8 -->
     <div class="piece-fallen HORSE fallen-horse">
       <div class="reusable-rect piece-base"><div class="sides side1"></div><div class="sides side2"></div></div>
       <div class="reusable-rect piece-upbase"><div class="sides side1"></div><div class="sides side2"></div></div>
@@ -1389,121 +866,90 @@ body { touch-action: none; user-select: none; -webkit-user-select: none; }
 </DIV>
 
 <script>
-// ===== INIT =====
+// PERF: inject masks via JS — template cloned once per piece, not baked into HTML
+(function(){
+  var tpl = document.getElementById('mask-tpl');
+  document.querySelectorAll('.piece').forEach(function(p){
+    p.appendChild(tpl.content.cloneNode(true));
+  });
+})();
+
+// PERF: responsive scale
 window.addEventListener('load', function(){
   var vw = window.innerWidth;
   var root = document.documentElement;
   if(vw < 1024){
     var vh = window.innerHeight;
-    // board is 960px wide at scale=1, but 3D perspective makes it appear wider
-    // use min of width/height fit, leave 10% padding
     var autoScale = Math.min((vw * 0.78) / 960, (vh * 0.72) / 960, 0.55);
     root.style.setProperty('--s', autoScale.toFixed(3));
-    root.style.setProperty('--p', Math.round(3705 * autoScale / 0.6) + 'px');
   }
-  setTimeout(function(){ root.classList.add('scalable'); }, 1000);
+  setTimeout(function(){ root.classList.add('scalable'); }, 800);
 });
 
-// ===== ZOOM (wheel + pinch) =====
+// PERF: zoom (wheel + pinch)
 (function(){
   var currentScale = null;
-
   function getScale(){
     if(currentScale === null){
-      var cs = getComputedStyle(document.documentElement).getPropertyValue('--s');
-      currentScale = parseFloat(cs) || 0.6;
+      currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s')) || 0.6;
     }
     return currentScale;
   }
-
   function setScale(s){
     s = Math.max(0.1, Math.min(3.0, s));
     currentScale = s;
     document.documentElement.style.setProperty('--s', s);
   }
-
   document.addEventListener('wheel', function(e){
     e.preventDefault();
-    var delta = e.deltaY > 0 ? -0.05 : 0.05;
-    setScale(getScale() + delta);
+    setScale(getScale() + (e.deltaY > 0 ? -0.05 : 0.05));
   }, {passive: false});
-
   var lastPinchDist = null;
-
-  function getPinchDist(touches){
-    var dx = touches[0].clientX - touches[1].clientX;
-    var dy = touches[0].clientY - touches[1].clientY;
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-
-  document.addEventListener('touchstart', function(e){
-    if(e.touches.length === 2) lastPinchDist = getPinchDist(e.touches);
-  }, {passive: true});
-
-  document.addEventListener('touchmove', function(e){
-    if(e.touches.length === 2 && lastPinchDist !== null){
-      var dist = getPinchDist(e.touches);
-      setScale(getScale() * (dist / lastPinchDist));
-      lastPinchDist = dist;
-    }
-  }, {passive: true});
-
-  document.addEventListener('touchend', function(e){
-    if(e.touches.length < 2) lastPinchDist = null;
-  }, {passive: true});
+  function getPinchDist(t){ var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY; return Math.sqrt(dx*dx+dy*dy); }
+  document.addEventListener('touchstart',  function(e){ if(e.touches.length===2) lastPinchDist=getPinchDist(e.touches); }, {passive:true});
+  document.addEventListener('touchmove',   function(e){ if(e.touches.length===2&&lastPinchDist){ var d=getPinchDist(e.touches); setScale(getScale()*(d/lastPinchDist)); lastPinchDist=d; } }, {passive:true});
+  document.addEventListener('touchend',    function(e){ if(e.touches.length<2) lastPinchDist=null; }, {passive:true});
 })();
 
-// ===== DRAG ROTATION (mouse + touch) =====
+// PERF: drag rotation — direct transform string, no CSS var update on every frame
 (function(){
-  var rotX = 45;
-  var rotZ = -40;
-  var dragging = false;
-  var lastX = 0, lastY = 0;
+  var rotX = 45, rotZ = -40;
+  var dragging = false, lastX = 0;
   var sensitivity = 0.5;
+  var obj = document.querySelector('.object3d');
+  var root = document.documentElement;
 
-  function setRotation(){
-    document.documentElement.style.setProperty('--x', rotX + 'deg');
-    document.documentElement.style.setProperty('--z', rotZ + 'deg');
+  function applyTransform(){
+    // read --p once, not on every frame
+    var p = getComputedStyle(root).getPropertyValue('--p').trim() || '3705px';
+    obj.style.transform =
+      'perspective('+p+') rotateX('+rotX+'deg) rotateY(0deg) rotateZ('+rotZ+'deg) translate3d(0px,0px,-12px)';
   }
 
-  function onStart(x, y){
-    dragging = true;
-    lastX = x;
-    lastY = y;
-    document.documentElement.classList.add('noanimations');
+  function onStart(x){
+    dragging = true; lastX = x;
+    obj.style.transition = 'none'; // kill transition during drag
   }
-
-  function onMove(x, y){
+  function onMove(x){
     if(!dragging) return;
-    var dx = x - lastX;
+    rotZ -= (x - lastX) * sensitivity;
     lastX = x;
-    lastY = y;
-    rotZ -= dx * sensitivity;
-    setRotation();
+    applyTransform();
   }
-
   function onEnd(){
+    if(!dragging) return;
     dragging = false;
-    document.documentElement.classList.remove('noanimations');
+    obj.style.transition = ''; // restore
   }
 
-  document.addEventListener('mousedown', function(e){ onStart(e.clientX, e.clientY); });
-  document.addEventListener('mousemove', function(e){ onMove(e.clientX, e.clientY); });
-  document.addEventListener('mouseup', onEnd);
+  document.addEventListener('mousedown',  function(e){ onStart(e.clientX); });
+  document.addEventListener('mousemove',  function(e){ onMove(e.clientX); });
+  document.addEventListener('mouseup',    onEnd);
   document.addEventListener('mouseleave', onEnd);
-
-  document.addEventListener('touchstart', function(e){
-    if(e.touches.length !== 1) { onEnd(); return; }
-    onStart(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive: true});
-
-  document.addEventListener('touchmove', function(e){
-    if(e.touches.length !== 1) { onEnd(); return; }
-    onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive: true});
-
-  document.addEventListener('touchend', onEnd);
-  document.addEventListener('touchcancel', onEnd);
+  document.addEventListener('touchstart', function(e){ if(e.touches.length===1) onStart(e.touches[0].clientX); else onEnd(); }, {passive:true});
+  document.addEventListener('touchmove',  function(e){ if(e.touches.length===1) onMove(e.touches[0].clientX); }, {passive:true});
+  document.addEventListener('touchend',   onEnd);
+  document.addEventListener('touchcancel',onEnd);
 })();
 </script>
 </body>
