@@ -65,67 +65,104 @@ body::before{
   cursor:pointer;transition:background 0.2s,transform 0.2s;backdrop-filter:blur(6px);
 }
 .lightbox-close:hover{background:rgba(230,0,0,0.4);transform:scale(1.1) rotate(90deg);}
-/* iPHONE */
+/* iPHONE — Danny Ocean style iPhone X frame */
 .phone-scene{flex-shrink:0;filter:drop-shadow(0 40px 35px rgba(0,0,0,0.75));}
 .iphone{
-  width:clamp(250px,42vw,380px);aspect-ratio:9/19.5;position:relative;
-  border-radius:clamp(28px,5vw,44px);
-  background:linear-gradient(135deg,#e8e4de 0%,#d4cfc8 15%,#c8c3bc 30%,#bfbab3 45%,#c4bfb8 60%,#d0cbc4 75%,#dcd8d2 90%,#e4e0da 100%);
-  padding:clamp(3px,0.6vw,5px);
-  box-shadow:0 0 0 1px rgba(255,255,255,0.4),2px 4px 0 rgba(0,0,0,0.15),0 20px 50px rgba(0,0,0,0.5),0 40px 80px rgba(0,0,0,0.4),-3px 0 8px rgba(255,255,255,0.15),3px 0 8px rgba(0,0,0,0.2);
+  width:281.25px;
+  height:609px;
+  position:relative;
+  border-radius:40px;
+  background:linear-gradient(145deg,#2a2a2c 0%,#1a1a1c 40%,#111112 100%);
+  padding:10px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08),
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 20px 60px rgba(0,0,0,0.8),
+    0 40px 100px rgba(0,0,0,0.5);
 }
-.iphone::before{content:'';position:absolute;left:clamp(-5px,-1vw,-4px);top:25%;width:clamp(3px,0.6vw,5px);height:30%;background:linear-gradient(180deg,#d0cbc4 0%,#e0dbd4 20%,#c8c3bc 40%,#d8d3cc 60%,#e0dbd4 80%,#c8c3bc 100%);border-radius:3px 0 0 3px;box-shadow:-1px 0 2px rgba(0,0,0,0.3);}
-.iphone::after{content:'';position:absolute;right:clamp(-5px,-1vw,-4px);top:20%;width:clamp(3px,0.6vw,5px);height:22%;background:linear-gradient(180deg,#d0cbc4,#e0dbd4,#c8c3bc);border-radius:0 3px 3px 0;box-shadow:1px 0 2px rgba(0,0,0,0.3);}
-.iphone-screen{width:100%;height:100%;border-radius:clamp(25px,4.5vw,40px);overflow:hidden;background:#000;position:relative;}
-.iphone-screen::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.02) 50%,transparent 100%);border-radius:inherit;pointer-events:none;z-index:100;}
-.phone-wallpaper{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,#1a3a5c 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,#0d2440 0%,transparent 50%),linear-gradient(180deg,#0a1628 0%,#051020 100%);}
-.dynamic-island{position:absolute;top:clamp(8px,1.5vw,12px);left:50%;transform:translateX(-50%);width:clamp(80px,14vw,110px);height:clamp(24px,4vw,32px);background:#000;border-radius:20px;z-index:50;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 0 0 1px rgba(255,255,255,0.05);}
-.di-cam{width:clamp(8px,1.5vw,11px);height:clamp(8px,1.5vw,11px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#1a2a3a,#050a10);border:1px solid #1a1a1a;box-shadow:inset 0 1px 2px rgba(255,255,255,0.1);}
-.di-dot{width:clamp(4px,0.8vw,6px);height:clamp(4px,0.8vw,6px);border-radius:50%;background:#0d1520;border:1px solid #222;}
-.status-bar{position:absolute;top:clamp(38px,7vw,54px);left:0;right:0;padding:0 clamp(14px,3vw,22px);display:flex;justify-content:space-between;align-items:center;z-index:20;}
-.sb-time{font-size:clamp(11px,2vw,14px);font-weight:bold;color:#fff;letter-spacing:0.5px}
-.sb-icons{display:flex;align-items:center;gap:clamp(3px,0.6vw,5px)}
+/* left buttons (volume up, volume down) */
+.iphone::before{
+  content:'';position:absolute;
+  left:-4px;top:90px;
+  width:4px;height:110px;
+  background:linear-gradient(180deg,#2a2a2c 0%,#3a3a3c 20%,#1e1e20 50%,#3a3a3c 80%,#2a2a2c 100%);
+  border-radius:3px 0 0 3px;
+  box-shadow:-1px 0 3px rgba(0,0,0,0.5);
+}
+/* right button (power) */
+.iphone::after{
+  content:'';position:absolute;
+  right:-4px;top:120px;
+  width:4px;height:60px;
+  background:linear-gradient(180deg,#2a2a2c,#3a3a3c,#1e1e20,#3a3a3c,#2a2a2c);
+  border-radius:0 3px 3px 0;
+  box-shadow:1px 0 3px rgba(0,0,0,0.5);
+}
+.iphone-screen{
+  width:100%;height:100%;
+  border-radius:32px;
+  overflow:hidden;
+  background:#000;
+  position:relative;
+}
+/* notch */
+.iphone-notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:150px;height:28px;
+  background:#000;
+  border-radius:0 0 20px 20px;
+  z-index:60;
+}
+.iphone-screen::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.01) 50%,transparent 100%);
+  border-radius:inherit;pointer-events:none;z-index:100;
+}
+.phone-wallpaper{position:absolute;inset:0;background:url('https://media.idownloadblog.com/wp-content/uploads/2017/11/iOS-stock-6-for-iPhone-X-768x1663.png') center/cover no-repeat;}
+.status-bar{position:absolute;top:30px;left:0;right:0;padding:0 18px;display:flex;justify-content:space-between;align-items:center;z-index:20;}
+.sb-time{font-size:14px;font-weight:600;color:#fff;letter-spacing:0.5px}
+.sb-icons{display:flex;align-items:center;gap:4px}
 .sig-bars{display:flex;align-items:flex-end;gap:1px}
 .sig-bar{width:3px;background:#fff;border-radius:1px;opacity:0.9}
 .sig-bar:nth-child(1){height:4px}.sig-bar:nth-child(2){height:6px}.sig-bar:nth-child(3){height:8px}.sig-bar:nth-child(4){height:10px}.sig-bar.dim{opacity:0.3}
 .battery-icon{display:flex;align-items:center;gap:1px}
-.batt-body{width:clamp(18px,3.2vw,24px);height:clamp(10px,1.8vw,13px);border:1.5px solid rgba(255,255,255,0.7);border-radius:2px;padding:1.5px;}
+.batt-body{width:22px;height:12px;border:1.5px solid rgba(255,255,255,0.7);border-radius:2px;padding:1.5px;}
 .batt-fill{width:75%;height:100%;background:#4cd964;border-radius:1px}
 .batt-tip{width:2px;height:5px;background:rgba(255,255,255,0.5);border-radius:0 1px 1px 0}
-.phone-content{position:absolute;top:clamp(60px,11vw,90px);left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:clamp(10px,2vw,16px) clamp(12px,2.5vw,20px) clamp(10px,2vw,16px);gap:clamp(8px,1.5vw,12px);z-index:10;}
-.wifi-big{display:flex;flex-direction:column;align-items:center;gap:1px;margin-bottom:clamp(2px,0.5vw,4px)}
-.wb-arc{border:clamp(2px,0.4vw,3px) solid #4fc3f7;border-bottom:none;border-left:none;border-right:none;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:0;animation:wbArc 2s ease infinite;}
-.wb-arc:nth-child(1){width:clamp(10px,2vw,16px);height:clamp(6px,1.2vw,9px);animation-delay:0s}
-.wb-arc:nth-child(2){width:clamp(18px,3.4vw,26px);height:clamp(10px,2vw,15px);animation-delay:0.3s}
-.wb-arc:nth-child(3){width:clamp(27px,5vw,40px);height:clamp(15px,2.8vw,22px);animation-delay:0.6s}
-.wb-dot{width:clamp(5px,1vw,7px);height:clamp(5px,1vw,7px);border-radius:50%;background:#4fc3f7;box-shadow:0 0 8px #4fc3f7;margin-top:2px}
+.phone-content{position:absolute;top:65px;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:12px 14px 12px;gap:10px;z-index:10;}
+.wifi-big{display:flex;flex-direction:column;align-items:center;gap:1px;margin-bottom:3px}
+.wb-arc{border:2px solid #4fc3f7;border-bottom:none;border-left:none;border-right:none;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:0;animation:wbArc 2s ease infinite;}
+.wb-arc:nth-child(1){width:12px;height:7px;animation-delay:0s}
+.wb-arc:nth-child(2){width:22px;height:12px;animation-delay:0.3s}
+.wb-arc:nth-child(3){width:34px;height:18px;animation-delay:0.6s}
+.wb-dot{width:6px;height:6px;border-radius:50%;background:#4fc3f7;box-shadow:0 0 8px #4fc3f7;margin-top:2px}
 @keyframes wbArc{0%{opacity:0;transform:scale(0.8)}40%{opacity:1}100%{opacity:0;transform:scale(1.05)}}
-.wifi-network-name{font-size:clamp(10px,1.8vw,13px);font-weight:bold;color:#fff;text-align:center;letter-spacing:1px}
-.wifi-subtitle{font-size:clamp(8px,1.4vw,10px);color:rgba(255,255,255,0.5);text-align:center;letter-spacing:1px}
-.pw-card{width:100%;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:clamp(12px,2.2vw,18px);padding:clamp(10px,2vw,16px) clamp(10px,2vw,14px);display:flex;flex-direction:column;gap:clamp(8px,1.5vw,12px);box-shadow:0 4px 24px rgba(0,0,0,0.4);}
-.pw-card-title{font-size:clamp(9px,1.6vw,11px);color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;text-align:center}
+.wifi-network-name{font-size:12px;font-weight:bold;color:#fff;text-align:center;letter-spacing:1px}
+.wifi-subtitle{font-size:9px;color:rgba(255,255,255,0.5);text-align:center;letter-spacing:1px}
+.pw-card{width:100%;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,0.4);}
+.pw-card-title{font-size:10px;color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;text-align:center}
 .pw-input-wrap{position:relative}
-.pw-input{width:100%;background:rgba(0,0,0,0.35);border:1.5px solid rgba(255,255,255,0.18);border-radius:clamp(8px,1.5vw,12px);padding:clamp(8px,1.5vw,11px) clamp(32px,6vw,42px) clamp(8px,1.5vw,11px) clamp(10px,2vw,14px);font-family:'Share Tech Mono',monospace;font-size:clamp(11px,2vw,14px);color:#fff;outline:none;letter-spacing:3px;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;caret-color:#4fc3f7;}
-.pw-input::placeholder{color:rgba(255,255,255,0.25);letter-spacing:1px;font-size:clamp(9px,1.6vw,11px)}
+.pw-input{width:100%;background:rgba(0,0,0,0.35);border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;padding:9px 36px 9px 12px;font-family:'Share Tech Mono',monospace;font-size:13px;color:#fff;outline:none;letter-spacing:3px;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;caret-color:#4fc3f7;}
+.pw-input::placeholder{color:rgba(255,255,255,0.25);letter-spacing:1px;font-size:10px}
 .pw-input:focus{border-color:#4fc3f7;background:rgba(0,0,0,0.5);box-shadow:0 0 0 3px rgba(79,195,247,0.15)}
 .pw-input.err{border-color:#ef5350;box-shadow:0 0 0 3px rgba(239,83,80,0.15);animation:shake 0.4s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
-.pw-eye{position:absolute;right:clamp(8px,1.5vw,12px);top:50%;transform:translateY(-50%);cursor:pointer;font-size:clamp(12px,2.2vw,16px);opacity:0.5;transition:opacity 0.2s;user-select:none;}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;opacity:0.5;transition:opacity 0.2s;user-select:none;}
 .pw-eye:hover{opacity:0.9}
-.pw-btn{width:100%;background:linear-gradient(135deg,#4fc3f7,#0288d1);color:#fff;border:none;border-radius:clamp(8px,1.5vw,12px);padding:clamp(9px,1.7vw,13px);font-family:'Share Tech Mono',monospace;font-size:clamp(10px,1.8vw,12px);font-weight:bold;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;box-shadow:0 4px 15px rgba(2,136,209,0.4);}
+.pw-btn{width:100%;background:linear-gradient(135deg,#4fc3f7,#0288d1);color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;box-shadow:0 4px 15px rgba(2,136,209,0.4);}
 .pw-btn:hover{background:linear-gradient(135deg,#81d4fa,#0288d1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(2,136,209,0.5)}
 .pw-btn:active{transform:translateY(0)}
-.pw-status{min-height:clamp(12px,2.2vw,16px);text-align:center;font-size:clamp(8px,1.4vw,10px);letter-spacing:1px;transition:color 0.3s}
+.pw-status{min-height:13px;text-align:center;font-size:9px;letter-spacing:1px;transition:color 0.3s}
 .pw-status.err{color:#ef5350}.pw-status.ok{color:#66bb6a}.pw-status.chk{color:#4fc3f7;animation:chkPulse 0.7s infinite}
 @keyframes chkPulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.home-indicator{position:absolute;bottom:clamp(6px,1.2vw,10px);left:50%;transform:translateX(-50%);width:35%;height:clamp(4px,0.7vw,5px);background:rgba(255,255,255,0.35);border-radius:3px;}
-.connected-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#1a4a2a 0%,#0a2015 100%);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,1.5vw,12px);opacity:0;pointer-events:none;transition:opacity 0.6s;z-index:30;padding:20px;}
+.home-indicator{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:35%;height:4px;background:rgba(255,255,255,0.35);border-radius:3px;}
+.connected-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#1a4a2a 0%,#0a2015 100%);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:0;pointer-events:none;transition:opacity 0.6s;z-index:30;padding:20px;}
 .connected-overlay.show{opacity:1;pointer-events:all}
-.conn-check{font-size:clamp(32px,6vw,48px);animation:checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
+.conn-check{font-size:42px;animation:checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards}
 @keyframes checkPop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
-.conn-title{color:#fff;font-size:clamp(12px,2.2vw,16px);font-weight:bold;text-align:center;letter-spacing:1px}
-.conn-ssid{color:#66bb6a;font-size:clamp(11px,2vw,14px);letter-spacing:2px}
-.conn-speed{color:rgba(255,255,255,0.6);font-size:clamp(9px,1.6vw,11px);letter-spacing:1px}
+.conn-title{color:#fff;font-size:15px;font-weight:bold;text-align:center;letter-spacing:1px}
+.conn-ssid{color:#66bb6a;font-size:13px;letter-spacing:2px}
+.conn-speed{color:rgba(255,255,255,0.6);font-size:10px;letter-spacing:1px}
 .conn-bars{display:flex;align-items:flex-end;gap:3px}
 .conn-bar{width:8px;background:#66bb6a;border-radius:2px;box-shadow:0 0 8px #66bb6a88}
 .conn-bar:nth-child(1){height:8px;animation:barGrow 0.4s 0.3s both}
@@ -152,9 +189,7 @@ body::before{
     <div class="iphone">
       <div class="iphone-screen">
         <div class="phone-wallpaper"></div>
-        <div class="dynamic-island">
-          <div class="di-dot"></div><div class="di-cam"></div><div class="di-dot"></div>
-        </div>
+        <div class="iphone-notch"></div>
         <div class="status-bar">
           <div class="sb-time" id="sbTime">9:41</div>
           <div class="sb-icons">
