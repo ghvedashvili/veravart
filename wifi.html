@@ -3,7 +3,7 @@
 <html lang="ka">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=overlays-content"/>
 <title>Vodafone WiFi Scene</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
@@ -399,61 +399,28 @@ function closeModal(){document.getElementById('imgModal').classList.remove('open
 function handleOverlayClick(e){if(e.target===document.getElementById('imgModal'))closeModal();}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
 
-// ── Fit scene: use visualViewport so keyboard doesn't break layout ──
-var _lastScale = 1;
-
+// ── Fit scene once on load only, keyboard is overlay ──
 function fitScene(){
   var scene = document.querySelector('.scene');
-  // Use visualViewport when available (mobile browsers with keyboard)
-  var vw = window.visualViewport ? window.visualViewport.width  : window.innerWidth;
-  var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-
-  // Reset transform to measure natural size
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
   scene.style.transform = 'none';
   var sw = scene.scrollWidth;
   var sh = scene.scrollHeight;
-
-  var scaleX = vw / sw;
-  var scaleY = vh / sh;
-  var scale = Math.min(scaleX, scaleY, 1);
-  _lastScale = scale;
-
+  var scale = Math.min(vw / sw, vh / sh, 1);
   scene.style.transform = 'scale(' + scale + ')';
   scene.style.transformOrigin = 'top center';
-
-  // Pin body so scene never shifts up/down when keyboard opens
-  document.body.style.height = vh + 'px';
-  document.body.style.overflow = 'hidden';
-  document.documentElement.style.height = vh + 'px';
-  document.documentElement.style.overflow = 'hidden';
 }
-
-// Blur input on Enter/Done to close keyboard, then refit
-document.getElementById('pwInput').addEventListener('blur', function(){
-  // small delay so keyboard fully closes before refit
-  setTimeout(fitScene, 300);
-});
-
-// Prevent page from scrolling when input is focused
-document.getElementById('pwInput').addEventListener('focus', function(){
-  // Scroll prevention: fix position
-  setTimeout(fitScene, 350);
-  window.scrollTo(0,0);
-});
 
 fitScene();
+window.addEventListener('resize', function(){
+  // Only refit if NOT caused by keyboard (width change = real resize)
+  if(window.innerWidth !== _vw){ fitScene(); }
+  _vw = window.innerWidth;
+});
+var _vw = window.innerWidth;
 
-// Listen to visualViewport resize (handles keyboard open/close on mobile)
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', fitScene);
-  window.visualViewport.addEventListener('scroll', function(){
-    window.scrollTo(0,0);
-  });
-} else {
-  window.addEventListener('resize', fitScene);
-}
-
-// Belt & suspenders: prevent any scroll
+// Prevent scroll entirely
 window.addEventListener('scroll', function(){ window.scrollTo(0,0); }, {passive:false});
 document.body.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive:false});
 </script>
