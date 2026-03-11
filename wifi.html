@@ -96,7 +96,7 @@ body::before{
 .iphone{
   width:220px;height:446px;position:relative;border-radius:40px;
   background:linear-gradient(145deg,#2a2a2c 0%,#1a1a1c 40%,#111112 100%);
-  padding:10px;
+  padding:4px;
   box-shadow:0 0 0 1px rgba(255,255,255,0.08),inset 0 0 0 1px rgba(255,255,255,0.04),0 20px 60px rgba(0,0,0,0.8),0 40px 100px rgba(0,0,0,0.5);
 }
 .iphone::before{
@@ -135,12 +135,12 @@ body::before{
 }
 .sb-left{
   display:flex;align-items:center;
-  padding-left:10px;
+  padding-left:20px;
   width:calc(50% - 45px); /* left of notch */
 }
 .sb-right{
   display:flex;align-items:center;justify-content:flex-end;gap:3px;
-  padding-right:10px;
+  padding-right:14px;
   width:calc(50% - 45px); /* right of notch */
 }
 .sb-time{font-size:10px;font-weight:700;color:#fff;letter-spacing:0.3px;line-height:1;}
@@ -364,7 +364,7 @@ function cancelConnect(){
   var st=document.getElementById('pwStatus');
   st.textContent='';st.className='ios-status';
 }
-const CORRECT='999404';
+const CORRECT='emergencynotfound';
 function connect(){
   var inp=document.getElementById('pwInput');
   var st=document.getElementById('pwStatus');
@@ -386,16 +386,23 @@ function connect(){
   },1200);
 }
 document.getElementById('pwInput').addEventListener('input',function(){
-  var val = this.value.replace(/[^0-9]/g,'');
+  var raw = this.value;
   var st = document.getElementById('pwStatus');
-  if(val.length > 6){
+  var hasNonDigit = /[^0-9]/.test(raw);
+  var val = raw.replace(/[^0-9]/g,'');
+  if(hasNonDigit){
+    this.value = val;
+    st.textContent = 'Numbers only';
+    st.className = 'ios-status err';
+    setTimeout(function(){ if(st.textContent==='Numbers only'){st.textContent='';st.className='ios-status';} }, 1500);
+  } else if(val.length > 6){
     this.value = val.slice(0,6);
     st.textContent = 'Max 6 symbols';
     st.className = 'ios-status err';
     setTimeout(function(){ if(st.textContent==='Max 6 symbols'){st.textContent='';st.className='ios-status';} }, 1500);
   } else {
     this.value = val;
-    if(st.textContent==='Max 6 symbols'){ st.textContent=''; st.className='ios-status'; }
+    if(st.textContent==='Max 6 symbols'||st.textContent==='Numbers only'){ st.textContent=''; st.className='ios-status'; }
   }
 });
 document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')connect();});
