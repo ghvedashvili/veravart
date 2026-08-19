@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KidSmart Quoridor 5×5</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-card {
+    width: min(94vw, 480px);
+    max-height: 96dvh;
+    max-height: 96vh;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.header-row {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#info-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    flex: none;
+    padding: 0;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #2563eb;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    color: #2563eb;
+    font-size: 22px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.status-bar {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    padding: 8px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.players-info {
+    display: flex;
+    gap: 10px;
+}
+
+.player-box {
+    flex: 1;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    padding: 8px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.player-box.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    transform: translateY(-2px);
+}
+
+.wall-count {
+    font-size: 13px;
+    color: #475569;
+    margin-top: 4px;
+}
+
+/* ================= BOARD CONTAINER ================= */
+
+#board-container {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    aspect-ratio: 1;
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+    background: #cbd5e1;
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#board {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 14px; /* კედლის სისქის ტოლი ინტერვალი */
+    position: relative;
+}
+
+/* CELLS */
+
+.cell {
+    background: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.cell:hover {
+    background: #f1f5f9;
+}
+
+.cell.possible {
+    background: #dbeafe;
+    border: 2px dashed #3b82f6;
+}
+
+.cell.possible:hover {
+    background: #bfdbfe;
+}
+
+/* PAWNS */
+
+.pawn {
+    width: 60%;
+    height: 60%;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
+.human-pawn {
+    background: #2563eb;
+    border: 3px solid #1d4ed8;
+}
+
+.ai-pawn {
+    background: #ef4444;
+    border: 3px solid #dc2626;
+}
+
+/* WALLS LAYER — must sit EXACTLY on top of #board (same padding offset
+   as the board itself inside #board-container), otherwise every wall
+   is drawn a few pixels off from the real intersection. */
+
+#walls-layer {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    pointer-events: none; /* individual wall-slots re-enable pointer events themselves */
+}
+
+/* WALL ANCHOR SLOTS (INTERSECTIONS) — invisible hit-zones.
+   Sized/positioned in JS so that, together, they tile the whole board
+   with no dead space, making it easy to just "aim" near a wall you want. */
+
+.wall-slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    cursor: pointer;
+    touch-action: none; /* stops the page from scrolling while aiming a wall on touch screens */
+}
+
+/* WALL PLACED & PREVIEW */
+
+.wall-elem {
+    position: absolute;
+    border-radius: 6px;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.wall-placed {
+    background: #78350f;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.wall-preview.valid {
+    background: rgba(245, 158, 11, 0.75);
+    border: 2px solid #b45309;
+}
+
+.wall-preview.invalid {
+    background: rgba(239, 68, 68, 0.75);
+    border: 2px solid #b91c1c;
+}
+
+@keyframes pulse-wall {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+.wall-preview.armed {
+    animation: pulse-wall 0.9s ease-in-out infinite;
+}
+
+/* CONTROLS */
+
+.controls {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#wall-btn {
+    background: #f59e0b;
+    color: #ffffff;
+}
+
+#wall-btn.active {
+    background: #b45309;
+}
+
+#restart-btn {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.instructions {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+    text-align: left;
+}
+
+/* ================= MODALS ================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 200;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-box {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    max-height: 90dvh;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    padding: 0;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 14px;
+}
+
+.modal-box h2 {
+    margin: 0 0 10px 0;
+    color: #2563eb;
+    font-size: 20px;
+}
+
+.win-emoji {
+    font-size: 46px;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.modal-box p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0 0 16px 0;
+}
+
+#win-restart-btn {
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+}
+</style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="header-row">
+        <h1>🧱 Quoridor 5×5</h1>
+        <button id="info-btn" aria-label="წესები">ⓘ</button>
+    </div>
+    <div class="subtitle">მიაღწიე საპირისპირო მხარეს!</div>
+
+    <div class="status-bar" id="status">🔵 შენი სვლაა</div>
+
+    <div class="players-info">
+        <div class="player-box active" id="p1-box">
+            <div>🧒 <b>შენ</b></div>
+            <div class="wall-count">კედლები: <span id="p1-walls">5</span></div>
+        </div>
+        <div class="player-box" id="p2-box">
+            <div>🤖 <b>AI</b></div>
+            <div class="wall-count">კედლები: <span id="p2-walls">5</span></div>
+        </div>
+    </div>
+
+    <div id="board-container">
+        <div id="board"></div>
+        <div id="walls-layer"></div>
+    </div>
+
+    <div class="controls">
+        <button id="wall-btn">🧱 კედელი</button>
+        <button id="restart-btn">🔄 თავიდან</button>
+    </div>
+</div>
+
+<div id="info-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <button class="modal-close" id="info-close-btn" aria-label="დახურვა">✕</button>
+        <h2>📖 წესები</h2>
+        <div class="instructions">
+            • <b>მიზანი:</b> პირველი, ვინც საპირისპირო მხარეს მიაღწევს, იმარჯვებს.<br><br>
+            • <b>სვლა:</b> დააჭირე ლურჯად მონიშნულ უჯრას.<br><br>
+            • <b>კედელი (მაუსი):</b> დააჭირე „კედელი“-ს, გადაატარე კურსორი — მიმართულება ავტომატურად შეირჩევა, დააჭირე დასადებად.<br><br>
+            • <b>კედელი (მობილური):</b> დააჭირე „კედელი“-ს, შემდეგ შეეხე სასურველ ადგილს — ჯერ მხოლოდ ციმციმებს (არაფერი დაიდება!), იმავე ადგილას და იმავე მიმართულებით მეორე შეხებით დაისმევა.
+        </div>
+    </div>
+</div>
+
+<div id="win-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <button class="modal-close" id="win-close-btn" aria-label="დახურვა">✕</button>
+        <div class="win-emoji" id="win-emoji">🎉</div>
+        <h2 id="win-title">შენ გაიმარჯვე!</h2>
+        <p id="win-msg">საოცარი თამაში იყო!</p>
+        <button id="win-restart-btn">🔄 თავიდან თამაში</button>
+    </div>
+</div>
+
+<script>
+const SIZE = 5;
+
+let human = { r: 4, c: 2 };
+let ai = { r: 0, c: 2 };
+
+let humanWalls = 5;
+let aiWalls = 5;
+
+let walls = []; // { r, c, dir: 'h'|'v' }
+let turn = "human";
+let isWallMode = false;
+let wallDir = "h";
+let gameOver = false;
+
+// On touch devices, placing a wall needs a second confirming tap on the
+// same spot, so a stray tap while just looking around never wastes a
+// wall. armedWall holds the intersection that's currently "proposed".
+let isTouchDevice = false;
+let armedWall = null;
+window.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true, passive: true });
+
+const board = document.getElementById("board");
+const wallsLayer = document.getElementById("walls-layer");
+const statusEl = document.getElementById("status");
+const wallBtn = document.getElementById("wall-btn");
+const restartBtn = document.getElementById("restart-btn");
+
+const infoBtn = document.getElementById("info-btn");
+const infoModal = document.getElementById("info-modal");
+const infoCloseBtn = document.getElementById("info-close-btn");
+
+const winModal = document.getElementById("win-modal");
+const winCloseBtn = document.getElementById("win-close-btn");
+const winRestartBtn = document.getElementById("win-restart-btn");
+const winEmoji = document.getElementById("win-emoji");
+const winTitle = document.getElementById("win-title");
+const winMsg = document.getElementById("win-msg");
+
+wallBtn.addEventListener("click", toggleWallMode);
+restartBtn.addEventListener("click", initGame);
+
+infoBtn.addEventListener("click", () => infoModal.classList.remove("hidden"));
+infoCloseBtn.addEventListener("click", () => infoModal.classList.add("hidden"));
+infoModal.addEventListener("click", (e) => { if (e.target === infoModal) infoModal.classList.add("hidden"); });
+
+winCloseBtn.addEventListener("click", hideWinModal);
+winRestartBtn.addEventListener("click", initGame);
+
+function hideWinModal() {
+    winModal.classList.add("hidden");
+}
+
+function showWinModal(humanWon) {
+    winEmoji.textContent = humanWon ? "🎉" : "🤖";
+    winTitle.textContent = humanWon ? "შენ გაიმარჯვე!" : "კომპიუტერმა გაიმარჯვა!";
+    winMsg.textContent = humanWon ? "საოცარი სვლები იყო!" : "სცადე ისევ — გაიმარჯვებ!";
+    updateStatus(humanWon ? "🎉 გილოცავ! შენ გაიმარჯვე!" : "🤖 კომპიუტერმა გაიმარჯვა!");
+    winModal.classList.remove("hidden");
+}
+
+function initGame() {
+    human = { r: 4, c: 2 };
+    ai = { r: 0, c: 2 };
+    humanWalls = 5;
+    aiWalls = 5;
+    walls = [];
+    isWallMode = false;
+    wallDir = "h";
+    gameOver = false;
+    armedWall = null;
+
+    wallBtn.classList.remove("active");
+    hideWinModal();
+
+    // Coin-flip who goes first each game.
+    turn = Math.random() < 0.5 ? "human" : "ai";
+    beginTurn();
+}
+
+function toggleWallMode() {
+    if (gameOver || turn !== "human") return;
+    if (humanWalls <= 0 && !isWallMode) {
+        updateStatus("❌ კედლები აღარ გრჩება!");
+        return;
+    }
+    isWallMode = !isWallMode;
+    armedWall = null;
+    wallBtn.classList.toggle("active", isWallMode);
+    clearPreviews();
+    if (isWallMode) {
+        updateStatus(isTouchDevice ? "🧱 შეეხე სასურველ ადგილს" : "🧱 გადაატარე კურსორი და დააჭირე");
+    } else {
+        updateStatus("🔵 შენი სვლაა");
+    }
+    render();
+}
+
+// Renders the board for the current turn, and — if it's the AI's turn —
+// kicks off its move after a short "thinking" delay. Used both to start
+// a fresh game (which may randomly open with the AI) and after each move.
+function beginTurn() {
+    render();
+    if (turn === "ai") {
+        updateStatus("🤖 კომპიუტერი ფიქრობს...");
+        setTimeout(aiTurn, 600);
+    } else {
+        updateStatus("🔵 შენი სვლაა");
+    }
+}
+
+function updateStatus(text) {
+    statusEl.textContent = text;
+}
+
+/* ================= RENDER ENGINE ================= */
+
+function render() {
+    board.innerHTML = "";
+    wallsLayer.innerHTML = "";
+
+    // 1. Cells Render
+    for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+
+            if (turn === "human" && !isWallMode && !gameOver) {
+                if (getValidMoves(human, ai).some(m => m.r === r && m.c === c)) {
+                    cell.classList.add("possible");
+                }
+            }
+
+            if (human.r === r && human.c === c) {
+                const pawn = document.createElement("div");
+                pawn.className = "pawn human-pawn";
+                cell.appendChild(pawn);
+            }
+            if (ai.r === r && ai.c === c) {
+                const pawn = document.createElement("div");
+                pawn.className = "pawn ai-pawn";
+                cell.appendChild(pawn);
+            }
+
+            cell.addEventListener("click", () => handleCellClick(r, c));
+            board.appendChild(cell);
+        }
+    }
+
+    // 2. Slots for Wall Anchors (4x4 Intersections).
+    // Each slot is sized to exactly tile the board together with its
+    // neighbours (size = one cell + one gap), so there's no fiddly
+    // pixel-hunting — you just aim near the wall you want.
+    for (let r = 0; r < SIZE - 1; r++) {
+        for (let c = 0; c < SIZE - 1; c++) {
+            const slot = document.createElement("div");
+            slot.className = "wall-slot";
+
+            const pos = getIntersectionPosition(r, c);
+            const zoneSize = pos.cellWidth + pos.gap;
+            slot.style.left = pos.x + "px";
+            slot.style.top = pos.y + "px";
+            slot.style.width = zoneSize + "px";
+            slot.style.height = zoneSize + "px";
+            slot.style.pointerEvents = isWallMode ? "auto" : "none";
+
+            slot.addEventListener("mousemove", (e) => handleWallSlotHover(e, r, c));
+            slot.addEventListener("mouseleave", clearPreviews);
+            slot.addEventListener("click", (e) => handleWallSlotClick(e, r, c));
+
+            // Touch: show the same live preview while a finger is on the
+            // slot (and stop the page from scrolling underneath it), then
+            // place the wall on release.
+            slot.addEventListener("touchstart", (e) => handleWallSlotHover(e, r, c), { passive: true });
+            slot.addEventListener("touchmove", (e) => { e.preventDefault(); handleWallSlotHover(e, r, c); }, { passive: false });
+
+            wallsLayer.appendChild(slot);
+        }
+    }
+
+    // 3. Render Placed Walls
+    walls.forEach(w => {
+        const wallEl = createWallElement(w.r, w.c, w.dir, "wall-placed");
+        wallsLayer.appendChild(wallEl);
+    });
+
+    document.getElementById("p1-walls").textContent = humanWalls;
+    document.getElementById("p2-walls").textContent = aiWalls;
+    document.getElementById("p1-box").classList.toggle("active", turn === "human");
+    document.getElementById("p2-box").classList.toggle("active", turn === "ai");
+}
+
+/* ================= EXACT CALCULATIONS FOR WALL POSITIONING ================= */
+
+function getIntersectionPosition(r, c) {
+    const boardRect = board.getBoundingClientRect();
+    const cellWidth = (boardRect.width - 4 * 14) / 5;
+    const gap = 14;
+
+    // These x/y are measured from the board's own top-left corner, and
+    // #walls-layer is positioned to sit exactly on top of #board (same
+    // 10px offset as the board has inside #board-container), so using
+    // them directly as left/top inside #walls-layer lines walls up
+    // perfectly with the cell grid.
+    const x = (c + 1) * cellWidth + c * gap + gap / 2;
+    const y = (r + 1) * cellWidth + r * gap + gap / 2;
+
+    return { x, y, cellWidth, gap };
+}
+
+function createWallElement(r, c, dir, extraClass) {
+    const pos = getIntersectionPosition(r, c);
+    const wallEl = document.createElement("div");
+    wallEl.className = `wall-elem ${extraClass}`;
+
+    const wallLength = 2 * pos.cellWidth + pos.gap;
+    const wallThickness = pos.gap;
+
+    if (dir === 'h') {
+        wallEl.style.width = wallLength + "px";
+        wallEl.style.height = wallThickness + "px";
+        wallEl.style.left = (pos.x - wallLength / 2) + "px";
+        wallEl.style.top = (pos.y - wallThickness / 2) + "px";
+    } else {
+        wallEl.style.width = wallThickness + "px";
+        wallEl.style.height = wallLength + "px";
+        wallEl.style.left = (pos.x - wallThickness / 2) + "px";
+        wallEl.style.top = (pos.y - wallLength / 2) + "px";
+    }
+
+    return wallEl;
+}
+
+/* ================= HOVER & PLACEMENT LOGIC ================= */
+
+// Figures out whether the pointer is closer to a horizontal or a
+// vertical wall placement, based on where inside the (large) hit-zone
+// it currently is. Moving left/right previews a horizontal wall,
+// moving up/down previews a vertical wall — no manual toggle needed.
+function computeDirFromEvent(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clientX = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+    const clientY = (e.touches && e.touches.length) ? e.touches[0].clientY : e.clientY;
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
+    return Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
+}
+
+function handleWallSlotHover(e, r, c) {
+    if (!isWallMode || turn !== "human" || gameOver) return;
+    wallDir = computeDirFromEvent(e);
+    clearPreviews();
+
+    const isValid = canPlaceWall(r, c, wallDir);
+    const preview = createWallElement(r, c, wallDir, `wall-preview ${isValid ? 'valid' : 'invalid'}`);
+    preview.id = "active-preview";
+    wallsLayer.appendChild(preview);
+}
+
+function clearPreviews() {
+    const prev = document.getElementById("active-preview");
+    if (prev) prev.remove();
+}
+
+function handleWallSlotClick(e, r, c) {
+    if (!isWallMode || turn !== "human" || gameOver) return;
+
+    const dir = computeDirFromEvent(e);
+
+    if (isTouchDevice) {
+        // Second tap on the same intersection AND same direction => confirm & place.
+        if (armedWall && armedWall.r === r && armedWall.c === c && armedWall.dir === dir) {
+            armedWall = null;
+            if (canPlaceWall(r, c, dir)) {
+                walls.push({ r, c, dir });
+                humanWalls--;
+                isWallMode = false;
+                wallBtn.classList.remove("active");
+                clearPreviews();
+                endTurn();
+            } else {
+                clearPreviews();
+                updateStatus("❌ აქ კედელს ვერ დადებ!");
+            }
+            return;
+        }
+
+        // First tap here, or the direction changed since the last tap
+        // => just propose it, don't place anything yet.
+        armedWall = { r, c, dir };
+        clearPreviews();
+        const isValid = canPlaceWall(r, c, dir);
+        const preview = createWallElement(r, c, dir, `wall-preview armed ${isValid ? 'valid' : 'invalid'}`);
+        preview.id = "active-preview";
+        wallsLayer.appendChild(preview);
+        updateStatus(isValid
+            ? "👉 შეეხე იმავე ადგილას კიდევ ერთხელ დასადასტურებლად"
+            : "❌ აქ კედელს ვერ დადებ — სცადე სხვაგან");
+        return;
+    }
+
+    // Mouse users already saw an accurate live preview on hover, so one
+    // click is enough.
+    if (canPlaceWall(r, c, dir)) {
+        walls.push({ r, c, dir });
+        humanWalls--;
+        isWallMode = false;
+        wallBtn.classList.remove("active");
+        clearPreviews();
+        endTurn();
+    } else {
+        updateStatus("❌ აქ კედელს ვერ დადებ!");
+    }
+}
+
+function handleCellClick(r, c) {
+    if (isWallMode || turn !== "human" || gameOver) return;
+
+    const validMoves = getValidMoves(human, ai);
+    if (validMoves.some(m => m.r === r && m.c === c)) {
+        human.r = r;
+        human.c = c;
+        endTurn();
+    }
+}
+
+function endTurn() {
+    if (human.r === 0) {
+        gameOver = true;
+        render();
+        showWinModal(true);
+        return;
+    }
+    if (ai.r === SIZE - 1) {
+        gameOver = true;
+        render();
+        showWinModal(false);
+        return;
+    }
+
+    turn = turn === "human" ? "ai" : "human";
+    beginTurn();
+}
+
+/* ================= RULES & MOVEMENT ================= */
+
+function getValidMoves(pawn, opponent) {
+    const moves = [];
+    const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+
+    dirs.forEach(([dr, dc]) => {
+        const nr = pawn.r + dr;
+        const nc = pawn.c + dc;
+
+        if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+            if (!isWallBetween(pawn.r, pawn.c, nr, nc)) {
+                if (nr === opponent.r && nc === opponent.c) {
+                    const jumpR = nr + dr;
+                    const jumpC = nc + dc;
+                    if (jumpR >= 0 && jumpR < SIZE && jumpC >= 0 && jumpC < SIZE) {
+                        if (!isWallBetween(nr, nc, jumpR, jumpC)) {
+                            moves.push({ r: jumpR, c: jumpC });
+                        }
+                    }
+                } else {
+                    moves.push({ r: nr, c: nc });
+                }
+            }
+        }
+    });
+
+    return moves;
+}
+
+function isWallBetween(r1, c1, r2, c2) {
+    for (let w of walls) {
+        if (w.dir === 'h') {
+            if (Math.abs(r1 - r2) === 1 && c1 === c2) {
+                const minR = Math.min(r1, r2);
+                if (w.r === minR && (w.c === c1 || w.c === c1 - 1)) return true;
+            }
+        } else if (w.dir === 'v') {
+            if (Math.abs(c1 - c2) === 1 && r1 === r2) {
+                const minC = Math.min(c1, c2);
+                if (w.c === minC && (w.r === r1 || w.r === r1 - 1)) return true;
+            }
+        }
+    }
+    return false;
+}
+
+function canPlaceWall(r, c, dir) {
+    for (let w of walls) {
+        if (w.r === r && w.c === c) return false;
+        if (w.dir === dir) {
+            if (dir === 'h' && w.r === r && Math.abs(w.c - c) < 2) return false;
+            if (dir === 'v' && w.c === c && Math.abs(w.r - r) < 2) return false;
+        }
+    }
+
+    walls.push({ r, c, dir });
+    const humanCanReach = hasPath(human, 0);
+    const aiCanReach = hasPath(ai, SIZE - 1);
+    walls.pop();
+
+    return humanCanReach && aiCanReach;
+}
+
+function hasPath(pawn, targetRow) {
+    const queue = [{ r: pawn.r, c: pawn.c }];
+    const visited = new Set([`${pawn.r},${pawn.c}`]);
+
+    while (queue.length > 0) {
+        const curr = queue.shift();
+        if (curr.r === targetRow) return true;
+
+        const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+        for (let [dr, dc] of dirs) {
+            const nr = curr.r + dr;
+            const nc = curr.c + dc;
+
+            if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+                if (!isWallBetween(curr.r, curr.c, nr, nc)) {
+                    const key = `${nr},${nc}`;
+                    if (!visited.has(key)) {
+                        visited.add(key);
+                        queue.push({ r: nr, c: nc });
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function getShortestPathLength(pawn, targetRow) {
+    const queue = [{ r: pawn.r, c: pawn.c, dist: 0 }];
+    const visited = new Set([`${pawn.r},${pawn.c}`]);
+
+    while (queue.length > 0) {
+        const curr = queue.shift();
+        if (curr.r === targetRow) return curr.dist;
+
+        const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+        for (let [dr, dc] of dirs) {
+            const nr = curr.r + dr;
+            const nc = curr.c + dc;
+
+            if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+                if (!isWallBetween(curr.r, curr.c, nr, nc)) {
+                    const key = `${nr},${nc}`;
+                    if (!visited.has(key)) {
+                        visited.add(key);
+                        queue.push({ r: nr, c: nc, dist: curr.dist + 1 });
+                    }
+                }
+            }
+        }
+    }
+    return Infinity;
+}
+
+/* ================= AI LOGIC ================= */
+
+function aiTurn() {
+    if (gameOver) return;
+
+    let bestAction = null;
+    const humanDist = getShortestPathLength(human, 0);
+    const aiDist = getShortestPathLength(ai, SIZE - 1);
+
+    if (aiWalls > 0 && (humanDist <= aiDist || Math.random() < 0.3)) {
+        let maxDelay = 0;
+        let bestWall = null;
+
+        for (let r = 0; r < SIZE - 1; r++) {
+            for (let c = 0; c < SIZE - 1; c++) {
+                for (let dir of ['h', 'v']) {
+                    if (canPlaceWall(r, c, dir)) {
+                        walls.push({ r, c, dir });
+                        const newHumanDist = getShortestPathLength(human, 0);
+                        const newAiDist = getShortestPathLength(ai, SIZE - 1);
+                        walls.pop();
+
+                        const delay = (newHumanDist - humanDist) - (newAiDist - aiDist);
+                        if (delay > maxDelay) {
+                            maxDelay = delay;
+                            bestWall = { r, c, dir };
+                        }
+                    }
+                }
+            }
+        }
+
+        if (bestWall && maxDelay > 0) {
+            bestAction = { type: 'wall', ...bestWall };
+        }
+    }
+
+    if (!bestAction) {
+        const validMoves = getValidMoves(ai, human);
+        let minBonusDist = Infinity;
+        let bestMove = null;
+
+        validMoves.forEach(m => {
+            const dist = getShortestPathLength(m, SIZE - 1);
+            if (dist < minBonusDist) {
+                minBonusDist = dist;
+                bestMove = m;
+            }
+        });
+
+        if (bestMove) {
+            bestAction = { type: 'move', target: bestMove };
+        }
+    }
+
+    if (bestAction.type === 'wall') {
+        walls.push({ r: bestAction.r, c: bestAction.c, dir: bestAction.dir });
+        aiWalls--;
+    } else if (bestAction.type === 'move') {
+        ai.r = bestAction.target.r;
+        ai.c = bestAction.target.c;
+    }
+
+    endTurn();
+}
+
+window.addEventListener('resize', render);
+initGame();
+</script>
+
+</body>
+</html>
