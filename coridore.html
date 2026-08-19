@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>KidSmart Quoridor 5×5</title>
 <style>
 * {
@@ -10,32 +10,33 @@
 }
 
 html, body {
-    height: 100vh;
     height: 100dvh;
     margin: 0;
+    padding: 0;
     overflow: hidden;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background: #f0f4f8;
     color: #1e293b;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 .game-card {
-    width: min(94vw, 480px);
-    max-height: 96dvh;
-    max-height: 96vh;
+    width: min(96vw, 420px);
+    height: 98dvh;
+    max-height: 98dvh;
     background: #ffffff;
     border-radius: 20px;
-    padding: 14px 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    justify-content: space-between;
     overflow: hidden;
 }
 
@@ -51,51 +52,44 @@ body {
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     flex: none;
     padding: 0;
+    border: none;
     border-radius: 50%;
     background: #e2e8f0;
     color: #2563eb;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
+    cursor: pointer;
 }
 
 h1 {
     text-align: center;
     margin: 0;
     color: #2563eb;
-    font-size: 22px;
+    font-size: 20px;
 }
 
 .subtitle {
     text-align: center;
     color: #64748b;
-    font-size: 13px;
-}
-
-.status-bar {
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    padding: 8px;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: 600;
-    color: #0f172a;
-    font-size: 14px;
+    font-size: 12px;
+    margin-top: -2px;
 }
 
 .players-info {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    margin: 4px 0;
 }
 
 .player-box {
     flex: 1;
     background: #f8fafc;
     border: 2px solid #e2e8f0;
-    padding: 8px;
+    padding: 6px;
     border-radius: 12px;
     text-align: center;
     transition: all 0.2s ease;
@@ -107,25 +101,27 @@ h1 {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.player-title {
+    font-size: 14px;
+}
+
 .wall-count {
-    font-size: 13px;
+    font-size: 12px;
     color: #475569;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 /* ================= BOARD CONTAINER ================= */
 
 #board-container {
     width: 100%;
-    flex: 1 1 auto;
-    min-height: 0;
     aspect-ratio: 1;
     max-width: 100%;
     margin: 0 auto;
     position: relative;
     background: #cbd5e1;
     border-radius: 16px;
-    padding: 10px;
+    padding: 8px;
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -135,7 +131,7 @@ h1 {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
-    gap: 14px; /* კედლის სისქის ტოლი ინტერვალი */
+    gap: 10px;
     position: relative;
 }
 
@@ -143,7 +139,7 @@ h1 {
 
 .cell {
     background: #ffffff;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,59 +164,51 @@ h1 {
 /* PAWNS */
 
 .pawn {
-    width: 60%;
-    height: 60%;
+    width: 65%;
+    height: 65%;
     border-radius: 50%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
 }
 
 .human-pawn {
     background: #2563eb;
-    border: 3px solid #1d4ed8;
+    border: 2px solid #1d4ed8;
 }
 
 .ai-pawn {
     background: #ef4444;
-    border: 3px solid #dc2626;
+    border: 2px solid #dc2626;
 }
 
-/* WALLS LAYER — must sit EXACTLY on top of #board (same padding offset
-   as the board itself inside #board-container), otherwise every wall
-   is drawn a few pixels off from the real intersection. */
+/* WALLS LAYER */
 
 #walls-layer {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    pointer-events: none; /* individual wall-slots re-enable pointer events themselves */
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    pointer-events: none;
 }
-
-/* WALL ANCHOR SLOTS (INTERSECTIONS) — invisible hit-zones.
-   Sized/positioned in JS so that, together, they tile the whole board
-   with no dead space, making it easy to just "aim" near a wall you want. */
 
 .wall-slot {
     position: absolute;
     transform: translate(-50%, -50%);
     z-index: 30;
     cursor: pointer;
-    touch-action: none; /* stops the page from scrolling while aiming a wall on touch screens */
+    touch-action: none;
 }
-
-/* WALL PLACED & PREVIEW */
 
 .wall-elem {
     position: absolute;
-    border-radius: 6px;
+    border-radius: 4px;
     z-index: 20;
     pointer-events: none;
 }
 
 .wall-placed {
     background: #78350f;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .wall-preview.valid {
@@ -249,11 +237,11 @@ h1 {
     gap: 8px;
 }
 
-button {
+button.action-btn {
     flex: 1;
     border: none;
     border-radius: 10px;
-    padding: 12px;
+    padding: 10px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -274,18 +262,18 @@ button {
     color: #ffffff;
 }
 
-button:hover {
+button.action-btn:hover {
     opacity: 0.9;
 }
 
 .instructions {
-    font-size: 13px;
+    font-size: 12px;
     color: #475569;
-    line-height: 1.6;
+    line-height: 1.5;
     text-align: left;
 }
 
-/* ================= MODALS ================= */
+/* MODALS */
 
 .modal-overlay {
     position: fixed;
@@ -294,7 +282,7 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     z-index: 200;
 }
 
@@ -305,73 +293,54 @@ button:hover {
 .modal-box {
     position: relative;
     width: 100%;
-    max-width: 340px;
+    max-width: 320px;
     max-height: 90dvh;
     overflow-y: auto;
     background: #ffffff;
-    border-radius: 18px;
-    padding: 24px 20px 20px;
+    border-radius: 16px;
+    padding: 20px 16px;
     text-align: center;
     box-shadow: 0 20px 45px rgba(0,0,0,0.3);
 }
 
 .modal-close {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    flex: none;
-    padding: 0;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    border: none;
     border-radius: 50%;
     background: #f1f5f9;
     color: #475569;
     font-size: 14px;
+    cursor: pointer;
 }
 
-.modal-box h2 {
-    margin: 0 0 10px 0;
-    color: #2563eb;
-    font-size: 20px;
-}
-
-.win-emoji {
-    font-size: 46px;
-    line-height: 1;
-    margin-bottom: 6px;
-}
-
-.modal-box p {
-    color: #64748b;
-    font-size: 14px;
-    margin: 0 0 16px 0;
-}
-
-#win-restart-btn {
-    width: 100%;
-    background: #2563eb;
-    color: #ffffff;
-}
+.win-emoji { font-size: 40px; margin-bottom: 4px; }
+.modal-box h2 { margin: 0 0 8px 0; color: #2563eb; font-size: 18px; }
+.modal-box p { color: #64748b; font-size: 13px; margin: 0 0 14px 0; }
+#win-restart-btn { width: 100%; background: #2563eb; color: #ffffff; padding: 10px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div class="game-card">
-    <div class="header-row">
-        <h1>🧱 Quoridor 5×5</h1>
-        <button id="info-btn" aria-label="წესები">ⓘ</button>
+    <div>
+        <div class="header-row">
+            <h1>🧱 Quoridor 5×5</h1>
+            <button id="info-btn" aria-label="წესები">ⓘ</button>
+        </div>
+        <div class="subtitle">მიაღწიე საპირისპირო მხარეს!</div>
     </div>
-    <div class="subtitle">მიაღწიე საპირისპირო მხარეს!</div>
-
-    <div class="status-bar" id="status">🔵 შენი სვლაა</div>
 
     <div class="players-info">
         <div class="player-box active" id="p1-box">
-            <div>🧒 <b>შენ</b></div>
+            <div class="player-title">🧒 <b>შენ</b></div>
             <div class="wall-count">კედლები: <span id="p1-walls">5</span></div>
         </div>
         <div class="player-box" id="p2-box">
-            <div>🤖 <b>AI</b></div>
+            <div class="player-title">🤖 <b>AI</b></div>
             <div class="wall-count">კედლები: <span id="p2-walls">5</span></div>
         </div>
     </div>
@@ -382,8 +351,8 @@ button:hover {
     </div>
 
     <div class="controls">
-        <button id="wall-btn">🧱 კედელი</button>
-        <button id="restart-btn">🔄 თავიდან</button>
+        <button id="wall-btn" class="action-btn">🧱 კედელი</button>
+        <button id="restart-btn" class="action-btn">🔄 თავიდან</button>
     </div>
 </div>
 
@@ -425,16 +394,12 @@ let isWallMode = false;
 let wallDir = "h";
 let gameOver = false;
 
-// On touch devices, placing a wall needs a second confirming tap on the
-// same spot, so a stray tap while just looking around never wastes a
-// wall. armedWall holds the intersection that's currently "proposed".
 let isTouchDevice = false;
 let armedWall = null;
 window.addEventListener('touchstart', () => { isTouchDevice = true; }, { once: true, passive: true });
 
 const board = document.getElementById("board");
 const wallsLayer = document.getElementById("walls-layer");
-const statusEl = document.getElementById("status");
 const wallBtn = document.getElementById("wall-btn");
 const restartBtn = document.getElementById("restart-btn");
 
@@ -485,7 +450,6 @@ function initGame() {
     wallBtn.classList.remove("active");
     hideWinModal();
 
-    // Coin-flip who goes first each game.
     turn = Math.random() < 0.5 ? "human" : "ai";
     beginTurn();
 }
@@ -508,9 +472,6 @@ function toggleWallMode() {
     render();
 }
 
-// Renders the board for the current turn, and — if it's the AI's turn —
-// kicks off its move after a short "thinking" delay. Used both to start
-// a fresh game (which may randomly open with the AI) and after each move.
 function beginTurn() {
     render();
     if (turn === "ai") {
@@ -522,7 +483,7 @@ function beginTurn() {
 }
 
 function updateStatus(text) {
-    statusEl.textContent = text;
+    // #status ამოღებულია HTML-იდან, ფუნცია უსაფრთხოდ ტოვებს ლოგიკას უცვლელად
 }
 
 /* ================= RENDER ENGINE ================= */
@@ -531,7 +492,6 @@ function render() {
     board.innerHTML = "";
     wallsLayer.innerHTML = "";
 
-    // 1. Cells Render
     for (let r = 0; r < SIZE; r++) {
         for (let c = 0; c < SIZE; c++) {
             const cell = document.createElement("div");
@@ -559,10 +519,6 @@ function render() {
         }
     }
 
-    // 2. Slots for Wall Anchors (4x4 Intersections).
-    // Each slot is sized to exactly tile the board together with its
-    // neighbours (size = one cell + one gap), so there's no fiddly
-    // pixel-hunting — you just aim near the wall you want.
     for (let r = 0; r < SIZE - 1; r++) {
         for (let c = 0; c < SIZE - 1; c++) {
             const slot = document.createElement("div");
@@ -580,9 +536,6 @@ function render() {
             slot.addEventListener("mouseleave", clearPreviews);
             slot.addEventListener("click", (e) => handleWallSlotClick(e, r, c));
 
-            // Touch: show the same live preview while a finger is on the
-            // slot (and stop the page from scrolling underneath it), then
-            // place the wall on release.
             slot.addEventListener("touchstart", (e) => handleWallSlotHover(e, r, c), { passive: true });
             slot.addEventListener("touchmove", (e) => { e.preventDefault(); handleWallSlotHover(e, r, c); }, { passive: false });
 
@@ -590,7 +543,6 @@ function render() {
         }
     }
 
-    // 3. Render Placed Walls
     walls.forEach(w => {
         const wallEl = createWallElement(w.r, w.c, w.dir, "wall-placed");
         wallsLayer.appendChild(wallEl);
@@ -606,14 +558,9 @@ function render() {
 
 function getIntersectionPosition(r, c) {
     const boardRect = board.getBoundingClientRect();
-    const cellWidth = (boardRect.width - 4 * 14) / 5;
-    const gap = 14;
+    const gap = 10;
+    const cellWidth = (boardRect.width - 4 * gap) / 5;
 
-    // These x/y are measured from the board's own top-left corner, and
-    // #walls-layer is positioned to sit exactly on top of #board (same
-    // 10px offset as the board has inside #board-container), so using
-    // them directly as left/top inside #walls-layer lines walls up
-    // perfectly with the cell grid.
     const x = (c + 1) * cellWidth + c * gap + gap / 2;
     const y = (r + 1) * cellWidth + r * gap + gap / 2;
 
@@ -645,10 +592,6 @@ function createWallElement(r, c, dir, extraClass) {
 
 /* ================= HOVER & PLACEMENT LOGIC ================= */
 
-// Figures out whether the pointer is closer to a horizontal or a
-// vertical wall placement, based on where inside the (large) hit-zone
-// it currently is. Moving left/right previews a horizontal wall,
-// moving up/down previews a vertical wall — no manual toggle needed.
 function computeDirFromEvent(e) {
     const rect = e.currentTarget.getBoundingClientRect();
     const clientX = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
@@ -680,7 +623,6 @@ function handleWallSlotClick(e, r, c) {
     const dir = computeDirFromEvent(e);
 
     if (isTouchDevice) {
-        // Second tap on the same intersection AND same direction => confirm & place.
         if (armedWall && armedWall.r === r && armedWall.c === c && armedWall.dir === dir) {
             armedWall = null;
             if (canPlaceWall(r, c, dir)) {
@@ -697,8 +639,6 @@ function handleWallSlotClick(e, r, c) {
             return;
         }
 
-        // First tap here, or the direction changed since the last tap
-        // => just propose it, don't place anything yet.
         armedWall = { r, c, dir };
         clearPreviews();
         const isValid = canPlaceWall(r, c, dir);
@@ -711,8 +651,6 @@ function handleWallSlotClick(e, r, c) {
         return;
     }
 
-    // Mouse users already saw an accurate live preview on hover, so one
-    // click is enough.
     if (canPlaceWall(r, c, dir)) {
         walls.push({ r, c, dir });
         humanWalls--;
@@ -927,10 +865,10 @@ function aiTurn() {
         }
     }
 
-    if (bestAction.type === 'wall') {
+    if (bestAction && bestAction.type === 'wall') {
         walls.push({ r: bestAction.r, c: bestAction.c, dir: bestAction.dir });
         aiWalls--;
-    } else if (bestAction.type === 'move') {
+    } else if (bestAction && bestAction.type === 'move') {
         ai.r = bestAction.target.r;
         ai.c = bestAction.target.c;
     }
