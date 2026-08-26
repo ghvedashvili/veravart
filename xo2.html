@@ -106,7 +106,7 @@
 <body>
 
     <h1>Smart XO</h1>
-    <div id="status">შენი სვლაა (X) — დადე ფიგურა</div>
+    <div id="status">თამაში იტვირთება...</div>
 
     <div class="board-wrapper">
         <!-- შემერთებელი ხაზები უჯრების ცენტრებს შორის -->
@@ -151,7 +151,7 @@
     const winPatterns = [
         [0,1,2], [3,4,5], [6,7,8], // ჰორიზონტალური
         [0,3,6], [1,4,7], [2,5,8], // ვერტიკალური
-        [0,4,8], [2,4,6]          // დიაგონალური
+        [0,4,8], [2,4,6]           // დიაგონალური
     ];
 
     // ხაზების გასწვრივ მეზობლობა
@@ -387,12 +387,23 @@
 
     function resetGame() {
         board = Array(9).fill(null);
-        turn = HUMAN;
         selectedCell = null;
         gameOver = false;
-        statusEl.innerText = "შენი სვლაა (X) — დადე ფიგურა";
+        
+        // 50/50 შანსი დაწყებისას
+        turn = Math.random() < 0.5 ? HUMAN : AI;
         render();
+
+        if (turn === HUMAN) {
+            statusEl.innerText = "შენი სვლაა (X) — დადე ფიგურა";
+        } else {
+            statusEl.innerText = "AI იწყებს... ფიქრობს...";
+            setTimeout(aiMove, 500);
+        }
     }
+
+    // თამაშის ინიციალიზაცია პირველივე ჩატვირთვისას
+    resetGame();
 </script>
 </body>
 </html>
