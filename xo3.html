@@ -349,7 +349,7 @@ window.onload = function() {
             turnElement.textContent = "შენი სვლაა 👆";
         } else {
             turnElement.textContent = "კომპიუტერი ფიქრობს... 🤖";
-            setTimeout(computerMove, 300);
+            setTimeout(computerMove, 600);
         }
     }
 
@@ -450,7 +450,7 @@ window.onload = function() {
 
         currentTurn = COMPUTER;
         turnElement.textContent = "კომპიუტერი ფიქრობს... 🤖";
-        setTimeout(computerMove, 100);
+        setTimeout(computerMove, 600);
     }
 
     function computerMove() {
@@ -465,23 +465,33 @@ window.onload = function() {
         }
 
         let bestMove = null;
-        let bestScore = -Infinity;
-        const MAX_DEPTH = 5; 
 
-        for (const move of moves) {
-            const oldPiece = board[move.index];
+        // 1. ოპტიმიზაცია: თუ დაფა სრულიად ცარიელია, დადოს ცენტრში გამოთვლების გარეშე
+        const isBoardEmpty = board.every(cell => cell === null);
+        if (isBoardEmpty) {
+            bestMove = { index: 4, size: 2 }; // საშუალო ფიგურა ცენტრში
+        } else {
+            // 2. დინამიური სიღრმე: შევამციროთ სიღრმე თამაშის დასაწყისში
+            const occupiedCells = board.filter(cell => cell !== null).length;
+            const MAX_DEPTH = occupiedCells < 3 ? 4 : 5;
 
-            board[move.index] = { owner: COMPUTER, size: move.size };
-            inventory.C[move.size]--;
+            let bestScore = -Infinity;
 
-            let score = minimax(board, inventory, MAX_DEPTH, false, -Infinity, Infinity);
+            for (const move of moves) {
+                const oldPiece = board[move.index];
 
-            inventory.C[move.size]++;
-            board[move.index] = oldPiece;
+                board[move.index] = { owner: COMPUTER, size: move.size };
+                inventory.C[move.size]--;
 
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = move;
+                let score = minimax(board, inventory, MAX_DEPTH, false, -Infinity, Infinity);
+
+                inventory.C[move.size]++;
+                board[move.index] = oldPiece;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
             }
         }
 
