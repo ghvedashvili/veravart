@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Quatro 3x3 vs AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+
+        h1 { color: #333; margin-bottom: 5px; }
+        #status { 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #2c3e50; 
+            text-align: center;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 90px);
+            grid-template-rows: repeat(3, 90px);
+            gap: 8px;
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .cell {
+            width: 90px;
+            height: 90px;
+            background-color: #fff;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .inventory-container { 
+            text-align: center; 
+            margin-top: 15px; 
+            min-height: 120px;
+        }
+
+        .inventory {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 300px;
+            min-height: 50px;
+        }
+
+        .piece {
+            width: 50px;
+            height: 50px;
+            font-size: 32px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .piece.red { color: #e74c3c; border: 3px solid #e74c3c; }
+        .piece.blue { color: #3498db; border: 3px solid #3498db; }
+
+        .piece.active-given {
+            transform: scale(1.2);
+            background-color: #f1c40f;
+            box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
+            border-color: #f39c12 !important;
+            opacity: 1 !important;
+        }
+
+        .piece.dimmed {
+            opacity: 0.15;
+            filter: grayscale(80%);
+            cursor: not-allowed;
+        }
+
+        .piece.hidden {
+            display: none !important;
+        }
+
+        button.restart-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button.restart-btn:hover { background-color: #27ae60; }
+    </style>
+</head>
+<body>
+
+    <h1>Mini Quatro 3x3 vs AI</h1>
+    <div id="status">თამაში იწყება! აირჩიე ფიგურა AI-სთვის</div>
+
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+
+    <div class="inventory-container">
+        <h3>ხელმისაწვდომი ფიგურები:</h3>
+        <div class="inventory" id="inventory">
+            <div class="piece red" data-color="red" data-shape="X" id="p1">X</div>
+            <div class="piece red" data-color="red" data-shape="X" id="p2">X</div>
+            <div class="piece red" data-color="red" data-shape="O" id="p3">O</div>
+            <div class="piece red" data-color="red" data-shape="O" id="p4">O</div>
+            <div class="piece blue" data-color="blue" data-shape="X" id="p5">X</div>
+            <div class="piece blue" data-color="blue" data-shape="X" id="p6">X</div>
+            <div class="piece blue" data-color="blue" data-shape="O" id="p7">O</div>
+            <div class="piece blue" data-color="blue" data-shape="O" id="p8">O</div>
+        </div>
+    </div>
+
+    <button class="restart-btn" onclick="resetGame()">ახალი თამაში</button>
+
+    <script>
+        let boardState = Array(9).fill(null);
+        let inventoryState = [
+            { id: 'p1', color: 'red', shape: 'X', used: false },
+            { id: 'p2', color: 'red', shape: 'X', used: false },
+            { id: 'p3', color: 'red', shape: 'O', used: false },
+            { id: 'p4', color: 'red', shape: 'O', used: false },
+            { id: 'p5', color: 'blue', shape: 'X', used: false },
+            { id: 'p6', color: 'blue', shape: 'X', used: false },
+            { id: 'p7', color: 'blue', shape: 'O', used: false },
+            { id: 'p8', color: 'blue', shape: 'O', used: false }
+        ];
+
+        let currentPhase = 'CHOOSE_FOR_AI';
+        let givenPiece = null; 
+        let gameOver = false;
+
+        const statusEl = document.getElementById('status');
+        const boardEl = document.getElementById('board');
+
+        // მოთამაშე ირჩევს ფიგურას AI-სთვის
+        document.querySelectorAll('.piece').forEach(pieceEl => {
+            pieceEl.addEventListener('click', () => {
+                if (gameOver || currentPhase !== 'CHOOSE_FOR_AI') return;
+                
+                const pieceData = inventoryState.find(p => p.id === pieceEl.id);
+                if (pieceData.used) return;
+
+                givenPiece = pieceData;
+                highlightGivenPiece(givenPiece.id);
+
+                statusEl.textContent = "🤖 AI ფიქრობს სად დასვას შენი მიცემული ფიგურა...";
+                currentPhase = 'AI_TURNING';
+                setTimeout(aiTurn, 800);
+            });
+        });
+
+        // მოთამაშე სვამს ფიგურას დაფაზე
+        boardEl.addEventListener('click', (e) => {
+            const cell = e.target.closest('.cell');
+            if (!cell || gameOver || currentPhase !== 'PLACE_PIECE') return;
+
+            const index = Number(cell.dataset.index);
+            
+            // დაცვა: თუ უჯრა უკვე დაკავებულია, სვლა არ შესრულდეს
+            if (boardState[index] !== null) return;
+
+            placePieceOnBoard(index, givenPiece);
+            removePieceFromInventory(givenPiece.id);
+
+            if (checkWin(boardState)) {
+                statusEl.textContent = "🎉 გილოცავ! შენ გაიმარჯვე!";
+                gameOver = true;
+                resetInventoryHighlights();
+                return;
+            }
+
+            if (isDraw()) {
+                statusEl.textContent = "🤝 თამაში დასრულდა ფრედ!";
+                gameOver = true;
+                resetInventoryHighlights();
+                return;
+            }
+
+            currentPhase = 'CHOOSE_FOR_AI';
+            resetInventoryHighlights();
+            statusEl.textContent = "ახლა აირჩიე ფიგურა AI-სთვის მარაგებიდან!";
+        });
+
+        // AI-ს სვლა
+        function aiTurn() {
+            // მხოლოდ ნამდვილად ცარიელი უჯრების პოვნა
+            const emptyCells = boardState
+                .map((val, idx) => val === null ? idx : null)
+                .filter(val => val !== null);
+
+            if (emptyCells.length === 0) return;
+            
+            // 1. AI ამოწმებს, ხომ არ იგებს შენი მიცემული ფიგურით ცარიელ უჯრაზე დასმით
+            let chosenCell = emptyCells.find(cellIdx => {
+                boardState[cellIdx] = { color: givenPiece.color, shape: givenPiece.shape };
+                let win = checkWin(boardState);
+                boardState[cellIdx] = null; // უკან დაბრუნება
+                return win;
+            });
+
+            // თუ მომგებიანი სვლა არ არის, ირჩევს შემთხვევით ცარიელ უჯრას
+            if (chosenCell === undefined) {
+                chosenCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+
+            placePieceOnBoard(chosenCell, givenPiece);
+            removePieceFromInventory(givenPiece.id);
+
+            if (checkWin(boardState)) {
+                statusEl.textContent = "🤖 AI-მ გაიმარჯვა!";
+                gameOver = true;
+                resetInventoryHighlights();
+                return;
+            }
+
+            if (isDraw()) {
+                statusEl.textContent = "🤝 თამაში დასრულდა ფრედ!";
+                gameOver = true;
+                resetInventoryHighlights();
+                return;
+            }
+
+            // 2. AI ირჩევს ფიგურას შენთვის (ეძებს ფიგურას, რომლითაც შენ ვერ მოიგებ დარჩენილ ცარიელ უჯრებზე)
+            const remainingEmptyCells = boardState
+                .map((val, idx) => val === null ? idx : null)
+                .filter(val => val !== null);
+
+            const availablePieces = inventoryState.filter(p => !p.used);
+
+            let safePiece = availablePieces.find(piece => {
+                return !remainingEmptyCells.some(cellIdx => {
+                    boardState[cellIdx] = { color: piece.color, shape: piece.shape };
+                    let win = checkWin(boardState);
+                    boardState[cellIdx] = null;
+                    return win;
+                });
+            });
+
+            givenPiece = safePiece || availablePieces[0];
+            highlightGivenPiece(givenPiece.id);
+
+            currentPhase = 'PLACE_PIECE';
+            const colorName = givenPiece.color === 'red' ? 'წითელი' : 'ლურჯი';
+            statusEl.textContent = `🤖 AI-მ მოგცა: (${colorName} ${givenPiece.shape}). დასვი დაფაზე!`;
+        }
+
+        function placePieceOnBoard(index, piece) {
+            boardState[index] = { color: piece.color, shape: piece.shape };
+            
+            const cell = document.querySelector(`[data-index='${index}']`);
+            cell.innerHTML = ''; // დამატებითი დაცვა: ასუფთავებს უჯრას
+            
+            const pieceDiv = document.createElement('div');
+            pieceDiv.className = `piece ${piece.color}`;
+            pieceDiv.textContent = piece.shape;
+            cell.appendChild(pieceDiv);
+        }
+
+        function highlightGivenPiece(activeId) {
+            inventoryState.forEach(p => {
+                if (p.used) return;
+                const el = document.getElementById(p.id);
+                if (p.id === activeId) {
+                    el.classList.add('active-given');
+                    el.classList.remove('dimmed');
+                } else {
+                    el.classList.add('dimmed');
+                    el.classList.remove('active-given');
+                }
+            });
+        }
+
+        function resetInventoryHighlights() {
+            inventoryState.forEach(p => {
+                if (!p.used) {
+                    const el = document.getElementById(p.id);
+                    el.classList.remove('dimmed', 'active-given');
+                }
+            });
+        }
+
+        function removePieceFromInventory(id) {
+            const p = inventoryState.find(item => item.id === id);
+            if (p) p.used = true;
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('dimmed', 'active-given');
+                el.classList.add('hidden');
+            }
+        }
+
+        function checkWin(board) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            return winPatterns.some(pattern => {
+                const [a, b, c] = pattern;
+                const pA = board[a], pB = board[b], pC = board[c];
+                if (!pA || !pB || !pC) return false;
+
+                const sameColor = (pA.color === pB.color && pB.color === pC.color);
+                const sameShape = (pA.shape === pB.shape && pB.shape === pC.shape);
+
+                return sameColor || sameShape;
+            });
+        }
+
+        function isDraw() {
+            return boardState.every(cell => cell !== null);
+        }
+
+        function resetGame() {
+            boardState = Array(9).fill(null);
+            inventoryState.forEach(p => p.used = false);
+            givenPiece = null;
+            currentPhase = 'CHOOSE_FOR_AI';
+            gameOver = false;
+
+            document.querySelectorAll('.cell').forEach(cell => cell.innerHTML = '');
+            document.querySelectorAll('.piece').forEach(p => {
+                p.classList.remove('dimmed', 'active-given', 'hidden');
+            });
+            statusEl.textContent = "თამაში იწყება! აირჩიე ფიგურა AI-სთვის";
+        }
+    </script>
+</body>
+</html>
