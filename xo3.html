@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic-Tac-Eat</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #eef7ff, #f8f0ff);
+        color: #25324a;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+    }
+
+    .game {
+        width: min(94vw, 480px);
+        text-align: center;
+        background: white;
+        padding: 20px;
+        border-radius: 28px;
+        box-shadow: 0 15px 45px rgba(50, 70, 120, .15);
+    }
+
+    h1 {
+        margin: 0 0 5px;
+        font-size: 26px;
+    }
+
+    .subtitle {
+        color: #718096;
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+
+    .turn {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 12px;
+        min-height: 22px;
+    }
+
+    /* Inventory Rows */
+
+    .inventory-section {
+        background: #f7f9fc;
+        padding: 12px;
+        border-radius: 18px;
+        margin: 8px 0;
+    }
+
+    .inventory-title {
+        font-size: 12px;
+        font-weight: bold;
+        color: #718096;
+        margin-bottom: 8px;
+    }
+
+    .pieces-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .piece {
+        border: 2px solid #d8deea;
+        background: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform .15s, border-color .15s, box-shadow .15s;
+        font-weight: 900;
+        user-select: none;
+        position: relative;
+    }
+
+    /* Target Piece Sizes in Inventory */
+
+    .piece.small {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+    }
+
+    .piece.medium {
+        width: 48px;
+        height: 48px;
+        font-size: 19px;
+    }
+
+    .piece.large {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    /* Count Badge */
+
+    .count-badge {
+        position: absolute;
+        top: -4px;
+        right: -6px;
+        background: #25324a;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 2px 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    }
+
+    /* Colors */
+
+    .piece.player-piece {
+        color: #4f8cff;
+        border-color: #b0cdff;
+    }
+
+    .piece.computer-piece {
+        color: #ff626d;
+        border-color: #ffb8bc;
+        cursor: default;
+    }
+
+    .piece.player-piece:hover:not(.used) {
+        transform: translateY(-2px);
+    }
+
+    .piece.selected {
+        border-color: #6c63ff !important;
+        box-shadow: 0 0 0 4px rgba(108,99,255,.25);
+        transform: translateY(-3px);
+    }
+
+    .piece.used {
+        opacity: .2;
+        cursor: not-allowed !important;
+        transform: none !important;
+        background: #e2e8f0;
+    }
+
+    /* Board - Fixed Sizes */
+
+    .board {
+        width: min(85vw, 320px);
+        height: min(85vw, 320px);
+        margin: 12px auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 8px;
+        padding: 8px;
+        background: #dce4f2;
+        border-radius: 20px;
+    }
+
+    .cell {
+        background: #fff;
+        border-radius: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+
+    .cell:hover {
+        background: #f4f7ff;
+    }
+
+    /* Board Pieces */
+
+    .board-piece {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: white;
+        box-shadow: 0 4px 8px rgba(0,0,0,.15);
+        animation: appear .2s ease-out;
+        flex-shrink: 0;
+    }
+
+    .board-piece.small {
+        width: min(35%, 32px);
+        height: min(35%, 32px);
+        font-size: 14px;
+    }
+
+    .board-piece.medium {
+        width: min(60%, 54px);
+        height: min(60%, 54px);
+        font-size: 19px;
+    }
+
+    .board-piece.large {
+        width: min(85%, 76px);
+        height: min(85%, 76px);
+        font-size: 24px;
+    }
+
+    .player {
+        background: #4f8cff;
+    }
+
+    .computer {
+        background: #ff626d;
+    }
+
+    @keyframes appear {
+        from {
+            transform: scale(.4);
+            opacity: .2;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .message {
+        min-height: 22px;
+        font-size: 14px;
+        font-weight: bold;
+        margin: 6px;
+        color: #e53e3e;
+    }
+
+    button.new-game {
+        border: 0;
+        background: #6c63ff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: .2s;
+        margin-top: 5px;
+    }
+
+    button.new-game:hover {
+        background: #574fe5;
+        transform: translateY(-2px);
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>🍴 Tic-Tac-Eat</h1>
+    <div class="subtitle">დიდი ჭამს პატარას!</div>
+
+    <div class="turn" id="turn">შენი სვლაა 👆</div>
+
+    <!-- AI-ის მარაგები (3 ფიგურა) -->
+    <div class="inventory-section">
+        <div class="inventory-title">AI-ის ფიგურები (O)</div>
+        <div class="pieces-row">
+            <div class="piece computer-piece small" id="c-piece-1">O<span class="count-badge" id="c-count-1">3</span></div>
+            <div class="piece computer-piece medium" id="c-piece-2">O<span class="count-badge" id="c-count-2">3</span></div>
+            <div class="piece computer-piece large" id="c-piece-3">O<span class="count-badge" id="c-count-3">3</span></div>
+        </div>
+    </div>
+
+    <!-- დაფა -->
+    <div class="board" id="board"></div>
+
+    <!-- მოთამაშის მარაგები (3 ფიგურა) -->
+    <div class="inventory-section">
+        <div class="inventory-title">შენი ფიგურები (X)</div>
+        <div class="pieces-row">
+            <div class="piece player-piece small" id="p-piece-1">X<span class="count-badge" id="p-count-1">3</span></div>
+            <div class="piece player-piece medium" id="p-piece-2">X<span class="count-badge" id="p-count-2">3</span></div>
+            <div class="piece player-piece large" id="p-piece-3">X<span class="count-badge" id="p-count-3">3</span></div>
+        </div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <button class="new-game" id="new-game-btn">🔄 ახალი თამაში</button>
+
+</div>
+
+<script>
+window.onload = function() {
+
+    const boardElement = document.getElementById("board");
+    const turnElement = document.getElementById("turn");
+    const messageElement = document.getElementById("message");
+    const newGameBtn = document.getElementById("new-game-btn");
+
+    let board;
+    let selectedSize = null;
+    let gameOver = false;
+    let currentTurn = "P";
+
+    const PLAYER = "P";
+    const COMPUTER = "C";
+
+    const sizes = {
+        1: "small",
+        2: "medium",
+        3: "large"
+    };
+
+    let inventory = {
+        P: { 1: 3, 2: 3, 3: 3 },
+        C: { 1: 3, 2: 3, 3: 3 }
+    };
+
+    function newGame() {
+        board = Array(9).fill(null);
+
+        inventory = {
+            P: { 1: 3, 2: 3, 3: 3 },
+            C: { 1: 3, 2: 3, 3: 3 }
+        };
+
+        selectedSize = null;
+        gameOver = false;
+        messageElement.textContent = "";
+
+        currentTurn = Math.random() < 0.5 ? PLAYER : COMPUTER;
+
+        setupPlayerClickEvents();
+        renderBoard();
+        renderPieces();
+
+        if (currentTurn === PLAYER) {
+            turnElement.textContent = "შენი სვლაა 👆";
+        } else {
+            turnElement.textContent = "კომპიუტერი ფიქრობს... 🤖";
+            setTimeout(computerMove, 300);
+        }
+    }
+
+    newGameBtn.onclick = newGame;
+
+    function setupPlayerClickEvents() {
+        [1, 2, 3].forEach(size => {
+            const el = document.getElementById("p-piece-" + size);
+            el.onclick = function() {
+                if (inventory.P[size] <= 0 || gameOver || currentTurn !== PLAYER) return;
+                selectedSize = size;
+                renderPieces();
+            };
+        });
+    }
+
+    function renderBoard() {
+        boardElement.innerHTML = "";
+
+        board.forEach((piece, index) => {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.onclick = function() { playerMove(index); };
+
+            if (piece) {
+                const p = document.createElement("div");
+                p.className = "board-piece " + sizes[piece.size] + " " + (piece.owner === PLAYER ? "player" : "computer");
+                p.textContent = piece.owner === PLAYER ? "X" : "O";
+                cell.appendChild(p);
+            }
+
+            boardElement.appendChild(cell);
+        });
+    }
+
+    function renderPieces() {
+        [1, 2, 3].forEach(size => {
+            const count = inventory.P[size];
+            const el = document.getElementById("p-piece-" + size);
+            const badge = document.getElementById("p-count-" + size);
+
+            badge.textContent = count;
+            el.classList.toggle("selected", selectedSize === size);
+            el.classList.toggle("used", count <= 0);
+        });
+
+        [1, 2, 3].forEach(size => {
+            const count = inventory.C[size];
+            const el = document.getElementById("c-piece-" + size);
+            const badge = document.getElementById("c-count-" + size);
+
+            badge.textContent = count;
+            el.classList.toggle("used", count <= 0);
+        });
+    }
+
+    function canPlace(boardIndex, size, owner) {
+        const target = board[boardIndex];
+        if (!target) return true;
+        if (target.owner === owner) return false;
+        return size > target.size;
+    }
+
+    function playerMove(index) {
+        if (gameOver || currentTurn !== PLAYER) return;
+
+        if (selectedSize === null) {
+            messageElement.textContent = "ჯერ აირჩიე ფიგურა 👆";
+            return;
+        }
+
+        if (!canPlace(index, selectedSize, PLAYER)) {
+            messageElement.textContent = "აქ ამ ფიგურას ვერ დადებ! 🍴";
+            return;
+        }
+
+        board[index] = { owner: PLAYER, size: selectedSize };
+        inventory.P[selectedSize]--;
+        selectedSize = null;
+        messageElement.textContent = "";
+
+        renderBoard();
+        renderPieces();
+
+        if (checkWin(PLAYER)) {
+            gameOver = true;
+            turnElement.textContent = "შენ მოიგე! 🏆";
+            messageElement.style.color = "#38a169";
+            messageElement.textContent = "შესანიშნავია! კომპიუტერი შეჭამე 😄";
+            return;
+        }
+
+        if (isDraw()) {
+            gameOver = true;
+            turnElement.textContent = "ფრე! 🤝";
+            return;
+        }
+
+        currentTurn = COMPUTER;
+        turnElement.textContent = "კომპიუტერი ფიქრობს... 🤖";
+        setTimeout(computerMove, 100);
+    }
+
+    function computerMove() {
+        if (gameOver) return;
+
+        const moves = getPossibleMoves(COMPUTER);
+
+        if (moves.length === 0) {
+            gameOver = true;
+            turnElement.textContent = "ფრე! 🤝";
+            return;
+        }
+
+        let bestMove = null;
+        let bestScore = -Infinity;
+        const MAX_DEPTH = 5; 
+
+        for (const move of moves) {
+            const oldPiece = board[move.index];
+
+            board[move.index] = { owner: COMPUTER, size: move.size };
+            inventory.C[move.size]--;
+
+            let score = minimax(board, inventory, MAX_DEPTH, false, -Infinity, Infinity);
+
+            inventory.C[move.size]++;
+            board[move.index] = oldPiece;
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        }
+
+        board[bestMove.index] = { owner: COMPUTER, size: bestMove.size };
+        inventory.C[bestMove.size]--;
+
+        renderBoard();
+        renderPieces();
+
+        if (checkWin(COMPUTER)) {
+            gameOver = true;
+            turnElement.textContent = "კომპიუტერმა მოიგო 🤖";
+            messageElement.style.color = "#e53e3e";
+            messageElement.textContent = "ამჯერად კომპიუტერი უფრო ჭკვიანი აღმოჩნდა!";
+            return;
+        }
+
+        if (isDraw()) {
+            gameOver = true;
+            turnElement.textContent = "ფრე! 🤝";
+            return;
+        }
+
+        currentTurn = PLAYER;
+        turnElement.textContent = "შენი სვლაა 👆";
+    }
+
+    function minimax(boardState, invState, depth, isMaximizing, alpha, beta) {
+        if (checkWin(COMPUTER)) return 10000 + depth;
+        if (checkWin(PLAYER)) return -10000 - depth;
+        if (depth === 0) return evaluatePosition();
+
+        if (isMaximizing) {
+            let maxEval = -Infinity;
+            const moves = getPossibleMoves(COMPUTER);
+            if (moves.length === 0) return 0;
+
+            for (const move of moves) {
+                const old = boardState[move.index];
+
+                boardState[move.index] = { owner: COMPUTER, size: move.size };
+                invState.C[move.size]--;
+
+                let evaluation = minimax(boardState, invState, depth - 1, false, alpha, beta);
+
+                invState.C[move.size]++;
+                boardState[move.index] = old;
+
+                maxEval = Math.max(maxEval, evaluation);
+                alpha = Math.max(alpha, evaluation);
+                if (beta <= alpha) break;
+            }
+            return maxEval;
+        } else {
+            let minEval = Infinity;
+            const moves = getPossibleMoves(PLAYER);
+            if (moves.length === 0) return 0;
+
+            for (const move of moves) {
+                const old = boardState[move.index];
+
+                boardState[move.index] = { owner: PLAYER, size: move.size };
+                invState.P[move.size]--;
+
+                let evaluation = minimax(boardState, invState, depth - 1, true, alpha, beta);
+
+                invState.P[move.size]++;
+                boardState[move.index] = old;
+
+                minEval = Math.min(minEval, evaluation);
+                beta = Math.min(beta, evaluation);
+                if (beta <= alpha) break;
+            }
+            return minEval;
+        }
+    }
+
+    function getPossibleMoves(owner) {
+        const result = [];
+
+        for (let size = 1; size <= 3; size++) {
+            if (inventory[owner][size] <= 0) continue;
+
+            for (let i = 0; i < 9; i++) {
+                if (canPlace(i, size, owner)) {
+                    result.push({ index: i, size: size });
+                }
+            }
+        }
+
+        return result;
+    }
+
+    function evaluatePosition() {
+        let score = 0;
+        const lines = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        for (const line of lines) {
+            let compCount = 0;
+            let playerCount = 0;
+
+            line.forEach(i => {
+                if (!board[i]) return;
+                if (board[i].owner === COMPUTER) compCount++;
+                if (board[i].owner === PLAYER) playerCount++;
+            });
+
+            if (compCount > 0 && playerCount === 0) {
+                score += Math.pow(10, compCount);
+            } else if (playerCount > 0 && compCount === 0) {
+                score -= Math.pow(10, playerCount);
+            }
+        }
+
+        if (board[4] && board[4].owner === COMPUTER) score += 15;
+        if (board[4] && board[4].owner === PLAYER) score -= 15;
+
+        return score;
+    }
+
+    function checkWin(owner) {
+        const lines = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        return lines.some(line =>
+            line.every(i => board[i] && board[i].owner === owner)
+        );
+    }
+
+    function isDraw() {
+        return getPossibleMoves(PLAYER).length === 0 &&
+               getPossibleMoves(COMPUTER).length === 0;
+    }
+
+    newGame();
+};
+</script>
+
+</body>
+</html>
