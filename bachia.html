@@ -25,60 +25,54 @@ body {
 .game {
     width: 100%;
     max-width: 440px;
-    padding: 10px;
     text-align: center;
 }
 
-/* სათაური */
 h1 {
     margin: 0 0 4px 0;
-    font-size: 32px;
+    font-size: 28px;
     color: #1b5e20;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .subtitle {
     color: #43a047;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
-/* არჩევანის პანელი */
 .role-selector {
     background: #ffffff;
     border: 2px solid #a5d6a7;
     border-radius: 20px;
-    padding: 12px;
-    margin-bottom: 14px;
+    padding: 10px;
+    margin-bottom: 12px;
     box-shadow: 0 6px 16px rgba(46, 125, 50, 0.1);
 }
 
 .role-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: #2e7d32;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .role-buttons {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
 }
 
 .role-btn {
     flex: 1;
-    margin: 0;
-    padding: 10px;
-    font-size: 15px;
+    padding: 8px;
+    font-size: 14px;
     font-weight: 700;
     border: 2px solid #a5d6a7;
     background: #f1f8e9;
     color: #2e7d32;
     border-radius: 12px;
     cursor: pointer;
-    box-shadow: none;
     transition: all 0.2s;
 }
 
@@ -89,77 +83,48 @@ h1 {
     box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
 }
 
-/* სტატუსი */
 .status-box {
     background: #ffffff;
     border: 2px solid #a5d6a7;
     border-radius: 20px;
-    padding: 12px 16px;
-    margin-bottom: 14px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
     box-shadow: 0 8px 20px rgba(46, 125, 50, 0.12);
 }
 
 .status {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 800;
     color: #2e7d32;
+    min-height: 22px;
 }
 
-/* მიმართულება */
-.direction {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 380px;
-    margin: 0 auto 8px;
-    font-weight: 800;
-    font-size: 14px;
-    color: #388e3c;
-    padding: 0 6px;
-}
+/* =========================
+   GAME BOARD
+========================= */
 
-.direction .goal {
-    color: #1b5e20;
-    background: #e8f5e9;
-    padding: 3px 10px;
-    border-radius: 12px;
-    border: 1px solid #a5d6a7;
-}
-
-/* დაფა */
 .board {
     position: relative;
     width: 380px;
-    height: 560px;
+    height: 500px;
     margin: 0 auto;
-    background: radial-gradient(circle at 50% 30%, #f1f8e9 0%, #ded2b8 100%);
+
+    background:
+        radial-gradient(
+            circle at 50% 30%,
+            #ffffff 0%,
+            #e8f5e9 100%
+        );
+
     border: 6px solid #388e3c;
     border-radius: 32px;
-    box-shadow: 
-        0 16px 32px rgba(27, 94, 32, 0.2),
-        inset 0 0 0 3px rgba(255,255,255,0.5);
+
+    box-shadow:
+        0 16px 32px rgba(27, 94, 32, 0.2);
+
     overflow: hidden;
 }
 
-.board::before {
-    content: "🌲";
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    font-size: 26px;
-    opacity: 0.5;
-}
-
-.board::after {
-    content: "🏡";
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 26px;
-    opacity: 0.6;
-}
-
-/* SVG ხაზები */
 svg {
     position: absolute;
     left: 0;
@@ -170,51 +135,65 @@ svg {
 }
 
 .game-line {
-    stroke: #81c784;
-    stroke-width: 6;
+    stroke: #4caf50;
+    stroke-width: 5;
     stroke-linecap: round;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
-/* წერტილები */
+/* =========================
+   NODES
+========================= */
+
 .node {
     position: absolute;
-    width: 62px;
-    height: 62px;
-    margin-left: -31px;
-    margin-top: -31px;
+
+    width: 56px;
+    height: 56px;
+
+    margin-left: -28px;
+    margin-top: -28px;
+
     border-radius: 50%;
+
     background: #ffffff;
-    border: 4px solid #4caf50;
+    border: 4px solid #2e7d32;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 33px;
+
+    font-size: 30px;
+
     cursor: pointer;
+
     z-index: 3;
+
     user-select: none;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
-    transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, box-shadow 0.2s;
+
+    transition:
+        transform 0.18s,
+        background 0.18s,
+        box-shadow 0.18s;
 }
 
 .node:hover {
     transform: scale(1.08);
 }
 
-/* არჩეული ფიგურა */
 .node.selected {
     background: #fff9c4;
     border-color: #fbc02d;
     transform: scale(1.18);
-    box-shadow: 
-        0 0 0 6px rgba(251, 192, 45, 0.3),
-        0 8px 16px rgba(0,0,0,0.2);
+
+    box-shadow:
+        0 0 0 5px rgba(251, 192, 45, 0.2);
 }
 
-/* შესაძლო სვლა */
 .node.possible {
-    background: #e8f5e9;
-    border-color: #2e7d32;
+    background: #a5d6a7;
+    border-color: #1b5e20;
+
     animation: pulse 1.2s infinite;
 }
 
@@ -222,45 +201,74 @@ svg {
     0%, 100% {
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
     }
+
     50% {
         box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
     }
 }
 
-/* ღილაკი */
+/* =========================
+   RESTART
+========================= */
+
 .restart-btn {
     width: 380px;
+
     margin-top: 12px;
-    padding: 14px;
+    padding: 12px;
+
     border: none;
     border-radius: 16px;
-    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+
+    background:
+        linear-gradient(
+            135deg,
+            #2e7d32 0%,
+            #43a047 100%
+        );
+
     color: white;
-    font-size: 17px;
+
+    font-size: 16px;
     font-weight: 800;
+
     cursor: pointer;
-    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.3);
-    transition: all 0.2s;
+
+    box-shadow:
+        0 6px 14px rgba(46, 125, 50, 0.25);
+
+    transition: transform 0.15s;
 }
 
 .restart-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(46, 125, 50, 0.4);
 }
 
-@media(max-width: 410px) {
-    .board, .direction, .role-selector, .restart-btn {
-        width: 320px;
+.restart-btn:active {
+    transform: translateY(0);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 430px) {
+
+    body {
+        padding: 8px;
     }
+
+    h1 {
+        font-size: 24px;
+    }
+
     .board {
-        height: 500px;
+        width: min(380px, 94vw);
+        height: min(500px, 124vw);
     }
-    .node {
-        width: 54px;
-        height: 54px;
-        margin-left: -27px;
-        margin-top: -27px;
-        font-size: 28px;
+
+    .restart-btn {
+        width: min(380px, 94vw);
     }
 }
 </style>
@@ -271,315 +279,961 @@ svg {
 <div class="game">
 
     <h1>🐰 ბაჭია და მგლები 🐺</h1>
-    <div class="subtitle" id="sub-title">აირჩიე ვისი მართვა გინდა!</div>
+
+    <div class="subtitle">
+        ორიგინალური კლასიკური დაფა
+    </div>
 
     <div class="role-selector">
-        <div class="role-title">🎯 აირჩიე შენი პერსონაჟი:</div>
-        <div class="role-buttons">
-            <button class="role-btn active" id="btn-wolf" onclick="selectRole('W')">🐺 მგლები (შენი 3 პერსონაჟი)</button>
-            <button class="role-btn" id="btn-hare" onclick="selectRole('H')">🐰 ბაჭია (შენი 1 პერსონაჟი)</button>
+
+        <div class="role-title">
+            🎯 აირჩიე შენი პერსონაჟი:
         </div>
+
+        <div class="role-buttons">
+
+            <button
+                class="role-btn active"
+                id="btn-wolf"
+                onclick="selectRole('W')">
+                🐺 3 მგელი
+            </button>
+
+            <button
+                class="role-btn"
+                id="btn-hare"
+                onclick="selectRole('H')">
+                🐰 1 ბაჭია
+            </button>
+
+        </div>
+
     </div>
 
     <div class="status-box">
-        <div class="status" id="status">შენი სვლაა!</div>
-    </div>
-
-    <div class="direction">
-        <span>🏆 მიზანი</span>
-        <span class="goal" id="goal-text">⬆️ ზემოთ (სახლი)</span>
+        <div class="status" id="status">
+            თამაში იწყება...
+        </div>
     </div>
 
     <div class="board" id="board">
+
         <svg id="lines"></svg>
+
     </div>
 
-    <button class="restart-btn" onclick="newGame()">🔄 ხელახლა დაწყება</button>
+    <button
+        class="restart-btn"
+        onclick="newGame()">
+        🔄 ხელახლა დაწყება
+    </button>
 
 </div>
 
+
 <script>
 
+/* =========================================================
+   BOARD NODES
+========================================================= */
+
 const nodes = [
-    {id: 0, x: 190, y: 45},
-    {id: 1, x: 100, y: 135},
-    {id: 2, x: 190, y: 135},
-    {id: 3, x: 280, y: 135},
-    {id: 4, x: 100, y: 235},
-    {id: 5, x: 190, y: 235},
-    {id: 6, x: 280, y: 235},
-    {id: 7, x: 100, y: 335},
-    {id: 8, x: 190, y: 335},
-    {id: 9, x: 280, y: 335},
-    {id: 10, x: 100, y: 435},
-    {id: 11, x: 190, y: 435},
-    {id: 12, x: 280, y: 435},
-    {id: 13, x: 190, y: 515}
+
+    { id: 0,  x: 190, y: 45 },
+
+    { id: 1,  x: 90,  y: 135 },
+    { id: 2,  x: 190, y: 135 },
+    { id: 3,  x: 290, y: 135 },
+
+    { id: 4,  x: 90,  y: 245 },
+    { id: 5,  x: 190, y: 245 },
+    { id: 6,  x: 290, y: 245 },
+
+    { id: 7,  x: 90,  y: 355 },
+    { id: 8,  x: 190, y: 355 },
+    { id: 9,  x: 290, y: 355 },
+
+    { id: 10, x: 190, y: 445 }
+
 ];
 
+
+/* =========================================================
+   CONNECTIONS
+
+   აქ არის მთავარი შესწორება.
+
+   ცენტრი არის node 5.
+
+   მაგალითად:
+   7 → 5
+   9 → 5
+
+   ახლა მგელს შეუძლია ქვემოდან ცენტრში გადასვლა.
+========================================================= */
+
 const adj = {
-    0: [1, 2, 3],
-    1: [0, 2, 4, 5],
-    2: [0, 1, 3, 4, 5, 6],
-    3: [0, 2, 5, 6],
-    4: [1, 2, 5, 7, 8],
-    5: [1, 2, 3, 4, 6, 7, 8, 9],
-    6: [2, 3, 5, 8, 9],
-    7: [4, 5, 8, 10, 11],
-    8: [4, 5, 6, 7, 9, 10, 11, 12],
-    9: [5, 6, 8, 11, 12],
-    10: [7, 8, 11, 13],
-    11: [7, 8, 9, 10, 12, 13],
-    12: [8, 9, 11, 13],
-    13: [10, 11, 12]
+
+    0:  [1, 2, 3],
+
+    1:  [0, 2, 4, 5],
+    2:  [0, 1, 3, 5],
+    3:  [0, 2, 5, 6],
+
+    4:  [1, 5, 7],
+
+    5:  [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9
+    ],
+
+    6:  [3, 5, 9],
+
+    7:  [4, 5, 8, 10],
+    8:  [5, 7, 9, 10],
+    9:  [5, 6, 8, 10],
+
+    10: [7, 8, 9]
+
 };
 
-let userRole = 'W'; // 'W' = მგელი, 'H' = ბაჭია
+
+/* =========================================================
+   GAME VARIABLES
+========================================================= */
+
+let userRole = 'W';
+
 let wolves = [];
+
 let hare = 0;
-let currentTurn = 'USER'; // 'USER' ან 'AI'
+
+let currentTurn = 'USER';
+
 let selectedWolf = null;
+
 let gameOver = false;
 
+
+/* =========================================================
+   SELECT ROLE
+========================================================= */
+
 function selectRole(role) {
+
     userRole = role;
-    document.getElementById('btn-wolf').classList.toggle('active', role === 'W');
-    document.getElementById('btn-hare').classList.toggle('active', role === 'H');
+
+    document
+        .getElementById('btn-wolf')
+        .classList
+        .toggle('active', role === 'W');
+
+    document
+        .getElementById('btn-hare')
+        .classList
+        .toggle('active', role === 'H');
+
     newGame();
 }
 
+
+/* =========================================================
+   NEW GAME
+========================================================= */
+
 function newGame() {
+
     gameOver = false;
+
     selectedWolf = null;
 
+
+    /*
+       თუ მომხმარებელი მგელია:
+
+       მგლები იწყებენ ქვემოდან.
+       ბაჭია იწყებს ზემოდან.
+    */
+
     if (userRole === 'W') {
-        // მოთამაშე არის მგელი -> მგლები იწყებენ დაბლა (13, 10, 12), ბაჭია მაღლა (0)
-        wolves = [13, 10, 12];
+
+        wolves = [7, 9, 10];
+
         hare = 0;
-        currentTurn = 'USER'; // მგლები (მოთამაშე) იწყებს
-        document.getElementById("status").textContent = "შენი სვლაა! აირჩიე მგელი 🐺";
-        document.getElementById("goal-text").textContent = "⬆️ იმოძრავე ზემოთ და ჩაკეტე ბაჭია!";
-    } else {
-        // მოთამაშე არის ბაჭია -> ბაჭია იწყებს დაბლა (13), მგლები მაღლა (0, 1, 3)
-        wolves = [0, 1, 3];
-        hare = 13;
-        currentTurn = 'USER'; // ბაჭია (მოთამაშე) იწყებს
-        document.getElementById("status").textContent = "შენი სვლაა! გაიქეცი ზემოთ 🐰";
-        document.getElementById("goal-text").textContent = "⬆️ გაასწარი სამივე მგელს ზემოთ!";
+
+        currentTurn = 'AI';
+
+        document
+            .getElementById("status")
+            .textContent =
+            "ბაჭია იწყებს... 🐰";
+
+        drawLines();
+
+        render();
+
+        setTimeout(aiHareMove, 500);
+
     }
 
-    drawLines();
-    render();
+
+    /*
+       თუ მომხმარებელი ბაჭიაა:
+
+       ბაჭია იწყებს ქვემოდან.
+       მგლები იწყებენ ზემოდან.
+    */
+
+    else {
+
+        wolves = [0, 1, 3];
+
+        hare = 10;
+
+        currentTurn = 'USER';
+
+        document
+            .getElementById("status")
+            .textContent =
+            "შენი სვლაა! აირჩიე ბაჭია 🐰";
+
+        drawLines();
+
+        render();
+    }
 }
+
+
+/* =========================================================
+   DRAW BOARD LINES
+========================================================= */
 
 function drawLines() {
-    const svg = document.getElementById("lines");
+
+    const svg =
+        document.getElementById("lines");
+
     svg.innerHTML = "";
+
     const drawn = new Set();
 
+
     for (const from in adj) {
+
         adj[from].forEach(to => {
-            const key = Math.min(from, to) + "-" + Math.max(from, to);
-            if (drawn.has(key)) return;
+
+            const key =
+                Math.min(from, to)
+                + "-"
+                + Math.max(from, to);
+
+            if (drawn.has(key)) {
+                return;
+            }
+
             drawn.add(key);
 
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", nodes[from].x);
-            line.setAttribute("y1", nodes[from].y);
-            line.setAttribute("x2", nodes[to].x);
-            line.setAttribute("y2", nodes[to].y);
+
+            const line =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "line"
+                );
+
+
+            line.setAttribute(
+                "x1",
+                nodes[from].x
+            );
+
+            line.setAttribute(
+                "y1",
+                nodes[from].y
+            );
+
+            line.setAttribute(
+                "x2",
+                nodes[to].x
+            );
+
+            line.setAttribute(
+                "y2",
+                nodes[to].y
+            );
+
+
             line.classList.add("game-line");
+
             svg.appendChild(line);
+
         });
     }
 }
 
-// მგლის ვალიდური სვლები (ყოველთვის მიდის დაბლიდან მაღლა -> Y მცირდება)
+
+/* =========================================================
+   WOLF MOVES
+========================================================= */
+
 function getWolfMoves(fromNode) {
+
     return adj[fromNode].filter(to => {
-        if (nodes[to].y > nodes[fromNode].y) return false; // უკან (დაბლა) ვერ ბრუნდება
-        if (wolves.includes(to)) return false;
-        if (hare === to) return false;
+
+
+        /*
+           მომხმარებელი მგელია.
+
+           მგლები მოძრაობენ ქვემოდან ზემოთ.
+
+           ამიტომ უკან დაბრუნება არ შეიძლება.
+        */
+
+        if (
+            userRole === 'W' &&
+            nodes[to].y >
+            nodes[fromNode].y + 10
+        ) {
+
+            return false;
+        }
+
+
+        /*
+           მომხმარებელი ბაჭიაა.
+
+           AI მგლები მოძრაობენ ზემოდან ქვემოთ.
+        */
+
+        if (
+            userRole === 'H' &&
+            nodes[to].y <
+            nodes[fromNode].y - 10
+        ) {
+
+            return false;
+        }
+
+
+        /*
+           დაკავებულ წერტილზე გადასვლა არ შეიძლება.
+        */
+
+        if (
+            wolves.includes(to) ||
+            hare === to
+        ) {
+
+            return false;
+        }
+
+
         return true;
+
     });
 }
 
-// ბაჭიის ვალიდური სვლები
+
+/* =========================================================
+   HARE MOVES
+========================================================= */
+
 function getHareMoves() {
-    return adj[hare].filter(to => !wolves.includes(to));
+
+    return adj[hare].filter(
+        to => !wolves.includes(to)
+    );
 }
+
+
+/* =========================================================
+   RENDER BOARD
+========================================================= */
 
 function render() {
-    const board = document.getElementById("board");
-    board.querySelectorAll(".node").forEach(n => n.remove());
+
+    const board =
+        document.getElementById("board");
+
+
+    /*
+       ძველი კვანძების წაშლა.
+    */
+
+    board
+        .querySelectorAll(".node")
+        .forEach(n => n.remove());
+
 
     nodes.forEach(node => {
-        const el = document.createElement("div");
+
+        const el =
+            document.createElement("div");
+
+
         el.className = "node";
-        el.style.left = node.x + "px";
-        el.style.top = node.y + "px";
+
+
+        el.style.left =
+            node.x + "px";
+
+        el.style.top =
+            node.y + "px";
+
+
+        /*
+           მგელი
+        */
 
         if (wolves.includes(node.id)) {
+
             el.textContent = "🐺";
-        } else if (hare === node.id) {
+
+        }
+
+
+        /*
+           ბაჭია
+        */
+
+        else if (hare === node.id) {
+
             el.textContent = "🐰";
+
         }
 
-        if (selectedWolf === node.id) {
+
+        /*
+           არჩეული მგელი
+        */
+
+        if (
+            selectedWolf === node.id
+        ) {
+
             el.classList.add("selected");
+
         }
 
-        if (selectedWolf !== null && currentTurn === 'USER' && userRole === 'W' && getWolfMoves(selectedWolf).includes(node.id)) {
+
+        /*
+           შესაძლო მგლის სვლა
+        */
+
+        if (
+            selectedWolf !== null &&
+            currentTurn === 'USER' &&
+            userRole === 'W' &&
+            getWolfMoves(selectedWolf)
+                .includes(node.id)
+        ) {
+
             el.classList.add("possible");
+
         }
 
-        if (userRole === 'H' && currentTurn === 'USER' && node.id !== hare && getHareMoves().includes(node.id)) {
-            // თუ ბაჭიას ვმართავთ, ვაჩვენოთ შესაძლო სვლები
-            if (selectedWolf === hare) el.classList.add("possible");
+
+        /*
+           შესაძლო ბაჭიის სვლა
+        */
+
+        if (
+            userRole === 'H' &&
+            currentTurn === 'USER' &&
+            selectedWolf === hare &&
+            getHareMoves().includes(node.id)
+        ) {
+
+            el.classList.add("possible");
+
         }
 
-        el.onclick = () => clickNode(node.id);
+
+        /*
+           დაჭერა
+        */
+
+        el.onclick = () =>
+            clickNode(node.id);
+
+
         board.appendChild(el);
+
     });
 }
+
+
+/* =========================================================
+   CLICK NODE
+========================================================= */
 
 function clickNode(id) {
-    if (gameOver || currentTurn !== 'USER') return;
+
+    if (
+        gameOver ||
+        currentTurn !== 'USER'
+    ) {
+
+        return;
+    }
+
+
+    /* =====================================================
+       USER PLAYS WOLVES
+    ===================================================== */
 
     if (userRole === 'W') {
-        // მოთამაშე მართავს მგლებს
+
+
+        /*
+           მგლის არჩევა
+        */
+
         if (wolves.includes(id)) {
+
             selectedWolf = id;
+
             render();
+
             return;
         }
 
-        if (selectedWolf !== null && getWolfMoves(selectedWolf).includes(id)) {
-            const idx = wolves.indexOf(selectedWolf);
+
+        /*
+           არჩეული მგლის გადაადგილება
+        */
+
+        if (
+            selectedWolf !== null &&
+            getWolfMoves(selectedWolf)
+                .includes(id)
+        ) {
+
+            const idx =
+                wolves.indexOf(selectedWolf);
+
+
             wolves[idx] = id;
+
+
             selectedWolf = null;
 
-            if (checkWin()) return;
+
+            /*
+               გამარჯვების შემოწმება
+            */
+
+            if (checkWin()) {
+                return;
+            }
+
+
+            /*
+               ახლა ბაჭიას სვლაა
+            */
 
             currentTurn = 'AI';
-            document.getElementById("status").textContent = "ბაჭია ფიქრობს... 🐰";
+
+            document
+                .getElementById("status")
+                .textContent =
+                "ბაჭია ფიქრობს... 🐰";
+
+
             render();
-            setTimeout(aiHareMove, 600);
+
+
+            setTimeout(
+                aiHareMove,
+                400
+            );
+
         }
-    } else {
-        // მოთამაშე მართავს ბაჭიას
+
+    }
+
+
+    /* =====================================================
+       USER PLAYS HARE
+    ===================================================== */
+
+    else {
+
+
+        /*
+           ბაჭიის არჩევა
+        */
+
         if (id === hare) {
-            selectedWolf = hare; // მოვნიშნოთ ბაჭია
+
+            selectedWolf = hare;
+
             render();
+
             return;
         }
 
-        if (getHareMoves().includes(id)) {
+
+        /*
+           ბაჭიის გადაადგილება
+        */
+
+        if (
+            getHareMoves()
+                .includes(id)
+        ) {
+
             hare = id;
+
             selectedWolf = null;
 
-            if (checkWin()) return;
+
+            if (checkWin()) {
+                return;
+            }
+
 
             currentTurn = 'AI';
-            document.getElementById("status").textContent = "მგლები ფიქრობენ... 🐺";
+
+
+            document
+                .getElementById("status")
+                .textContent =
+                "მგლები ფიქრობენ... 🐺";
+
+
             render();
-            setTimeout(aiWolfMove, 600);
+
+
+            setTimeout(
+                aiWolfMove,
+                400
+            );
+
         }
+
     }
 }
 
-/* AI — ბაჭიის სვლა (როცა მოთამაშე მგელია) */
+
+/* =========================================================
+   AI HARE MOVE
+========================================================= */
+
 function aiHareMove() {
-    if (gameOver) return;
-    const moves = getHareMoves();
+
+    if (gameOver) {
+        return;
+    }
+
+
+    const moves =
+        getHareMoves();
+
+
+    /*
+       ბაჭიას სვლა აღარ აქვს.
+       მგლებმა მოიგეს.
+    */
 
     if (moves.length === 0) {
-        finish("🎉 ყოჩაღ! მგლებმა ბაჭია ალყაში მოაქციეს!");
+
+        finish(
+            "🎉 მგლებმა ბაჭია ალყაში მოაქციეს! მოიგე! 🐺"
+        );
+
         return;
     }
 
-    // AI ბაჭიას მიზანია ჩამოვიდეს დაბლა (Y-ის გაზრდა / მგლების უკან მოქცევა)
-    moves.sort((a, b) => nodes[b].y - nodes[a].y);
+
+    /*
+       ბაჭია ცდილობს ქვემოთ წასვლას.
+    */
+
+    moves.sort(
+        (a, b) =>
+            nodes[b].y -
+            nodes[a].y
+    );
+
+
     hare = moves[0];
 
-    if (checkWin()) return;
 
-    currentTurn = 'USER';
-    document.getElementById("status").textContent = "შენი სვლაა! აირჩიე მგელი 🐺";
-    render();
-}
-
-/* AI — მგლების სვლა (როცა მოთამაშე ბაჭია) */
-function aiWolfMove() {
-    if (gameOver) return;
-
-    // ვიპოვოთ ყველა მგლის ყველა შესაძლო სვლა
-    let possibleMoves = [];
-    wolves.forEach((wolfId, index) => {
-        const moves = adj[wolfId].filter(to => {
-            if (nodes[to].y < nodes[wolfId].y) return false; // AI მგლები მიდიან ზევიდან დაბლა -> Y იზრდება
-            if (wolves.includes(to)) return false;
-            if (hare === to) return false;
-            return true;
-        });
-        moves.forEach(to => possibleMoves.push({ wolfIndex: index, from: wolfId, to: to }));
-    });
-
-    if (possibleMoves.length === 0) {
-        finish("🐰 მგლებს სვლა აღარ აქვთ! ბაჭიამ მოიგო!");
+    if (checkWin()) {
         return;
     }
 
-    // AI მგლები ირჩევენ სვლას, რომელიც ყველაზე მეტად უახლოვდება ბაჭიას
-    possibleMoves.sort((a, b) => {
-        let distA = Math.hypot(nodes[a.to].x - nodes[hare].x, nodes[a.to].y - nodes[hare].y);
-        let distB = Math.hypot(nodes[b.to].x - nodes[hare].x, nodes[b.to].y - nodes[hare].y);
-        return distA - distB;
-    });
-
-    const bestMove = possibleMoves[0];
-    wolves[bestMove.wolfIndex] = bestMove.to;
-
-    if (checkWin()) return;
 
     currentTurn = 'USER';
-    document.getElementById("status").textContent = "შენი სვლაა! აირჩიე ბაჭია 🐰";
+
+
+    document
+        .getElementById("status")
+        .textContent =
+        "შენი სვლაა! აირჩიე მგელი 🐺";
+
+
     render();
 }
 
-function checkWin() {
-    if (userRole === 'W') {
-        // მოთამაშე = მგლები (ქვემოდან ზემოთ მიდიან)
-        const minWolfY = Math.min(...wolves.map(id => nodes[id].y));
-        if (nodes[hare].y > minWolfY) {
-            finish("🐰 ბაჭიამ გაასწრო მგლებს! ბაჭიამ მოიგო!");
-            return true;
-        }
-        if (getHareMoves().length === 0) {
-            finish("🎉 ყოჩაღ! მგლებმა ბაჭია ალყაში მოაქციეს!");
-            return true;
-        }
-    } else {
-        // მოთამაშე = ბაჭია (ქვემოდან ზემოთ გარბის)
-        const minWolfY = Math.min(...wolves.map(id => nodes[id].y));
-        if (nodes[hare].y < minWolfY) {
-            finish("🎉 ყოჩაღ! ბაჭიამ სამივე მგელს გაასწრო და მოიგო! 🐰");
-            return true;
-        }
-        if (getHareMoves().length === 0) {
-            finish("🐺 მგლებმა ბაჭია ალყაში მოაქციეს! მგლებმა მოიგეს!");
-            return true;
-        }
+
+/* =========================================================
+   AI WOLF MOVE
+========================================================= */
+
+function aiWolfMove() {
+
+    if (gameOver) {
+        return;
     }
+
+
+    let possibleMoves = [];
+
+
+    /*
+       ყველა მგლის შესაძლო სვლების პოვნა
+    */
+
+    wolves.forEach(
+        (wId, idx) => {
+
+            getWolfMoves(wId)
+                .forEach(to => {
+
+                    possibleMoves.push({
+
+                        idx: idx,
+
+                        from: wId,
+
+                        to: to
+
+                    });
+
+                });
+
+        }
+    );
+
+
+    /*
+       თუ არც ერთ მგელს სვლა აღარ აქვს,
+       ბაჭია იგებს.
+    */
+
+    if (
+        possibleMoves.length === 0
+    ) {
+
+        finish(
+            "🐰 მგლებს სვლა აღარ აქვთ! ბაჭიამ მოიგო!"
+        );
+
+        return;
+    }
+
+
+    /*
+       მგელი ცდილობს ბაჭიასთან მიახლოებას.
+    */
+
+    possibleMoves.sort(
+        (a, b) => {
+
+            const dA =
+                Math.hypot(
+                    nodes[a.to].x -
+                    nodes[hare].x,
+
+                    nodes[a.to].y -
+                    nodes[hare].y
+                );
+
+
+            const dB =
+                Math.hypot(
+                    nodes[b.to].x -
+                    nodes[hare].x,
+
+                    nodes[b.to].y -
+                    nodes[hare].y
+                );
+
+
+            return dA - dB;
+        }
+    );
+
+
+    /*
+       საუკეთესო სვლა
+    */
+
+    wolves[
+        possibleMoves[0].idx
+    ] =
+        possibleMoves[0].to;
+
+
+    if (checkWin()) {
+        return;
+    }
+
+
+    currentTurn = 'USER';
+
+
+    document
+        .getElementById("status")
+        .textContent =
+        "შენი სვლაა! აირჩიე ბაჭია 🐰";
+
+
+    render();
+}
+
+
+/* =========================================================
+   CHECK WIN
+========================================================= */
+
+function checkWin() {
+
+
+    /* =====================================================
+       USER = WOLVES
+    ===================================================== */
+
+    if (userRole === 'W') {
+
+        /*
+           ყველაზე წინ მყოფი მგლის Y
+        */
+
+        const minWolfY =
+            Math.min(
+                ...wolves.map(
+                    id => nodes[id].y
+                )
+            );
+
+
+        /*
+           თუ ბაჭიამ მგლებს გაუსწრო
+        */
+
+        if (
+            nodes[hare].y >
+            minWolfY
+        ) {
+
+            finish(
+                "🐰 ბაჭიამ გაასწრო მგლებს! ბაჭიამ მოიგო!"
+            );
+
+            return true;
+        }
+
+
+        /*
+           ბაჭია ვეღარ მოძრაობს
+        */
+
+        if (
+            getHareMoves().length === 0
+        ) {
+
+            finish(
+                "🎉 მგლებმა ბაჭია ალყაში მოაქციეს! მოიგე! 🐺"
+            );
+
+            return true;
+        }
+
+    }
+
+
+    /* =====================================================
+       USER = HARE
+    ===================================================== */
+
+    else {
+
+        const minWolfY =
+            Math.min(
+                ...wolves.map(
+                    id => nodes[id].y
+                )
+            );
+
+
+        /*
+           ბაჭიამ მგლებს ზემოდან გაასწრო
+        */
+
+        if (
+            nodes[hare].y <
+            minWolfY
+        ) {
+
+            finish(
+                "🎉 ბაჭიამ სამივე მგელს გაასწრო და მოიგო! 🐰"
+            );
+
+            return true;
+        }
+
+
+        /*
+           ბაჭია ვეღარ მოძრაობს
+        */
+
+        if (
+            getHareMoves().length === 0
+        ) {
+
+            finish(
+                "🐺 მგლებმა ბაჭია ალყაში მოაქციეს! მგლებმა მოიგეს!"
+            );
+
+            return true;
+        }
+
+    }
+
+
     return false;
 }
 
+
+/* =========================================================
+   FINISH GAME
+========================================================= */
+
 function finish(msg) {
+
     gameOver = true;
-    document.getElementById("status").textContent = msg;
+
+    document
+        .getElementById("status")
+        .textContent = msg;
+
     selectedWolf = null;
+
     render();
 }
+
+
+/* =========================================================
+   START
+========================================================= */
 
 newGame();
 
