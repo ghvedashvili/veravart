@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayles</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #0f172a;
+            --subtext: #64748b;
+            --hover: #f1f5f9;
+            --selected: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .status {
+            font-size: 0.875rem;
+            color: var(--subtext);
+            margin-bottom: 40px;
+            height: 1.2em;
+        }
+
+        .board {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            min-height: 90px;
+            margin-bottom: 40px;
+        }
+
+        .pin-wrapper {
+            padding: 8px 6px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.15s ease;
+        }
+
+        .pin-wrapper:hover {
+            background-color: var(--hover);
+        }
+
+        /* კეგლის SVG სტილიზაცია */
+        .bowling-pin {
+            width: 24px;
+            height: 64px;
+            display: block;
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+
+        .pin-slot {
+            width: 36px;
+            height: 80px;
+        }
+
+        .pin-wrapper.selected .bowling-pin {
+            transform: translateY(-8px);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--text);
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        .btn-primary:disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-subtle {
+            background: transparent;
+            color: var(--subtext);
+            border: none;
+        }
+
+        .btn-subtle:hover {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>KAYLES</h1>
+    <div class="status" id="status">აირჩიეთ 1 ან 2 მეზობელი კეგლი</div>
+
+    <div class="board" id="board"></div>
+
+    <div class="controls">
+        <button class="btn-primary" id="endTurnBtn" onclick="playerMove()" disabled>სვლის დასრულება</button>
+        <button class="btn-subtle" onclick="resetGame()">თავიდან დაწყება</button>
+    </div>
+</div>
+
+<script>
+    const INITIAL_COUNT = 10;
+    let pins = Array(INITIAL_COUNT).fill(true);
+    let selectedIndices = [];
+    let isPlayerTurn = true;
+
+    const kaylesG = [0, 1, 2, 3, 1, 4, 3, 2, 1, 4, 2, 6, 4, 1, 2, 7, 1, 4, 3, 2, 1, 4, 6, 7];
+
+    function getG(n) {
+        if (n < kaylesG.length) return kaylesG[n];
+        return kaylesG[n % 12 + 12];
+    }
+
+    // კეგლის SVG ვიზუალიზაცია
+    function createPinSVG(isSelected) {
+        const primaryColor = isSelected ? '#2563eb' : '#0f172a';
+        const stripeColor = isSelected ? '#ffffff' : '#ef4444';
+
+        return `
+            <svg class="bowling-pin" viewBox="0 0 24 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- კეგლის ტანი -->
+                <path d="M12 2C8.68629 2 6 4.68629 6 8C6 10.5 7 12.5 8 15C9 17.5 7 24 5 32C3 40 2 48 5 56C7.5 62 16.5 62 19 56C22 48 21 40 19 32C17 24 15 17.5 16 15C17 12.5 18 10.5 18 8C18 4.68629 15.3137 2 12 2Z" fill="${primaryColor}"/>
+                <!-- წითელი ზოლები (ყელზე) -->
+                <rect x="7.5" y="11" width="9" height="2.5" rx="1" fill="${stripeColor}"/>
+                <rect x="7" y="15" width="10" height="2.5" rx="1" fill="${stripeColor}"/>
+            </svg>
+        `;
+    }
+
+    function renderBoard() {
+        const boardEl = document.getElementById('board');
+        boardEl.innerHTML = '';
+
+        pins.forEach((active, idx) => {
+            if (active) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'pin-wrapper';
+                const isSelected = selectedIndices.includes(idx);
+                
+                if (isSelected) {
+                    wrapper.classList.add('selected');
+                }
+
+                wrapper.innerHTML = createPinSVG(isSelected);
+                wrapper.onclick = () => toggleSelect(idx);
+                boardEl.appendChild(wrapper);
+            } else {
+                const slot = document.createElement('div');
+                slot.className = 'pin-slot';
+                boardEl.appendChild(slot);
+            }
+        });
+
+        document.getElementById('endTurnBtn').disabled = selectedIndices.length === 0 || !isPlayerTurn;
+    }
+
+    function toggleSelect(idx) {
+        if (!isPlayerTurn) return;
+
+        if (selectedIndices.includes(idx)) {
+            selectedIndices = selectedIndices.filter(i => i !== idx);
+        } else {
+            if (selectedIndices.length === 0) {
+                selectedIndices.push(idx);
+            } else if (selectedIndices.length === 1) {
+                const first = selectedIndices[0];
+                if (Math.abs(first - idx) === 1) {
+                    selectedIndices.push(idx);
+                } else {
+                    selectedIndices = [idx];
+                }
+            } else {
+                selectedIndices = [idx];
+            }
+        }
+        renderBoard();
+    }
+
+    function playerMove() {
+        if (selectedIndices.length === 0 || !isPlayerTurn) return;
+
+        selectedIndices.forEach(idx => pins[idx] = false);
+        selectedIndices = [];
+        renderBoard();
+
+        if (checkGameOver('მოიგეთ')) return;
+
+        isPlayerTurn = false;
+        document.getElementById('status').innerText = 'კომპიუტერის სვლა...';
+
+        setTimeout(aiMove, 600);
+    }
+
+    function getBlocks() {
+        let blocks = [];
+        let currentLen = 0;
+        let currentIndices = [];
+
+        for (let i = 0; i < pins.length; i++) {
+            if (pins[i]) {
+                currentLen++;
+                currentIndices.push(i);
+            } else if (currentLen > 0) {
+                blocks.push({ len: currentLen, indices: currentIndices });
+                currentLen = 0;
+                currentIndices = [];
+            }
+        }
+        if (currentLen > 0) {
+            blocks.push({ len: currentLen, indices: currentIndices });
+        }
+        return blocks;
+    }
+
+    function aiMove() {
+        let blocks = getBlocks();
+        let totalXor = blocks.reduce((acc, b) => acc ^ getG(b.len), 0);
+
+        let moveIndices = [];
+
+        for (let b of blocks) {
+            let currentG = getG(b.len);
+            let targetG = totalXor ^ currentG;
+
+            for (let i = 0; i < b.len; i++) {
+                let leftLen = i;
+                let rightLen = b.len - i - 1;
+                if ((getG(leftLen) ^ getG(rightLen)) === targetG) {
+                    moveIndices = [b.indices[i]];
+                    break;
+                }
+            }
+            if (moveIndices.length > 0) break;
+
+            for (let i = 0; i < b.len - 1; i++) {
+                let leftLen = i;
+                let rightLen = b.len - i - 2;
+                if ((getG(leftLen) ^ getG(rightLen)) === targetG) {
+                    moveIndices = [b.indices[i], b.indices[i + 1]];
+                    break;
+                }
+            }
+            if (moveIndices.length > 0) break;
+        }
+
+        if (moveIndices.length === 0 && blocks.length > 0) {
+            let b = blocks[0];
+            moveIndices = [b.indices[0]];
+        }
+
+        moveIndices.forEach(idx => pins[idx] = false);
+        renderBoard();
+
+        if (checkGameOver('წააგეთ')) return;
+
+        isPlayerTurn = true;
+        document.getElementById('status').innerText = 'თქვენი სვლაა';
+    }
+
+    function checkGameOver(msg) {
+        if (!pins.some(p => p)) {
+            document.getElementById('status').innerText = msg;
+            document.getElementById('endTurnBtn').disabled = true;
+            return true;
+        }
+        return false;
+    }
+
+    function resetGame() {
+        pins = Array(INITIAL_COUNT).fill(true);
+        selectedIndices = [];
+        isPlayerTurn = true;
+        document.getElementById('status').innerText = 'აირჩიეთ 1 ან 2 მეზობელი კეგლი';
+        renderBoard();
+    }
+
+    renderBoard();
+</script>
+
+</body>
+</html>
