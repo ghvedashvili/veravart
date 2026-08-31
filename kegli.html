@@ -18,6 +18,7 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -27,7 +28,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 12px;
         }
 
         .container {
@@ -47,7 +48,7 @@
         .status {
             font-size: 0.875rem;
             color: var(--subtext);
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             height: 1.2em;
         }
 
@@ -55,33 +56,43 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 12px;
-            min-height: 90px;
-            margin-bottom: 40px;
+            gap: 4px; /* შევამცირეთ დაშორება */
+            min-height: 80px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 100%;
         }
 
         .pin-wrapper {
-            padding: 8px 6px;
+            padding: 6px 2px;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 6px;
             transition: background 0.15s ease;
+            flex: 1 1 auto;
+            max-width: 36px;
+            display: flex;
+            justify-content: center;
         }
 
         .pin-wrapper:hover {
             background-color: var(--hover);
         }
 
-        /* კეგლის SVG სტილიზაცია */
+        /* კეგლის SVG ადაპტირებადი ზომები */
         .bowling-pin {
-            width: 24px;
-            height: 64px;
+            width: 100%;
+            max-width: 24px;
+            height: auto;
+            max-height: 64px;
             display: block;
             transition: transform 0.15s ease, filter 0.15s ease;
         }
 
+        /* ცარიელი სლოტი ზუსტად იგივე ზომის ინარჩუნებს */
         .pin-slot {
-            width: 36px;
-            height: 80px;
+            flex: 1 1 auto;
+            max-width: 36px;
+            height: 64px;
         }
 
         .pin-wrapper.selected .bowling-pin {
@@ -92,6 +103,8 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            max-width: 280px;
+            margin: 0 auto;
         }
 
         button {
@@ -129,6 +142,16 @@
         .btn-subtle:hover {
             color: var(--text);
         }
+
+        /* მცირე ეკრანებისთვის (360px-მდე) დამატებითი ოპტიმიზაცია */
+        @media (max-width: 380px) {
+            .board {
+                gap: 2px;
+            }
+            .pin-wrapper, .pin-slot {
+                max-width: 30px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -158,16 +181,13 @@
         return kaylesG[n % 12 + 12];
     }
 
-    // კეგლის SVG ვიზუალიზაცია
     function createPinSVG(isSelected) {
         const primaryColor = isSelected ? '#2563eb' : '#0f172a';
         const stripeColor = isSelected ? '#ffffff' : '#ef4444';
 
         return `
             <svg class="bowling-pin" viewBox="0 0 24 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- კეგლის ტანი -->
                 <path d="M12 2C8.68629 2 6 4.68629 6 8C6 10.5 7 12.5 8 15C9 17.5 7 24 5 32C3 40 2 48 5 56C7.5 62 16.5 62 19 56C22 48 21 40 19 32C17 24 15 17.5 16 15C17 12.5 18 10.5 18 8C18 4.68629 15.3137 2 12 2Z" fill="${primaryColor}"/>
-                <!-- წითელი ზოლები (ყელზე) -->
                 <rect x="7.5" y="11" width="9" height="2.5" rx="1" fill="${stripeColor}"/>
                 <rect x="7" y="15" width="10" height="2.5" rx="1" fill="${stripeColor}"/>
             </svg>
