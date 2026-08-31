@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nim</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #0f172a;
+            --subtext: #64748b;
+            --match: #0f172a;
+            --match-head: #ef4444;
+            --border: #e2e8f0;
+            --hover: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .status {
+            font-size: 0.875rem;
+            color: var(--subtext);
+            margin-bottom: 40px;
+            height: 1.2em;
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            min-height: 60px;
+        }
+
+        .match-wrapper {
+            padding: 8px 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.15s ease;
+        }
+
+        .match-wrapper:hover {
+            background-color: var(--hover);
+        }
+
+        .match {
+            width: 4px;
+            height: 48px;
+            background-color: var(--match);
+            border-radius: 2px;
+            position: relative;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .match::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 10px;
+            background-color: var(--match-head);
+            border-radius: 50%;
+        }
+
+        .match-wrapper.selected .match {
+            transform: translateY(-8px);
+            background-color: #2563eb;
+        }
+
+        .match-wrapper.selected .match::before {
+            background-color: #2563eb;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--text);
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        .btn-primary:disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-subtle {
+            background: transparent;
+            color: var(--subtext);
+            border: none;
+        }
+
+        .btn-subtle:hover {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>NIM</h1>
+    <div class="status" id="status">აირჩიეთ ღერები</div>
+
+    <div class="board" id="board"></div>
+
+    <div class="controls">
+        <button class="btn-primary" id="endTurnBtn" onclick="playerMove()">სვლის დასრულება</button>
+        <button class="btn-subtle" onclick="resetGame()">თავიდან დაწყება</button>
+    </div>
+</div>
+
+<script>
+    let rows = [1, 3, 5, 7];
+    let selectedRow = -1;
+    let selectedCount = 0;
+    let isPlayerTurn = true;
+
+    function renderBoard() {
+        const boardEl = document.getElementById('board');
+        boardEl.innerHTML = '';
+
+        rows.forEach((count, rowIndex) => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'row';
+
+            for (let i = 0; i < count; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'match-wrapper';
+                
+                if (selectedRow === rowIndex && i >= count - selectedCount) {
+                    wrapper.classList.add('selected');
+                }
+
+                const matchEl = document.createElement('div');
+                matchEl.className = 'match';
+                
+                wrapper.appendChild(matchEl);
+                wrapper.onclick = () => selectMatch(rowIndex);
+                rowEl.appendChild(wrapper);
+            }
+
+            boardEl.appendChild(rowEl);
+        });
+    }
+
+    function selectMatch(rowIndex) {
+        if (!isPlayerTurn) return;
+
+        if (selectedRow !== -1 && selectedRow !== rowIndex) {
+            selectedCount = 0;
+        }
+
+        selectedRow = rowIndex;
+        if (selectedCount < rows[rowIndex]) {
+            selectedCount++;
+        } else {
+            selectedCount = 0;
+            selectedRow = -1;
+        }
+
+        renderBoard();
+    }
+
+    function playerMove() {
+        if (selectedCount === 0 || !isPlayerTurn) return;
+
+        rows[selectedRow] -= selectedCount;
+        selectedRow = -1;
+        selectedCount = 0;
+        renderBoard();
+
+        if (checkGameOver('წააგეთ')) return;
+
+        isPlayerTurn = false;
+        document.getElementById('status').innerText = 'კომპიუტერის სვლა...';
+        document.getElementById('endTurnBtn').disabled = true;
+
+        setTimeout(aiMove, 600);
+    }
+
+    function aiMove() {
+        let activeRows = rows.map((val, idx) => ({ val, idx })).filter(r => r.val > 0);
+        let nonOneRows = activeRows.filter(r => r.val > 1);
+
+        let targetRow, removeCount;
+
+        // Misère ნიმის სტრატეგია (ვინც ბოლო ღერს იღებს, ის აგებს)
+        if (nonOneRows.length === 1) {
+            // როცა დარჩენილია მხოლოდ 1 რიგი, რომელშიც 1-ზე მეტი ღერია
+            let loneRow = nonOneRows[0];
+            let onesCount = activeRows.length - 1;
+
+            if (onesCount % 2 === 0) {
+                // თუ 1-ღერიანი რიგების რაოდენობა ლუწია, დავტოვოთ 1 ღერი
+                removeCount = loneRow.val - 1;
+            } else {
+                // თუ კენტია, წავშალოთ მთლიანი რიგი
+                removeCount = loneRow.val;
+            }
+            targetRow = loneRow.idx;
+        } else {
+            // სტანდარტული Nim-Sum (XOR) სტრატეგია
+            let nimSum = rows.reduce((acc, val) => acc ^ val, 0);
+
+            if (nimSum !== 0) {
+                for (let r of activeRows) {
+                    let target = r.val ^ nimSum;
+                    if (target < r.val) {
+                        targetRow = r.idx;
+                        removeCount = r.val - target;
+                        break;
+                    }
+                }
+            } else {
+                // თუ წაგებულ პოზიციაშია, აიღოს 1 ღერი ყველაზე დიდ რიგში
+                let maxRow = activeRows.reduce((prev, current) => (prev.val > current.val) ? prev : current);
+                targetRow = maxRow.idx;
+                removeCount = 1;
+            }
+        }
+
+        rows[targetRow] -= removeCount;
+        renderBoard();
+
+        if (checkGameOver('მოიგეთ')) return;
+
+        isPlayerTurn = true;
+        document.getElementById('status').innerText = 'თქვენი სვლაა';
+        document.getElementById('endTurnBtn').disabled = false;
+    }
+
+    function checkGameOver(msg) {
+        const totalRemaining = rows.reduce((a, b) => a + b, 0);
+        if (totalRemaining === 0) {
+            document.getElementById('status').innerText = msg;
+            document.getElementById('endTurnBtn').disabled = true;
+            return true;
+        }
+        return false;
+    }
+
+    function resetGame() {
+        rows = [1, 3, 5, 7];
+        selectedRow = -1;
+        selectedCount = 0;
+        isPlayerTurn = true;
+        document.getElementById('status').innerText = 'აირჩიეთ ღერები';
+        document.getElementById('endTurnBtn').disabled = false;
+        renderBoard();
+    }
+
+    renderBoard();
+</script>
+
+</body>
+</html>
