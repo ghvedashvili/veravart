@@ -13,9 +13,9 @@
             --cell-bg: #f8fafc;
             --player-color: #2563eb;
             --ai-color: #ef4444;
-            --draw-color: #6b7280;
-            --selected-color: #93c5fd;
-            --confirm-btn: #16a34a;
+            --draw-color: #475569;
+            --preview-valid: rgba(37, 99, 235, 0.4);
+            --preview-invalid: rgba(239, 68, 68, 0.25);
         }
 
         * {
@@ -51,16 +51,22 @@
         }
 
         .status {
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: var(--subtext);
-            margin-bottom: 20px;
-            height: 1.2em;
+            margin-bottom: 8px;
+            min-height: 1.4em;
             font-weight: 500;
         }
 
-        .status.draw {
-            color: var(--draw-color);
-            font-weight: 700;
+        .status.winner { color: var(--player-color); font-weight: 700; }
+        .status.loser { color: var(--ai-color); font-weight: 700; }
+        .status.draw { color: var(--draw-color); font-weight: 700; }
+
+        .score {
+            font-size: 0.85rem;
+            color: var(--subtext);
+            margin-bottom: 16px;
+            font-weight: 600;
         }
 
         .legend {
@@ -86,7 +92,6 @@
 
         .box.player { background-color: var(--player-color); }
         .box.ai { background-color: var(--ai-color); }
-        .box.draw { background-color: var(--draw-color); }
 
         .board {
             display: grid;
@@ -98,11 +103,6 @@
             width: 300px;
             height: 300px;
             margin: 0 auto 20px auto;
-            transition: background-color 0.3s ease;
-        }
-
-        .board.is-draw {
-            background-color: var(--draw-color);
         }
 
         .cell {
@@ -122,14 +122,13 @@
             cursor: default;
         }
 
-        .cell.filled-draw {
-            background-color: #9ca3af;
-            cursor: default;
+        .cell.preview-valid {
+            background-color: var(--preview-valid);
         }
 
-        .cell.selected {
-            background-color: var(--selected-color);
-            box-shadow: inset 0 0 0 2px var(--player-color);
+        .cell.preview-invalid {
+            background-color: var(--preview-invalid);
+            cursor: not-allowed;
         }
 
         .controls {
@@ -147,27 +146,15 @@
             font-weight: 500;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.15s ease;
-            border: none;
-        }
-
-        .btn-confirm {
-            background-color: var(--confirm-btn);
-            color: white;
-            display: none;
-        }
-
-        .btn-confirm.visible {
-            display: block;
-        }
-
-        .btn-subtle {
             background: transparent;
             color: var(--subtext);
+            border: 1px solid var(--border);
+            transition: all 0.15s ease;
         }
 
-        .btn-subtle:hover {
+        button:hover {
             color: var(--text);
+            border-color: var(--text);
         }
     </style>
 </head>
@@ -176,18 +163,17 @@
 <div class="container">
     <h1>CRAM</h1>
     <div class="status" id="status">თამაში იწყება...</div>
+    <div class="score" id="score">ანგარიში — თქვენ: 0 | AI: 0</div>
 
     <div class="legend">
         <div class="legend-item"><div class="box player"></div> თქვენ (—)</div>
         <div class="legend-item"><div class="box ai"></div> AI (|)</div>
-        <div class="legend-item"><div class="box draw"></div> ფრე (=)</div>
     </div>
 
-    <div class="board" id="board"></div>
+    <div class="board" id="board" onmouseleave="clearPreview()"></div>
 
     <div class="controls">
-        <button class="btn-confirm" id="confirmBtn" onclick="confirmMove()">სვლის დადასტურება</button>
-        <button class="btn-subtle" onclick="resetGame()">თავიდან დაწყება</button>
+        <button onclick="resetGame()">თავიდან დაწყება</button>
     </div>
 </div>
 
@@ -196,142 +182,122 @@
     let grid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
     let isPlayerTurn = true;
     let gameOver = false;
-    let isDrawGame = false;
-    let selectedPos = null;
     let playerMovesCount = 0;
     let aiMovesCount = 0;
 
     function initGame() {
         grid = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
         gameOver = false;
-        isDrawGame = false;
-        selectedPos = null;
         playerMovesCount = 0;
         aiMovesCount = 0;
         
-        toggleConfirmButton(false);
-        document.getElementById('status').classList.remove('draw');
+        const statusEl = document.getElementById('status');
+        statusEl.className = 'status';
+        updateScore();
 
-        // შემთხვევითი დაწყება (50/50 შანსი)
         isPlayerTurn = Math.random() < 0.5;
-
         render();
 
         if (isPlayerTurn) {
-            document.getElementById('status').innerText = 'თქვენ იწყებთ! (ჰორიზონტალური)';
+            statusEl.innerText = 'თქვენი სვლაა (ჰორიზონტალური)';
         } else {
-            document.getElementById('status').innerText = 'AI იწყებს! (ვერტიკალური)';
-            setTimeout(aiMove, 600);
+            statusEl.innerText = 'AI იწყებს...';
+            setTimeout(aiMove, 500);
         }
+    }
+
+    function updateScore() {
+        document.getElementById('score').innerText = `ანგარიში — თქვენ: ${playerMovesCount} | AI: ${aiMovesCount}`;
     }
 
     function render() {
         const boardEl = document.getElementById('board');
         boardEl.innerHTML = '';
-        
-        if (isDrawGame) {
-            boardEl.classList.add('is-draw');
-        } else {
-            boardEl.classList.remove('is-draw');
-        }
 
         for (let r = 0; r < SIZE; r++) {
             for (let c = 0; c < SIZE; c++) {
                 const cellEl = document.createElement('div');
                 cellEl.className = 'cell';
+                cellEl.dataset.r = r;
+                cellEl.dataset.c = c;
 
-                if (isDrawGame && grid[r][c] !== 0) {
-                    cellEl.classList.add('filled-draw');
-                } else {
-                    if (grid[r][c] === 1) cellEl.classList.add('filled-player');
-                    if (grid[r][c] === 2) cellEl.classList.add('filled-ai');
-                }
+                if (grid[r][c] === 1) cellEl.classList.add('filled-player');
+                if (grid[r][c] === 2) cellEl.classList.add('filled-ai');
 
-                if (selectedPos && selectedPos.r === r && (selectedPos.c === c || selectedPos.c + 1 === c)) {
-                    cellEl.classList.add('selected');
-                }
-
+                cellEl.onmouseenter = () => handleMouseEnter(r, c);
                 cellEl.onclick = () => handleCellClick(r, c);
                 boardEl.appendChild(cellEl);
             }
         }
     }
 
+    function getTargetColumn(r, c) {
+        if (c + 1 < SIZE && grid[r][c] === 0 && grid[r][c + 1] === 0) {
+            return c;
+        } else if (c - 1 >= 0 && grid[r][c] === 0 && grid[r][c - 1] === 0) {
+            return c - 1;
+        }
+        return null;
+    }
+
+    function handleMouseEnter(r, c) {
+        clearPreview();
+        if (!isPlayerTurn || gameOver) return;
+
+        const targetC = getTargetColumn(r, c);
+
+        if (targetC !== null) {
+            highlightCells(r, targetC, r, targetC + 1, 'preview-valid');
+        } else {
+            const cellEl = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+            if (cellEl && grid[r][c] === 0) {
+                cellEl.classList.add('preview-invalid');
+            }
+        }
+    }
+
+    function highlightCells(r1, c1, r2, c2, className) {
+        const cell1 = document.querySelector(`.cell[data-r="${r1}"][data-c="${c1}"]`);
+        const cell2 = document.querySelector(`.cell[data-r="${r2}"][data-c="${c2}"]`);
+        if (cell1) cell1.classList.add(className);
+        if (cell2) cell2.classList.add(className);
+    }
+
+    function clearPreview() {
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.classList.remove('preview-valid', 'preview-invalid');
+        });
+    }
+
     function handleCellClick(r, c) {
         if (!isPlayerTurn || gameOver) return;
 
-        if (selectedPos && selectedPos.r === r && (selectedPos.c === c || selectedPos.c + 1 === c)) {
-            confirmMove();
-            return;
-        }
+        const targetC = getTargetColumn(r, c);
+        if (targetC === null) return;
 
-        let validColumn = c;
-        if (c + 1 >= SIZE || grid[r][c] !== 0 || grid[r][c + 1] !== 0) {
-            if (c - 1 >= 0 && grid[r][c - 1] === 0 && grid[r][c] === 0) {
-                validColumn = c - 1;
-            } else {
-                return;
-            }
-        }
+        clearPreview();
 
-        selectedPos = { r, c: validColumn };
-        toggleConfirmButton(true);
-        render();
-    }
-
-    function confirmMove() {
-        if (!selectedPos || !isPlayerTurn || gameOver) return;
-
-        const { r, c } = selectedPos;
-        grid[r][c] = 1;
-        grid[r][c + 1] = 1;
-
+        grid[r][targetC] = 1;
+        grid[r][targetC + 1] = 1;
         playerMovesCount++;
-        selectedPos = null;
-        toggleConfirmButton(false);
+        updateScore();
+        render();
 
-        // შემოწმება: დარჩა თუ არა AI-ს ვალიდური სვლა
-        if (getValidMoves(false).length === 0) {
-            checkGameOver();
+        const playerHasMoves = getValidMoves(true).length > 0;
+        const aiHasMoves = getValidMoves(false).length > 0;
+
+        if (!playerHasMoves && !aiHasMoves) {
+            endGame();
             return;
         }
 
-        isPlayerTurn = false;
-        document.getElementById('status').innerText = 'კომპიუტერის სვლა...';
-        render();
-
-        setTimeout(aiMove, 500);
-    }
-
-    function checkGameOver() {
-        // თუ მოთამაშეებს თანაბარი რაოდენობის სვლა აქვთ გაკეთებული და სვლები ამოიწურა -> ფრე
-        if (playerMovesCount === aiMovesCount) {
-            isDrawGame = true;
-            gameOver = true;
-            const statusEl = document.getElementById('status');
-            statusEl.innerText = 'თამაში დასრულდა ფრედ! (თანაბარი სვლები)';
-            statusEl.classList.add('draw');
-            render();
-            return true;
-        }
-
-        // სხვა შემთხვევაში იგებს ის, ვისი ოპონენტიც ვეღარ აკეთებს სვლას
-        gameOver = true;
-        if (isPlayerTurn) {
-            document.getElementById('status').innerText = 'მოიგეთ! AI-ს სვლის ადგილი აღარ აქვს';
+        if (aiHasMoves) {
+            isPlayerTurn = false;
+            document.getElementById('status').innerText = 'კომპიუტერის სვლა...';
+            setTimeout(aiMove, 400);
         } else {
-            document.getElementById('status').innerText = 'წააგეთ! სვლის ადგილი აღარ გაქვთ';
-        }
-        render();
-        return true;
-    }
-
-    function toggleConfirmButton(show) {
-        const btn = document.getElementById('confirmBtn');
-        if (show) {
-            btn.classList.add('visible');
-        } else {
-            btn.classList.remove('visible');
+            // AI-ს სვლა აღარ აქვს, მოთამაშე აგრძელებს
+            document.getElementById('status').innerText = 'AI-ს სვლები ამოეწურა! გააგრძელეთ თქვენი სვლები';
         }
     }
 
@@ -359,7 +325,13 @@
         const moves = getValidMoves(false);
 
         if (moves.length === 0) {
-            checkGameOver();
+            const playerHasMoves = getValidMoves(true).length > 0;
+            if (!playerHasMoves) {
+                endGame();
+            } else {
+                isPlayerTurn = true;
+                document.getElementById('status').innerText = 'AI-ს სვლები ამოეწურა! გააგრძელეთ თქვენი სვლა';
+            }
             return;
         }
 
@@ -388,15 +360,42 @@
         grid[bestMove[0].r][bestMove[0].c] = 2;
         grid[bestMove[1].r][bestMove[1].c] = 2;
         aiMovesCount++;
+        updateScore();
+        render();
 
-        if (getValidMoves(true).length === 0) {
-            checkGameOver();
+        const playerHasMoves = getValidMoves(true).length > 0;
+        const aiHasMoves = getValidMoves(false).length > 0;
+
+        if (!playerHasMoves && !aiHasMoves) {
+            endGame();
             return;
         }
 
-        isPlayerTurn = true;
-        document.getElementById('status').innerText = 'თქვენი სვლაა (ჰორიზონტალური)';
-        render();
+        if (playerHasMoves) {
+            isPlayerTurn = true;
+            document.getElementById('status').innerText = 'თქვენი სვლაა (ჰორიზონტალური)';
+        } else {
+            // მოთამაშეს სვლა აღარ აქვს, AI აგრძელებს ავტომატურად
+            document.getElementById('status').innerText = 'სვლები ამოგეწურათ! AI აგრძელებს...';
+            setTimeout(aiMove, 500);
+        }
+    }
+
+    function endGame() {
+        gameOver = true;
+        clearPreview();
+        const statusEl = document.getElementById('status');
+        
+        if (playerMovesCount === aiMovesCount) {
+            statusEl.innerText = `🤝 ფრე! (საბოლოო ანგარიში: ${playerMovesCount} - ${aiMovesCount})`;
+            statusEl.classList.add('draw');
+        } else if (playerMovesCount > aiMovesCount) {
+            statusEl.innerText = `🎉 თქვენ მოიგეთ! (საბოლოო ანგარიში: ${playerMovesCount} - ${aiMovesCount})`;
+            statusEl.classList.add('winner');
+        } else {
+            statusEl.innerText = `❌ წააგეთ! (საბოლოო ანგარიში: ${playerMovesCount} - ${aiMovesCount})`;
+            statusEl.classList.add('loser');
+        }
     }
 
     function resetGame() {
