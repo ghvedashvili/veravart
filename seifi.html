@@ -1,0 +1,2246 @@
+
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>რიცხვითი სეიფი 🔐</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    font-family:"Segoe UI",Tahoma,sans-serif;
+
+    background:
+        radial-gradient(circle at 50% -10%,#164e63 0%,transparent 35%),
+        linear-gradient(135deg,#020617,#0f172a 55%,#111827);
+
+    color:#f8fafc;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:560px;
+
+    background:rgba(15,23,42,.9);
+
+    border:1px solid rgba(148,163,184,.2);
+
+    border-radius:26px;
+
+    padding:28px 24px;
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.55);
+
+    backdrop-filter:blur(15px);
+}
+
+/* HEADER */
+
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.title{
+    font-size:1.8rem;
+    font-weight:800;
+    margin-bottom:6px;
+}
+
+.subtitle{
+    color:#94a3b8;
+    font-size:.92rem;
+}
+
+/* STATS */
+
+.topbar{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+
+    margin-bottom:16px;
+}
+
+.stat{
+    background:#111c31;
+    border:1px solid #26354d;
+    border-radius:12px;
+
+    padding:9px;
+
+    text-align:center;
+}
+
+.stat-label{
+    color:#64748b;
+    font-size:.68rem;
+}
+
+.stat-value{
+    margin-top:3px;
+    font-size:.95rem;
+    font-weight:800;
+}
+
+/* DIFFICULTY */
+
+.level-box{
+    text-align:center;
+    margin-bottom:17px;
+}
+
+.level{
+    display:inline-block;
+
+    padding:7px 16px;
+
+    border-radius:20px;
+
+    font-size:.85rem;
+    font-weight:bold;
+
+    background:rgba(56,189,248,.1);
+    border:1px solid rgba(56,189,248,.3);
+
+    color:#38bdf8;
+}
+
+/* SAFE */
+
+.safe-display{
+
+    background:#020617;
+
+    border:2px solid #334155;
+
+    border-radius:18px;
+
+    padding:22px 15px;
+
+    margin-bottom:19px;
+
+    box-shadow:
+        inset 0 3px 15px rgba(0,0,0,.7);
+}
+
+.lock-icon{
+    text-align:center;
+
+    font-size:3rem;
+
+    margin-bottom:17px;
+
+    transition:.3s;
+}
+
+.code-inputs{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:10px;
+}
+
+.code-input{
+
+    width:60px;
+    height:68px;
+
+    border-radius:13px;
+
+    border:2px solid #475569;
+
+    background:#1e293b;
+
+    color:#38bdf8;
+
+    text-align:center;
+
+    font-size:2rem;
+
+    font-weight:bold;
+
+    outline:none;
+
+    transition:.2s;
+}
+
+.code-input:focus{
+
+    border-color:#38bdf8;
+
+    box-shadow:
+        0 0 16px rgba(56,189,248,.35);
+
+    transform:translateY(-2px);
+}
+
+/* HINTS */
+
+.hints-box{
+
+    background:#0b1425;
+
+    border:1px solid #26354d;
+
+    border-left:4px solid #38bdf8;
+
+    border-radius:0 14px 14px 0;
+
+    padding:17px;
+
+    margin-bottom:18px;
+}
+
+.hints-title{
+
+    color:#38bdf8;
+
+    font-weight:800;
+
+    margin-bottom:13px;
+}
+
+.hints-list{
+
+    list-style:none;
+}
+
+.hints-list li{
+
+    color:#cbd5e1;
+
+    font-size:.92rem;
+
+    line-height:1.45;
+
+    margin-bottom:10px;
+
+    padding-left:23px;
+
+    position:relative;
+}
+
+.hints-list li:last-child{
+    margin-bottom:0;
+}
+
+.hints-list li::before{
+
+    content:"🔹";
+
+    position:absolute;
+
+    left:0;
+}
+
+/* BUTTONS */
+
+.buttons{
+
+    display:flex;
+
+    gap:9px;
+}
+
+button{
+
+    border:0;
+
+    cursor:pointer;
+
+    border-radius:12px;
+
+    padding:15px;
+
+    font-size:1rem;
+
+    font-weight:800;
+
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+button:active{
+    transform:translateY(1px);
+}
+
+.btn-submit{
+
+    flex:1;
+
+    color:white;
+
+    background:
+        linear-gradient(135deg,#0284c7,#0369a1);
+
+    box-shadow:
+        0 5px 18px rgba(2,132,199,.25);
+}
+
+.btn-new{
+
+    width:54px;
+
+    color:#e2e8f0;
+
+    background:#1e293b;
+
+    border:1px solid #334155;
+}
+
+/* MESSAGE */
+
+.message{
+
+    min-height:27px;
+
+    text-align:center;
+
+    margin-top:14px;
+
+    font-weight:800;
+
+    line-height:1.4;
+}
+
+.message.success{
+    color:#4ade80;
+}
+
+.message.error{
+    color:#f87171;
+}
+
+.message.info{
+    color:#38bdf8;
+}
+
+/* PROGRESS */
+
+.progress{
+
+    height:7px;
+
+    background:#1e293b;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    margin-top:18px;
+}
+
+.progress-bar{
+
+    height:100%;
+
+    background:
+        linear-gradient(90deg,#0ea5e9,#38bdf8);
+
+    transition:.4s;
+}
+
+/* ANIMATION */
+
+@keyframes shake{
+
+    0%,100%{
+        transform:translateX(0);
+    }
+
+    20%,60%{
+        transform:translateX(-7px);
+    }
+
+    40%,80%{
+        transform:translateX(7px);
+    }
+}
+
+.shake{
+    animation:shake .4s;
+}
+
+@keyframes unlock{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.3) rotate(-5deg);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+}
+
+.unlock{
+    animation:unlock .6s;
+}
+
+/* MOBILE */
+
+@media(max-width:430px){
+
+    .container{
+        padding:22px 15px;
+    }
+
+    .title{
+        font-size:1.5rem;
+    }
+
+    .code-input{
+
+        width:53px;
+        height:61px;
+
+        font-size:1.8rem;
+    }
+
+    .code-inputs{
+        gap:7px;
+    }
+
+    .hints-list li{
+        font-size:.86rem;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <div class="title">
+            🔐 რიცხვითი სეიფი
+        </div>
+
+        <div class="subtitle">
+            იპოვე 4-ციფრიანი კოდი ლოგიკური მინიშნებებით
+        </div>
+
+    </div>
+
+
+    <div class="topbar">
+
+        <div class="stat">
+            <div class="stat-label">
+                დონე
+            </div>
+
+            <div class="stat-value" id="levelValue">
+                1 / 20
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-label">
+                ქულა
+            </div>
+
+            <div class="stat-value" id="scoreValue">
+                0
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-label">
+                მცდელობა
+            </div>
+
+            <div class="stat-value" id="attemptValue">
+                0
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="level-box">
+
+        <span
+            class="level"
+            id="difficulty"
+        >
+            🟢 მარტივი
+        </span>
+
+    </div>
+
+
+    <div class="safe-display" id="safeDisplay">
+
+        <div
+            class="lock-icon"
+            id="lockIcon"
+        >
+            🔒
+        </div>
+
+
+        <div class="code-inputs">
+
+            <input
+                class="code-input"
+                id="digit1"
+                maxlength="1"
+                inputmode="numeric"
+                autocomplete="off"
+                autofocus
+            >
+
+            <input
+                class="code-input"
+                id="digit2"
+                maxlength="1"
+                inputmode="numeric"
+                autocomplete="off"
+            >
+
+            <input
+                class="code-input"
+                id="digit3"
+                maxlength="1"
+                inputmode="numeric"
+                autocomplete="off"
+            >
+
+            <input
+                class="code-input"
+                id="digit4"
+                maxlength="1"
+                inputmode="numeric"
+                autocomplete="off"
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="hints-box">
+
+        <div class="hints-title">
+            💡 საიდუმლო მინიშნებები
+        </div>
+
+        <ul
+            class="hints-list"
+            id="hintsList"
+        ></ul>
+
+    </div>
+
+
+    <div class="buttons">
+
+        <button
+            class="btn-submit"
+            onclick="checkCode()"
+        >
+            🔓 სეიფის გახსნა
+        </button>
+
+        <button
+            class="btn-new"
+            onclick="newPuzzle()"
+            title="ახალი ამოცანა"
+        >
+            🔄
+        </button>
+
+    </div>
+
+
+    <div
+        class="message"
+        id="message"
+    ></div>
+
+
+    <div class="progress">
+
+        <div
+            class="progress-bar"
+            id="progressBar"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   GLOBAL
+============================================================ */
+
+let currentLevel = 1;
+
+let score = 0;
+
+let attempts = 0;
+
+let solved = false;
+
+let secretCode = [];
+
+let puzzleConditions = [];
+
+let puzzleHints = [];
+
+
+/* ============================================================
+   ELEMENTS
+============================================================ */
+
+const inputs =
+    document.querySelectorAll(".code-input");
+
+const hintsList =
+    document.getElementById("hintsList");
+
+const message =
+    document.getElementById("message");
+
+const lockIcon =
+    document.getElementById("lockIcon");
+
+const safeDisplay =
+    document.getElementById("safeDisplay");
+
+const levelValue =
+    document.getElementById("levelValue");
+
+const scoreValue =
+    document.getElementById("scoreValue");
+
+const attemptValue =
+    document.getElementById("attemptValue");
+
+const difficulty =
+    document.getElementById("difficulty");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+
+/* ============================================================
+   ALL 4-DIGIT CODES
+============================================================ */
+
+function allCodes(){
+
+    const result = [];
+
+    for(let a=1;a<=9;a++){
+
+        for(let b=0;b<=9;b++){
+
+            for(let c=0;c<=9;c++){
+
+                for(let d=0;d<=9;d++){
+
+                    result.push([a,b,c,d]);
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return result;
+}
+
+
+/* ============================================================
+   RANDOM CHOICE
+============================================================ */
+
+function randomItem(array){
+
+    return array[
+        Math.floor(Math.random()*array.length)
+    ];
+}
+
+
+/* ============================================================
+   LEVEL 1
+============================================================ */
+
+function generateLevel1(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a > 4 &&
+            b === a - 2 &&
+            c === 8 &&
+            d === 9
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions: [
+
+            x => x[0] > 4,
+            x => x[1] === x[0]-2,
+            x => x[2] === 8,
+            x => x[3] === 9
+
+        ],
+
+        hints: [
+
+            "პირველი ციფრი 4-ზე მეტია.",
+            "მეორე ციფრი პირველზე 2-ით ნაკლებია.",
+            "მესამე ციფრი 8-ია.",
+            "მეოთხე ციფრი 9-ია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 2
+============================================================ */
+
+function generateLevel2(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a > 3 &&
+            b < a &&
+            c === a+b &&
+            d === 9 &&
+            c <= 9
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0] > 3,
+
+            x => x[1] < x[0],
+
+            x => x[2] === x[0]+x[1],
+
+            x => x[3] === 9
+
+        ],
+
+        hints:[
+
+            "პირველი ციფრი 3-ზე მეტია.",
+
+            "მეორე ციფრი პირველზე ნაკლებია.",
+
+            "პირველი და მეორე ციფრების ჯამი მესამე ციფრია.",
+
+            "ბოლო ციფრი 9-ია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 3
+============================================================ */
+
+function generateLevel3(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a%2===0 &&
+            b===a/2 &&
+            c===a+b &&
+            d>c
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]%2===0,
+
+            x => x[1]===x[0]/2,
+
+            x => x[2]===x[0]+x[1],
+
+            x => x[3]>x[2]
+
+        ],
+
+        hints:[
+
+            "პირველი ციფრი ლუწია.",
+
+            "მეორე ციფრი პირველი ციფრის ნახევარია.",
+
+            "პირველი ორი ციფრის ჯამი მესამე ციფრია.",
+
+            "მეოთხე ციფრი მესამეზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 4
+============================================================ */
+
+function generateLevel4(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a>b &&
+            c===a-b &&
+            d===a+c &&
+            d<=9 &&
+            (a+b+c+d)%2===0
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]>x[1],
+
+            x => x[2]===x[0]-x[1],
+
+            x => x[3]===x[0]+x[2],
+
+            x => (x[0]+x[1]+x[2]+x[3])%2===0
+
+        ],
+
+        hints:[
+
+            "პირველი ციფრი მეორეზე დიდია.",
+
+            "პირველსა და მეორეს შორის სხვაობა მესამე ციფრია.",
+
+            "პირველი და მესამე ციფრების ჯამი მეოთხე ციფრია.",
+
+            "ოთხივე ციფრის ჯამი ლუწია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 5
+============================================================ */
+
+function generateLevel5(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+d===10 &&
+            b===a-3 &&
+            c===b+2 &&
+            d>c
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[3]===10,
+
+            x => x[1]===x[0]-3,
+
+            x => x[2]===x[1]+2,
+
+            x => x[3]>x[2]
+
+        ],
+
+        hints:[
+
+            "პირველი და მეოთხე ციფრების ჯამი 10-ია.",
+
+            "მეორე ციფრი პირველზე 3-ით ნაკლებია.",
+
+            "მესამე ციფრი მეორეზე 2-ით მეტია.",
+
+            "მეოთხე ციფრი მესამეზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 6
+============================================================ */
+
+function generateLevel6(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a%2===1 &&
+            b===a+1 &&
+            c===b-3 &&
+            d===a+c
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]%2===1,
+
+            x => x[1]===x[0]+1,
+
+            x => x[2]===x[1]-3,
+
+            x => x[3]===x[0]+x[2]
+
+        ],
+
+        hints:[
+
+            "პირველი ციფრი კენტია.",
+
+            "მეორე ციფრი პირველზე 1-ით მეტია.",
+
+            "მესამე ციფრი მეორეზე 3-ით ნაკლებია.",
+
+            "პირველი და მესამე ციფრების ჯამი მეოთხე ციფრია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 7
+============================================================ */
+
+function generateLevel7(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a>b &&
+            b>c &&
+            c>d &&
+            a-d===5
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]>x[1],
+
+            x => x[1]>x[2],
+
+            x => x[2]>x[3],
+
+            x => x[0]-x[3]===5
+
+        ],
+
+        hints:[
+
+            "ციფრები მარცხნიდან მარჯვნივ კლებადობითაა.",
+
+            "პირველი ციფრი მეორეზე მეტია.",
+
+            "მეორე ციფრი მესამეზე მეტია.",
+
+            "პირველსა და მეოთხეს შორის სხვაობა 5-ია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 8
+============================================================ */
+
+function generateLevel8(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            (a+b)%2===0 &&
+            c===(a*b)%10 &&
+            d===(a+c)%10 &&
+            d>b
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => (x[0]+x[1])%2===0,
+
+            x => x[2]===(x[0]*x[1])%10,
+
+            x => x[3]===(x[0]+x[2])%10,
+
+            x => x[3]>x[1]
+
+        ],
+
+        hints:[
+
+            "პირველი და მეორე ციფრების ჯამი ლუწია.",
+
+            "პირველი ორი ციფრის ნამრავლის ბოლო ციფრი მესამეა.",
+
+            "პირველი და მესამე ციფრების ჯამის ბოლო ციფრი მეოთხეა.",
+
+            "მეოთხე ციფრი მეორეზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 9
+============================================================ */
+
+function generateLevel9(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+b+c+d===18 &&
+            a>d &&
+            b===c-1 &&
+            d===a-4
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[1]+x[2]+x[3]===18,
+
+            x => x[0]>x[3],
+
+            x => x[1]===x[2]-1,
+
+            x => x[3]===x[0]-4
+
+        ],
+
+        hints:[
+
+            "ოთხივე ციფრის ჯამი 18-ია.",
+
+            "პირველი ციფრი მეოთხეზე მეტია.",
+
+            "მეორე ციფრი მესამეზე 1-ით ნაკლებია.",
+
+            "პირველი ციფრი მეოთხეზე 4-ით მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 10
+============================================================ */
+
+function generateLevel10(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a*2===b+c &&
+            c===d+2 &&
+            a>d &&
+            (a+b+c+d)%3===0
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]*2===x[1]+x[2],
+
+            x => x[2]===x[3]+2,
+
+            x => x[0]>x[3],
+
+            x => (x[0]+x[1]+x[2]+x[3])%3===0
+
+        ],
+
+        hints:[
+
+            "პირველი ციფრის გაორმაგება მეორე და მესამე ციფრების ჯამის ტოლია.",
+
+            "მესამე ციფრი მეოთხეზე 2-ით მეტია.",
+
+            "პირველი ციფრი მეოთხეზე მეტია.",
+
+            "ოთხივე ციფრის ჯამი 3-ზე იყოფა."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 11
+============================================================ */
+
+function generateLevel11(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+b===c+d &&
+            a>c &&
+            b<d &&
+            a-d===1
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[1]===x[2]+x[3],
+
+            x => x[0]>x[2],
+
+            x => x[1]<x[3],
+
+            x => x[0]-x[3]===1
+
+        ],
+
+        hints:[
+
+            "პირველი ორი ციფრის ჯამი ბოლო ორი ციფრის ჯამის ტოლია.",
+
+            "პირველი ციფრი მესამეზე მეტია.",
+
+            "მეორე ციფრი მეოთხეზე ნაკლებია.",
+
+            "პირველი ციფრი მეოთხეზე ზუსტად 1-ით მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 12
+============================================================ */
+
+function generateLevel12(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            (a*b)%10===c &&
+            (b+c)%10===d &&
+            a>b &&
+            c<d
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => (x[0]*x[1])%10===x[2],
+
+            x => (x[1]+x[2])%10===x[3],
+
+            x => x[0]>x[1],
+
+            x => x[2]<x[3]
+
+        ],
+
+        hints:[
+
+            "პირველი და მეორე ციფრების ნამრავლის ბოლო ციფრი მესამეა.",
+
+            "მეორე და მესამე ციფრების ჯამის ბოლო ციფრი მეოთხეა.",
+
+            "პირველი ციფრი მეორეზე დიდია.",
+
+            "მესამე ციფრი მეოთხეზე ნაკლებია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 13
+============================================================ */
+
+function generateLevel13(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+d===12 &&
+            b*2===c &&
+            a-b===d-2 &&
+            c>a
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[3]===12,
+
+            x => x[1]*2===x[2],
+
+            x => x[0]-x[1]===x[3]-2,
+
+            x => x[2]>x[0]
+
+        ],
+
+        hints:[
+
+            "პირველი და მეოთხე ციფრების ჯამი 12-ია.",
+
+            "მეორე ციფრის გაორმაგება მესამე ციფრია.",
+
+            "პირველსა და მეორეს შორის სხვაობა მეოთხესა და 2-ს შორის სხვაობის ტოლია.",
+
+            "მესამე ციფრი პირველზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 14
+============================================================ */
+
+function generateLevel14(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+b+c+d===20 &&
+            a*c===b*d &&
+            a>b &&
+            c>d
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[1]+x[2]+x[3]===20,
+
+            x => x[0]*x[2]===x[1]*x[3],
+
+            x => x[0]>x[1],
+
+            x => x[2]>x[3]
+
+        ],
+
+        hints:[
+
+            "ოთხივე ციფრის ჯამი 20-ია.",
+
+            "პირველი × მესამე = მეორე × მეოთხე.",
+
+            "პირველი ციფრი მეორეზე მეტია.",
+
+            "მესამე ციფრი მეოთხეზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 15
+============================================================ */
+
+function generateLevel15(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            (a+b)%10===c &&
+            (b+c)%10===d &&
+            a>d &&
+            a+b>c+d
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => (x[0]+x[1])%10===x[2],
+
+            x => (x[1]+x[2])%10===x[3],
+
+            x => x[0]>x[3],
+
+            x => x[0]+x[1]>x[2]+x[3]
+
+        ],
+
+        hints:[
+
+            "პირველი + მეორე ციფრის ბოლო ციფრი მესამეა.",
+
+            "მეორე + მესამე ციფრის ბოლო ციფრი მეოთხეა.",
+
+            "პირველი ციფრი მეოთხეზე მეტია.",
+
+            "პირველი ორი ციფრის ჯამი ბოლო ორი ციფრის ჯამზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 16
+============================================================ */
+
+function generateLevel16(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a*b+c===2*d &&
+            a+c===b+d &&
+            a>c &&
+            b>d
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]*x[1]+x[2]===2*x[3],
+
+            x => x[0]+x[2]===x[1]+x[3],
+
+            x => x[0]>x[2],
+
+            x => x[1]>x[3]
+
+        ],
+
+        hints:[
+
+            "პირველი × მეორე + მესამე = მეოთხე × 2.",
+
+            "პირველი + მესამე = მეორე + მეოთხე.",
+
+            "პირველი ციფრი მესამეზე მეტია.",
+
+            "მეორე ციფრი მეოთხეზე მეტია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 17
+============================================================ */
+
+function generateLevel17(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+b===10 &&
+            c+d===10 &&
+            a>c &&
+            b<d &&
+            a-c===2
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[1]===10,
+
+            x => x[2]+x[3]===10,
+
+            x => x[0]>x[2],
+
+            x => x[1]<x[3],
+
+            x => x[0]-x[2]===2
+
+        ],
+
+        hints:[
+
+            "პირველი და მეორე ციფრების ჯამი 10-ია.",
+
+            "მესამე და მეოთხე ციფრების ჯამიც 10-ია.",
+
+            "პირველი ციფრი მესამეზე ზუსტად 2-ით მეტია.",
+
+            "მეორე ციფრი მეოთხეზე ნაკლებია.",
+
+            "პირველი და მესამე ციფრების სხვაობა 2-ია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 18
+============================================================ */
+
+function generateLevel18(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a*b===c+d &&
+            a+c===b+d &&
+            a>b &&
+            c>d &&
+            (a+d)%2===0
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]*x[1]===x[2]+x[3],
+
+            x => x[0]+x[2]===x[1]+x[3],
+
+            x => x[0]>x[1],
+
+            x => x[2]>x[3],
+
+            x => (x[0]+x[3])%2===0
+
+        ],
+
+        hints:[
+
+            "პირველი × მეორე = მესამე + მეოთხე.",
+
+            "პირველი + მესამე = მეორე + მეოთხე.",
+
+            "პირველი ციფრი მეორეზე მეტია.",
+
+            "მესამე ციფრი მეოთხეზე მეტია.",
+
+            "პირველი და მეოთხე ციფრების ჯამი ლუწია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 19
+============================================================ */
+
+function generateLevel19(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+b+c+d===22 &&
+            a*d===b+c+5 &&
+            a>b &&
+            c>d &&
+            (a*b)%2===0
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[1]+x[2]+x[3]===22,
+
+            x => x[0]*x[3]===x[1]+x[2]+5,
+
+            x => x[0]>x[1],
+
+            x => x[2]>x[3],
+
+            x => (x[0]*x[1])%2===0
+
+        ],
+
+        hints:[
+
+            "ოთხივე ციფრის ჯამი 22-ია.",
+
+            "პირველი × მეოთხე = მეორე + მესამე + 5.",
+
+            "პირველი ციფრი მეორეზე მეტია.",
+
+            "მესამე ციფრი მეოთხეზე მეტია.",
+
+            "პირველი × მეორე ლუწი რიცხვია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   LEVEL 20
+============================================================ */
+
+function generateLevel20(){
+
+    const candidates =
+        allCodes().filter(([a,b,c,d]) =>
+
+            a+b===c+d &&
+            a*c===b+d+8 &&
+            a-d===3 &&
+            b+c===12 &&
+            a>c &&
+            d<b
+
+        );
+
+    const code = randomItem(candidates);
+
+    return {
+
+        code,
+
+        conditions:[
+
+            x => x[0]+x[1]===x[2]+x[3],
+
+            x => x[0]*x[2]===x[1]+x[3]+8,
+
+            x => x[0]-x[3]===3,
+
+            x => x[1]+x[2]===12,
+
+            x => x[0]>x[2],
+
+            x => x[3]<x[1]
+
+        ],
+
+        hints:[
+
+            "პირველი + მეორე = მესამე + მეოთხე.",
+
+            "პირველი × მესამე = მეორე + მეოთხე + 8.",
+
+            "პირველი ციფრი მეოთხეზე ზუსტად 3-ით მეტია.",
+
+            "მეორე + მესამე = 12.",
+
+            "პირველი ციფრი მესამეზე მეტია.",
+
+            "მეოთხე ციფრი მეორეზე ნაკლებია."
+
+        ]
+
+    };
+}
+
+
+/* ============================================================
+   GENERATOR
+============================================================ */
+
+const generators = {
+
+    1:generateLevel1,
+    2:generateLevel2,
+    3:generateLevel3,
+    4:generateLevel4,
+    5:generateLevel5,
+    6:generateLevel6,
+    7:generateLevel7,
+    8:generateLevel8,
+    9:generateLevel9,
+    10:generateLevel10,
+    11:generateLevel11,
+    12:generateLevel12,
+    13:generateLevel13,
+    14:generateLevel14,
+    15:generateLevel15,
+    16:generateLevel16,
+    17:generateLevel17,
+    18:generateLevel18,
+    19:generateLevel19,
+    20:generateLevel20
+};
+
+
+/* ============================================================
+   CREATE PUZZLE
+============================================================ */
+
+function createPuzzle(){
+
+    const generator =
+        generators[currentLevel];
+
+    let puzzle = null;
+
+    /*
+       უსაფრთხოების მიზნით ვცდილობთ
+       რამდენჯერმე.
+    */
+
+    for(let i=0;i<100;i++){
+
+        puzzle = generator();
+
+        if(
+            puzzle &&
+            puzzle.code &&
+            puzzle.code.length===4
+        ){
+            break;
+        }
+
+    }
+
+    if(!puzzle){
+
+        alert(
+            "ამ დონის გენერირება ვერ მოხერხდა."
+        );
+
+        return;
+
+    }
+
+    secretCode =
+        puzzle.code.slice();
+
+    puzzleConditions =
+        puzzle.conditions.slice();
+
+    puzzleHints =
+        puzzle.hints.slice();
+
+    renderHints();
+
+}
+
+
+/* ============================================================
+   RENDER HINTS
+============================================================ */
+
+function renderHints(){
+
+    hintsList.innerHTML = "";
+
+    puzzleHints.forEach((hint,index)=>{
+
+        const li =
+            document.createElement("li");
+
+        li.textContent = hint;
+
+        hintsList.appendChild(li);
+
+    });
+
+}
+
+
+/* ============================================================
+   VERIFY CODE BY CONDITIONS
+============================================================ */
+
+function verifyCode(code){
+
+    /*
+       ძალიან მნიშვნელოვანი:
+
+       პასუხი აღარ მოწმდება მხოლოდ
+       secretCode === enteredCode
+
+       არამედ ყველა მინიშნების
+       მათემატიკური პირობა მოწმდება.
+
+       ამიტომ 7189 Level 2-ში:
+
+       7 > 3       TRUE
+       1 < 7       TRUE
+       7+1 = 8     TRUE
+       9 = 9       TRUE
+
+       => სწორი პასუხია.
+    */
+
+    return puzzleConditions.every(
+        condition => condition(code)
+    );
+
+}
+
+
+/* ============================================================
+   COUNT VALID SOLUTIONS
+============================================================ */
+
+function countSolutions(){
+
+    let count = 0;
+
+    for(let a=1;a<=9;a++){
+
+        for(let b=0;b<=9;b++){
+
+            for(let c=0;c<=9;c++){
+
+                for(let d=0;d<=9;d++){
+
+                    const code=[a,b,c,d];
+
+                    if(verifyCode(code)){
+
+                        count++;
+
+                        if(count>1){
+                            return count;
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return count;
+
+}
+
+
+/* ============================================================
+   NEW PUZZLE
+============================================================ */
+
+function newPuzzle(){
+
+    solved=false;
+
+    attempts=0;
+
+    attemptValue.textContent="0";
+
+    lockIcon.textContent="🔒";
+
+    lockIcon.classList.remove("unlock");
+
+    message.textContent="";
+
+    message.className="message";
+
+    inputs.forEach(input=>{
+
+        input.value="";
+
+        input.style.borderColor="#475569";
+
+        input.disabled=false;
+
+    });
+
+    createPuzzle();
+
+    updateUI();
+
+    /*
+       ფოკუსი პირველ ველზე
+    */
+
+    setTimeout(()=>{
+
+        inputs[0].focus();
+
+    },50);
+
+}
+
+
+/* ============================================================
+   CHECK CODE
+============================================================ */
+
+function checkCode(){
+
+    if(solved){
+        return;
+    }
+
+    const code=[];
+
+    for(const input of inputs){
+
+        if(input.value===""){
+
+            showMessage(
+                "გთხოვ, შეიყვანე ოთხივე ციფრი!",
+                "error"
+            );
+
+            return;
+
+        }
+
+        code.push(
+            Number(input.value)
+        );
+
+    }
+
+
+    attempts++;
+
+    attemptValue.textContent =
+        attempts;
+
+
+    /*
+       ამოწმებს პირობებს.
+    */
+
+    const correct =
+        verifyCode(code);
+
+
+    if(correct){
+
+        solved=true;
+
+        lockIcon.textContent="🔓";
+
+        lockIcon.classList.add("unlock");
+
+
+        inputs.forEach(input=>{
+
+            input.style.borderColor="#4ade80";
+
+        });
+
+
+        /*
+           ქულა
+        */
+
+        let points =
+            currentLevel * 10;
+
+        points +=
+            Math.max(
+                100 - (attempts-1)*15,
+                20
+            );
+
+        score += points;
+
+        scoreValue.textContent =
+            score;
+
+
+        if(currentLevel===20){
+
+            progressBar.style.width="100%";
+
+            showMessage(
+                "🏆 საოცარია! ყველა 20 დონე გაიარე! საბოლოო ქულა: "+score,
+                "success"
+            );
+
+        }else{
+
+            showMessage(
+                "🎉 სწორია! სეიფი გაიხსნა! +"+points+" ქულა",
+                "success"
+            );
+
+
+            setTimeout(()=>{
+
+                currentLevel++;
+
+                newPuzzle();
+
+            },1500);
+
+        }
+
+    }else{
+
+        lockIcon.textContent="🔒";
+
+        lockIcon.classList.remove("unlock");
+
+
+        inputs.forEach(input=>{
+
+            input.style.borderColor="#f87171";
+
+        });
+
+
+        safeDisplay.classList.remove("shake");
+
+        void safeDisplay.offsetWidth;
+
+        safeDisplay.classList.add("shake");
+
+
+        showMessage(
+            "❌ არასწორია. გადაამოწმე ყველა მინიშნება.",
+            "error"
+        );
+
+
+        setTimeout(()=>{
+
+            inputs.forEach(input=>{
+
+                input.style.borderColor="#475569";
+
+            });
+
+        },1000);
+
+    }
+
+}
+
+
+/* ============================================================
+   MESSAGE
+============================================================ */
+
+function showMessage(text,type){
+
+    message.textContent=text;
+
+    message.className=
+        "message "+type;
+
+}
+
+
+/* ============================================================
+   UPDATE UI
+============================================================ */
+
+function updateUI(){
+
+    levelValue.textContent =
+        currentLevel+" / 20";
+
+    scoreValue.textContent =
+        score;
+
+    attemptValue.textContent =
+        attempts;
+
+
+    if(currentLevel<=5){
+
+        difficulty.textContent=
+            "🟢 მარტივი";
+
+    }else if(currentLevel<=10){
+
+        difficulty.textContent=
+            "🟡 საშუალო";
+
+    }else if(currentLevel<=15){
+
+        difficulty.textContent=
+            "🟠 რთული";
+
+    }else{
+
+        difficulty.textContent=
+            "🔴 ექსპერტი";
+
+    }
+
+
+    progressBar.style.width =
+        ((currentLevel-1)/20*100)+"%";
+
+}
+
+
+/* ============================================================
+   INPUT HANDLING
+============================================================ */
+
+inputs.forEach((input,index)=>{
+
+
+    input.addEventListener(
+        "input",
+        function(){
+
+            this.value =
+                this.value.replace(
+                    /[^0-9]/g,
+                    ""
+                );
+
+
+            if(
+                this.value &&
+                index<inputs.length-1
+            ){
+
+                inputs[index+1].focus();
+
+            }
+
+        }
+    );
+
+
+    input.addEventListener(
+        "keydown",
+        function(e){
+
+            if(
+                e.key==="Backspace" &&
+                this.value==="" &&
+                index>0
+            ){
+
+                inputs[index-1].focus();
+
+            }
+
+
+            if(
+                e.key==="ArrowLeft" &&
+                index>0
+            ){
+
+                inputs[index-1].focus();
+
+            }
+
+
+            if(
+                e.key==="ArrowRight" &&
+                index<inputs.length-1
+            ){
+
+                inputs[index+1].focus();
+
+            }
+
+
+            if(e.key==="Enter"){
+
+                checkCode();
+
+            }
+
+        }
+    );
+
+});
+
+
+/* ============================================================
+   START
+============================================================ */
+
+newPuzzle();
+
+</script>
+
+</body>
+</html>
+
