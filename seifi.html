@@ -1,9 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="ka">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>რიცხვითი სეიფი 🔐</title>
 
@@ -16,27 +20,51 @@
 }
 
 body{
+
     min-height:100vh;
-    font-family:"Segoe UI",Tahoma,sans-serif;
+
+    font-family:
+        "Segoe UI",
+        Tahoma,
+        Arial,
+        sans-serif;
 
     background:
-        radial-gradient(circle at 50% -10%,#164e63 0%,transparent 35%),
-        linear-gradient(135deg,#020617,#0f172a 55%,#111827);
+        radial-gradient(
+            circle at 50% -10%,
+            #164e63 0%,
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #020617,
+            #0f172a 55%,
+            #111827
+        );
 
     color:#f8fafc;
 
     display:flex;
+
     justify-content:center;
+
     align-items:center;
 
     padding:20px;
 }
 
-.container{
-    width:100%;
-    max-width:560px;
 
-    background:rgba(15,23,42,.9);
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.container{
+
+    width:100%;
+
+    max-width:620px;
+
+    background:rgba(15,23,42,.92);
 
     border:1px solid rgba(148,163,184,.2);
 
@@ -48,65 +76,105 @@ body{
         0 25px 70px rgba(0,0,0,.55);
 
     backdrop-filter:blur(15px);
+
 }
 
-/* HEADER */
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
+
     text-align:center;
+
     margin-bottom:20px;
+
 }
 
 .title{
+
     font-size:1.8rem;
+
     font-weight:800;
+
     margin-bottom:6px;
+
 }
 
 .subtitle{
+
     color:#94a3b8;
+
     font-size:.92rem;
+
 }
 
-/* STATS */
+
+/* =========================================================
+   TOP BAR
+========================================================= */
 
 .topbar{
+
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+
+    grid-template-columns:
+        repeat(4,1fr);
+
     gap:8px;
 
     margin-bottom:16px;
+
 }
 
 .stat{
+
     background:#111c31;
+
     border:1px solid #26354d;
+
     border-radius:12px;
 
-    padding:9px;
+    padding:9px 5px;
 
     text-align:center;
+
 }
 
 .stat-label{
+
     color:#64748b;
-    font-size:.68rem;
+
+    font-size:.65rem;
+
 }
 
 .stat-value{
+
     margin-top:3px;
-    font-size:.95rem;
+
+    font-size:.92rem;
+
     font-weight:800;
+
 }
 
-/* DIFFICULTY */
+
+/* =========================================================
+   LEVEL
+========================================================= */
 
 .level-box{
+
     text-align:center;
+
     margin-bottom:17px;
+
 }
 
 .level{
+
     display:inline-block;
 
     padding:7px 16px;
@@ -114,15 +182,23 @@ body{
     border-radius:20px;
 
     font-size:.85rem;
+
     font-weight:bold;
 
-    background:rgba(56,189,248,.1);
-    border:1px solid rgba(56,189,248,.3);
+    background:
+        rgba(56,189,248,.1);
+
+    border:
+        1px solid rgba(56,189,248,.3);
 
     color:#38bdf8;
+
 }
 
-/* SAFE */
+
+/* =========================================================
+   SAFE
+========================================================= */
 
 .safe-display{
 
@@ -138,9 +214,11 @@ body{
 
     box-shadow:
         inset 0 3px 15px rgba(0,0,0,.7);
+
 }
 
 .lock-icon{
+
     text-align:center;
 
     font-size:3rem;
@@ -148,6 +226,7 @@ body{
     margin-bottom:17px;
 
     transition:.3s;
+
 }
 
 .code-inputs{
@@ -157,11 +236,13 @@ body{
     justify-content:center;
 
     gap:10px;
+
 }
 
 .code-input{
 
     width:60px;
+
     height:68px;
 
     border-radius:13px;
@@ -181,6 +262,7 @@ body{
     outline:none;
 
     transition:.2s;
+
 }
 
 .code-input:focus{
@@ -191,9 +273,13 @@ body{
         0 0 16px rgba(56,189,248,.35);
 
     transform:translateY(-2px);
+
 }
 
-/* HINTS */
+
+/* =========================================================
+   HINTS
+========================================================= */
 
 .hints-box{
 
@@ -208,6 +294,7 @@ body{
     padding:17px;
 
     margin-bottom:18px;
+
 }
 
 .hints-title{
@@ -217,11 +304,13 @@ body{
     font-weight:800;
 
     margin-bottom:13px;
+
 }
 
 .hints-list{
 
     list-style:none;
+
 }
 
 .hints-list li{
@@ -237,10 +326,13 @@ body{
     padding-left:23px;
 
     position:relative;
+
 }
 
 .hints-list li:last-child{
+
     margin-bottom:0;
+
 }
 
 .hints-list li::before{
@@ -250,15 +342,20 @@ body{
     position:absolute;
 
     left:0;
+
 }
 
-/* BUTTONS */
+
+/* =========================================================
+   BUTTONS
+========================================================= */
 
 .buttons{
 
     display:flex;
 
     gap:9px;
+
 }
 
 button{
@@ -276,14 +373,29 @@ button{
     font-weight:800;
 
     transition:.2s;
+
 }
 
 button:hover{
+
     transform:translateY(-2px);
+
 }
 
 button:active{
+
     transform:translateY(1px);
+
+}
+
+button:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+
+    transform:none;
+
 }
 
 .btn-submit{
@@ -293,10 +405,15 @@ button:active{
     color:white;
 
     background:
-        linear-gradient(135deg,#0284c7,#0369a1);
+        linear-gradient(
+            135deg,
+            #0284c7,
+            #0369a1
+        );
 
     box-shadow:
         0 5px 18px rgba(2,132,199,.25);
+
 }
 
 .btn-new{
@@ -308,9 +425,13 @@ button:active{
     background:#1e293b;
 
     border:1px solid #334155;
+
 }
 
-/* MESSAGE */
+
+/* =========================================================
+   MESSAGE
+========================================================= */
 
 .message{
 
@@ -323,21 +444,31 @@ button:active{
     font-weight:800;
 
     line-height:1.4;
+
 }
 
 .message.success{
+
     color:#4ade80;
+
 }
 
 .message.error{
+
     color:#f87171;
+
 }
 
 .message.info{
+
     color:#38bdf8;
+
 }
 
-/* PROGRESS */
+
+/* =========================================================
+   PROGRESS
+========================================================= */
 
 .progress{
 
@@ -350,19 +481,152 @@ button:active{
     overflow:hidden;
 
     margin-top:18px;
+
 }
 
 .progress-bar{
 
     height:100%;
 
+    width:0%;
+
     background:
-        linear-gradient(90deg,#0ea5e9,#38bdf8);
+        linear-gradient(
+            90deg,
+            #0ea5e9,
+            #38bdf8
+        );
 
     transition:.4s;
+
 }
 
-/* ANIMATION */
+
+/* =========================================================
+   ACHIEVEMENTS
+========================================================= */
+
+.achievement-box{
+
+    margin-top:20px;
+
+    padding:15px;
+
+    background:#0b1425;
+
+    border:1px solid #26354d;
+
+    border-radius:15px;
+
+}
+
+.achievement-title{
+
+    font-weight:800;
+
+    color:#fbbf24;
+
+    margin-bottom:12px;
+
+}
+
+.achievements{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:7px;
+
+}
+
+.achievement{
+
+    text-align:center;
+
+    padding:8px 3px;
+
+    border-radius:10px;
+
+    background:#111c31;
+
+    border:1px solid #26354d;
+
+    opacity:.35;
+
+    filter:grayscale(1);
+
+    transition:.3s;
+
+}
+
+.achievement.unlocked{
+
+    opacity:1;
+
+    filter:none;
+
+    border-color:#80651b;
+
+    background:
+        rgba(251,191,36,.08);
+
+}
+
+.achievement-icon{
+
+    font-size:22px;
+
+}
+
+.achievement-name{
+
+    font-size:9px;
+
+    color:#94a3b8;
+
+    margin-top:4px;
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.reset-area{
+
+    text-align:center;
+
+    margin-top:17px;
+
+}
+
+.reset-btn{
+
+    background:transparent;
+
+    color:#64748b;
+
+    border:0;
+
+    font-size:.75rem;
+
+    padding:6px 10px;
+
+}
+
+.reset-btn:hover{
+
+    color:#f87171;
+
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
 
 @keyframes shake{
 
@@ -377,11 +641,15 @@ button:active{
     40%,80%{
         transform:translateX(7px);
     }
+
 }
 
 .shake{
+
     animation:shake .4s;
+
 }
+
 
 @keyframes unlock{
 
@@ -390,53 +658,124 @@ button:active{
     }
 
     50%{
-        transform:scale(1.3) rotate(-5deg);
+        transform:
+            scale(1.3)
+            rotate(-5deg);
     }
 
     100%{
         transform:scale(1);
     }
+
 }
 
 .unlock{
+
     animation:unlock .6s;
+
 }
 
-/* MOBILE */
 
-@media(max-width:430px){
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:500px){
+
+    body{
+
+        padding:10px;
+
+        align-items:flex-start;
+
+    }
 
     .container{
-        padding:22px 15px;
+
+        margin-top:10px;
+
+        padding:21px 14px;
+
+        border-radius:20px;
+
     }
 
     .title{
+
         font-size:1.5rem;
+
+    }
+
+    .subtitle{
+
+        font-size:.82rem;
+
+    }
+
+    .topbar{
+
+        grid-template-columns:
+            repeat(2,1fr);
+
     }
 
     .code-input{
 
         width:53px;
+
         height:61px;
 
         font-size:1.8rem;
+
     }
 
     .code-inputs{
+
         gap:7px;
+
     }
 
     .hints-list li{
+
         font-size:.86rem;
+
     }
+
+    .achievements{
+
+        grid-template-columns:
+            repeat(5,1fr);
+
+    }
+
+    .achievement-icon{
+
+        font-size:18px;
+
+    }
+
+    .achievement-name{
+
+        font-size:7px;
+
+    }
+
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
     <div class="header">
 
@@ -451,42 +790,83 @@ button:active{
     </div>
 
 
+    <!-- =====================================================
+         STATS
+    ====================================================== -->
+
     <div class="topbar">
 
+
         <div class="stat">
+
             <div class="stat-label">
                 დონე
             </div>
 
-            <div class="stat-value" id="levelValue">
+            <div
+                class="stat-value"
+                id="levelValue"
+            >
                 1 / 20
             </div>
+
         </div>
 
 
         <div class="stat">
+
             <div class="stat-label">
                 ქულა
             </div>
 
-            <div class="stat-value" id="scoreValue">
+            <div
+                class="stat-value"
+                id="scoreValue"
+            >
                 0
             </div>
+
         </div>
 
 
         <div class="stat">
+
             <div class="stat-label">
-                მცდელობა
+                შეცდომა
             </div>
 
-            <div class="stat-value" id="attemptValue">
+            <div
+                class="stat-value"
+                id="mistakeValue"
+            >
                 0
             </div>
+
         </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                რეკორდი
+            </div>
+
+            <div
+                class="stat-value"
+                id="recordValue"
+            >
+                1 / 20
+            </div>
+
+        </div>
+
 
     </div>
 
+
+    <!-- =====================================================
+         DIFFICULTY
+    ====================================================== -->
 
     <div class="level-box">
 
@@ -500,7 +880,15 @@ button:active{
     </div>
 
 
-    <div class="safe-display" id="safeDisplay">
+    <!-- =====================================================
+         SAFE
+    ====================================================== -->
+
+    <div
+        class="safe-display"
+        id="safeDisplay"
+    >
+
 
         <div
             class="lock-icon"
@@ -512,6 +900,7 @@ button:active{
 
         <div class="code-inputs">
 
+
             <input
                 class="code-input"
                 id="digit1"
@@ -521,6 +910,7 @@ button:active{
                 autofocus
             >
 
+
             <input
                 class="code-input"
                 id="digit2"
@@ -528,6 +918,7 @@ button:active{
                 inputmode="numeric"
                 autocomplete="off"
             >
+
 
             <input
                 class="code-input"
@@ -537,6 +928,7 @@ button:active{
                 autocomplete="off"
             >
 
+
             <input
                 class="code-input"
                 id="digit4"
@@ -545,33 +937,48 @@ button:active{
                 autocomplete="off"
             >
 
+
         </div>
 
     </div>
 
 
+    <!-- =====================================================
+         HINTS
+    ====================================================== -->
+
     <div class="hints-box">
+
 
         <div class="hints-title">
             💡 საიდუმლო მინიშნებები
         </div>
+
 
         <ul
             class="hints-list"
             id="hintsList"
         ></ul>
 
+
     </div>
 
 
+    <!-- =====================================================
+         BUTTONS
+    ====================================================== -->
+
     <div class="buttons">
+
 
         <button
             class="btn-submit"
+            id="submitBtn"
             onclick="checkCode()"
         >
             🔓 სეიფის გახსნა
         </button>
+
 
         <button
             class="btn-new"
@@ -581,14 +988,23 @@ button:active{
             🔄
         </button>
 
+
     </div>
 
+
+    <!-- =====================================================
+         MESSAGE
+    ====================================================== -->
 
     <div
         class="message"
         id="message"
     ></div>
 
+
+    <!-- =====================================================
+         PROGRESS
+    ====================================================== -->
 
     <div class="progress">
 
@@ -599,20 +1015,159 @@ button:active{
 
     </div>
 
+
+    <!-- =====================================================
+         ACHIEVEMENTS
+    ====================================================== -->
+
+    <div class="achievement-box">
+
+
+        <div class="achievement-title">
+            🏆 მიღწევები
+        </div>
+
+
+        <div class="achievements">
+
+
+            <div
+                class="achievement"
+                id="achievement1"
+            >
+
+                <div class="achievement-icon">
+                    🥉
+                </div>
+
+                <div class="achievement-name">
+                    პირველი
+                </div>
+
+            </div>
+
+
+            <div
+                class="achievement"
+                id="achievement2"
+            >
+
+                <div class="achievement-icon">
+                    🥈
+                </div>
+
+                <div class="achievement-name">
+                    5 დონე
+                </div>
+
+            </div>
+
+
+            <div
+                class="achievement"
+                id="achievement3"
+            >
+
+                <div class="achievement-icon">
+                    🥇
+                </div>
+
+                <div class="achievement-name">
+                    10 დონე
+                </div>
+
+            </div>
+
+
+            <div
+                class="achievement"
+                id="achievement4"
+            >
+
+                <div class="achievement-icon">
+                    💎
+                </div>
+
+                <div class="achievement-name">
+                    15 დონე
+                </div>
+
+            </div>
+
+
+            <div
+                class="achievement"
+                id="achievement5"
+            >
+
+                <div class="achievement-icon">
+                    👑
+                </div>
+
+                <div class="achievement-name">
+                    20 დონე
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESET
+    ====================================================== -->
+
+    <div class="reset-area">
+
+        <button
+            class="reset-btn"
+            onclick="resetProgress()"
+        >
+            🗑️ პროგრესის წაშლა
+        </button>
+
+    </div>
+
+
 </div>
+
 
 
 <script>
 
 /* ============================================================
-   GLOBAL
+   STORAGE
+============================================================ */
+
+
+/*
+    ეს არის ამ თამაშის უნიკალური გასაღები.
+
+    ბრაუზერში შეინახება:
+
+    number_safe_progress_v2
+
+    სხვა თამაშებს არ შეეხება.
+*/
+
+const SAVE_KEY =
+    "number_safe_progress_v2";
+
+
+/* ============================================================
+   GAME VARIABLES
 ============================================================ */
 
 let currentLevel = 1;
 
 let score = 0;
 
-let attempts = 0;
+let totalMistakes = 0;
+
+let levelAttempts = 0;
 
 let solved = false;
 
@@ -621,6 +1176,28 @@ let secretCode = [];
 let puzzleConditions = [];
 
 let puzzleHints = [];
+
+
+/*
+    მაქსიმალური დონე,
+    რომელიც ერთხელ მაინც გაიარა.
+*/
+
+let maxLevelReached = 1;
+
+
+/*
+    სულ გავლილი დონეები.
+*/
+
+let completedLevels = 0;
+
+
+/*
+    ზედიზედ სწორი პასუხები.
+*/
+
+let streak = 0;
 
 
 /* ============================================================
@@ -648,8 +1225,11 @@ const levelValue =
 const scoreValue =
     document.getElementById("scoreValue");
 
-const attemptValue =
-    document.getElementById("attemptValue");
+const mistakeValue =
+    document.getElementById("mistakeValue");
+
+const recordValue =
+    document.getElementById("recordValue");
 
 const difficulty =
     document.getElementById("difficulty");
@@ -659,12 +1239,146 @@ const progressBar =
 
 
 /* ============================================================
-   ALL 4-DIGIT CODES
+   SAVE PROGRESS
+============================================================ */
+
+function saveProgress(){
+
+    const data = {
+
+        currentLevel:
+            currentLevel,
+
+        score:
+            score,
+
+        totalMistakes:
+            totalMistakes,
+
+        maxLevelReached:
+            maxLevelReached,
+
+        completedLevels:
+            completedLevels,
+
+        streak:
+            streak
+
+    };
+
+
+    localStorage.setItem(
+
+        SAVE_KEY,
+
+        JSON.stringify(data)
+
+    );
+
+}
+
+
+/* ============================================================
+   LOAD PROGRESS
+============================================================ */
+
+function loadProgress(){
+
+    const saved =
+        localStorage.getItem(SAVE_KEY);
+
+
+    /*
+        თუ არაფერი არის შენახული,
+        ახალი თამაში იწყება.
+    */
+
+    if(!saved){
+
+        return;
+
+    }
+
+
+    try{
+
+        const data =
+            JSON.parse(saved);
+
+
+        currentLevel =
+            Number(data.currentLevel) || 1;
+
+
+        score =
+            Number(data.score) || 0;
+
+
+        totalMistakes =
+            Number(data.totalMistakes) || 0;
+
+
+        maxLevelReached =
+            Number(data.maxLevelReached) || 1;
+
+
+        completedLevels =
+            Number(data.completedLevels) || 0;
+
+
+        streak =
+            Number(data.streak) || 0;
+
+
+        /*
+            დაცვა დაზიანებული მონაცემებისგან
+        */
+
+        currentLevel =
+            Math.max(
+                1,
+                Math.min(
+                    20,
+                    currentLevel
+                )
+            );
+
+
+        maxLevelReached =
+            Math.max(
+                1,
+                Math.min(
+                    20,
+                    maxLevelReached
+                )
+            );
+
+
+    }catch(error){
+
+        console.log(
+            "შენახული პროგრესის წაკითხვა ვერ მოხერხდა."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   ALL CODES
 ============================================================ */
 
 function allCodes(){
 
     const result = [];
+
+
+    /*
+        პირველი ციფრი 1-9,
+        რათა 4-ციფრიანი კოდი
+        0-ით არ იწყებოდეს.
+    */
 
     for(let a=1;a<=9;a++){
 
@@ -674,7 +1388,12 @@ function allCodes(){
 
                 for(let d=0;d<=9;d++){
 
-                    result.push([a,b,c,d]);
+                    result.push([
+                        a,
+                        b,
+                        c,
+                        d
+                    ]);
 
                 }
 
@@ -684,19 +1403,24 @@ function allCodes(){
 
     }
 
+
     return result;
+
 }
 
 
 /* ============================================================
-   RANDOM CHOICE
+   RANDOM ITEM
 ============================================================ */
 
 function randomItem(array){
 
     return array[
-        Math.floor(Math.random()*array.length)
+        Math.floor(
+            Math.random()*array.length
+        )
     ];
+
 }
 
 
@@ -707,40 +1431,50 @@ function randomItem(array){
 function generateLevel1(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a > 4 &&
             b === a - 2 &&
             c === 8 &&
             d === 9
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
         code,
 
-        conditions: [
+        conditions:[
 
             x => x[0] > 4,
+
             x => x[1] === x[0]-2,
+
             x => x[2] === 8,
+
             x => x[3] === 9
 
         ],
 
-        hints: [
+        hints:[
 
             "პირველი ციფრი 4-ზე მეტია.",
+
             "მეორე ციფრი პირველზე 2-ით ნაკლებია.",
+
             "მესამე ციფრი 8-ია.",
+
             "მეოთხე ციფრი 9-ია."
 
         ]
 
     };
+
 }
 
 
@@ -751,17 +1485,20 @@ function generateLevel1(){
 function generateLevel2(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a > 3 &&
             b < a &&
             c === a+b &&
             d === 9 &&
             c <= 9
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -792,6 +1529,7 @@ function generateLevel2(){
         ]
 
     };
+
 }
 
 
@@ -802,16 +1540,19 @@ function generateLevel2(){
 function generateLevel3(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a%2===0 &&
             b===a/2 &&
             c===a+b &&
             d>c
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -842,6 +1583,7 @@ function generateLevel3(){
         ]
 
     };
+
 }
 
 
@@ -852,17 +1594,20 @@ function generateLevel3(){
 function generateLevel4(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a>b &&
             c===a-b &&
             d===a+c &&
             d<=9 &&
             (a+b+c+d)%2===0
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -876,7 +1621,13 @@ function generateLevel4(){
 
             x => x[3]===x[0]+x[2],
 
-            x => (x[0]+x[1]+x[2]+x[3])%2===0
+            x =>
+                (
+                    x[0]+
+                    x[1]+
+                    x[2]+
+                    x[3]
+                )%2===0
 
         ],
 
@@ -893,6 +1644,7 @@ function generateLevel4(){
         ]
 
     };
+
 }
 
 
@@ -903,16 +1655,19 @@ function generateLevel4(){
 function generateLevel5(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+d===10 &&
             b===a-3 &&
             c===b+2 &&
             d>c
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -943,6 +1698,7 @@ function generateLevel5(){
         ]
 
     };
+
 }
 
 
@@ -953,16 +1709,19 @@ function generateLevel5(){
 function generateLevel6(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a%2===1 &&
             b===a+1 &&
             c===b-3 &&
             d===a+c
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -993,6 +1752,7 @@ function generateLevel6(){
         ]
 
     };
+
 }
 
 
@@ -1003,16 +1763,19 @@ function generateLevel6(){
 function generateLevel7(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a>b &&
             b>c &&
             c>d &&
             a-d===5
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1043,6 +1806,7 @@ function generateLevel7(){
         ]
 
     };
+
 }
 
 
@@ -1053,16 +1817,19 @@ function generateLevel7(){
 function generateLevel8(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             (a+b)%2===0 &&
             c===(a*b)%10 &&
             d===(a+c)%10 &&
             d>b
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1070,11 +1837,14 @@ function generateLevel8(){
 
         conditions:[
 
-            x => (x[0]+x[1])%2===0,
+            x =>
+                (x[0]+x[1])%2===0,
 
-            x => x[2]===(x[0]*x[1])%10,
+            x =>
+                x[2]===(x[0]*x[1])%10,
 
-            x => x[3]===(x[0]+x[2])%10,
+            x =>
+                x[3]===(x[0]+x[2])%10,
 
             x => x[3]>x[1]
 
@@ -1093,6 +1863,7 @@ function generateLevel8(){
         ]
 
     };
+
 }
 
 
@@ -1103,16 +1874,19 @@ function generateLevel8(){
 function generateLevel9(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+b+c+d===18 &&
             a>d &&
             b===c-1 &&
             d===a-4
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1120,7 +1894,11 @@ function generateLevel9(){
 
         conditions:[
 
-            x => x[0]+x[1]+x[2]+x[3]===18,
+            x =>
+                x[0]+
+                x[1]+
+                x[2]+
+                x[3]===18,
 
             x => x[0]>x[3],
 
@@ -1143,6 +1921,7 @@ function generateLevel9(){
         ]
 
     };
+
 }
 
 
@@ -1153,16 +1932,19 @@ function generateLevel9(){
 function generateLevel10(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a*2===b+c &&
             c===d+2 &&
             a>d &&
             (a+b+c+d)%3===0
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1170,13 +1952,23 @@ function generateLevel10(){
 
         conditions:[
 
-            x => x[0]*2===x[1]+x[2],
+            x =>
+                x[0]*2===
+                x[1]+x[2],
 
-            x => x[2]===x[3]+2,
+            x =>
+                x[2]===
+                x[3]+2,
 
             x => x[0]>x[3],
 
-            x => (x[0]+x[1]+x[2]+x[3])%3===0
+            x =>
+                (
+                    x[0]+
+                    x[1]+
+                    x[2]+
+                    x[3]
+                )%3===0
 
         ],
 
@@ -1193,6 +1985,7 @@ function generateLevel10(){
         ]
 
     };
+
 }
 
 
@@ -1203,16 +1996,19 @@ function generateLevel10(){
 function generateLevel11(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+b===c+d &&
             a>c &&
             b<d &&
             a-d===1
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1220,7 +2016,9 @@ function generateLevel11(){
 
         conditions:[
 
-            x => x[0]+x[1]===x[2]+x[3],
+            x =>
+                x[0]+x[1]===
+                x[2]+x[3],
 
             x => x[0]>x[2],
 
@@ -1243,6 +2041,7 @@ function generateLevel11(){
         ]
 
     };
+
 }
 
 
@@ -1253,16 +2052,19 @@ function generateLevel11(){
 function generateLevel12(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             (a*b)%10===c &&
             (b+c)%10===d &&
             a>b &&
             c<d
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1270,9 +2072,13 @@ function generateLevel12(){
 
         conditions:[
 
-            x => (x[0]*x[1])%10===x[2],
+            x =>
+                (x[0]*x[1])%10===
+                x[2],
 
-            x => (x[1]+x[2])%10===x[3],
+            x =>
+                (x[1]+x[2])%10===
+                x[3],
 
             x => x[0]>x[1],
 
@@ -1293,6 +2099,7 @@ function generateLevel12(){
         ]
 
     };
+
 }
 
 
@@ -1303,16 +2110,19 @@ function generateLevel12(){
 function generateLevel13(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+d===12 &&
             b*2===c &&
             a-b===d-2 &&
             c>a
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1320,13 +2130,18 @@ function generateLevel13(){
 
         conditions:[
 
-            x => x[0]+x[3]===12,
+            x =>
+                x[0]+x[3]===12,
 
-            x => x[1]*2===x[2],
+            x =>
+                x[1]*2===x[2],
 
-            x => x[0]-x[1]===x[3]-2,
+            x =>
+                x[0]-x[1]===
+                x[3]-2,
 
-            x => x[2]>x[0]
+            x =>
+                x[2]>x[0]
 
         ],
 
@@ -1343,6 +2158,7 @@ function generateLevel13(){
         ]
 
     };
+
 }
 
 
@@ -1353,16 +2169,19 @@ function generateLevel13(){
 function generateLevel14(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+b+c+d===20 &&
             a*c===b*d &&
             a>b &&
             c>d
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1370,9 +2189,15 @@ function generateLevel14(){
 
         conditions:[
 
-            x => x[0]+x[1]+x[2]+x[3]===20,
+            x =>
+                x[0]+
+                x[1]+
+                x[2]+
+                x[3]===20,
 
-            x => x[0]*x[2]===x[1]*x[3],
+            x =>
+                x[0]*x[2]===
+                x[1]*x[3],
 
             x => x[0]>x[1],
 
@@ -1393,6 +2218,7 @@ function generateLevel14(){
         ]
 
     };
+
 }
 
 
@@ -1403,16 +2229,19 @@ function generateLevel14(){
 function generateLevel15(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             (a+b)%10===c &&
             (b+c)%10===d &&
             a>d &&
             a+b>c+d
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1420,13 +2249,19 @@ function generateLevel15(){
 
         conditions:[
 
-            x => (x[0]+x[1])%10===x[2],
+            x =>
+                (x[0]+x[1])%10===
+                x[2],
 
-            x => (x[1]+x[2])%10===x[3],
+            x =>
+                (x[1]+x[2])%10===
+                x[3],
 
             x => x[0]>x[3],
 
-            x => x[0]+x[1]>x[2]+x[3]
+            x =>
+                x[0]+x[1]>
+                x[2]+x[3]
 
         ],
 
@@ -1443,6 +2278,7 @@ function generateLevel15(){
         ]
 
     };
+
 }
 
 
@@ -1453,16 +2289,19 @@ function generateLevel15(){
 function generateLevel16(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a*b+c===2*d &&
             a+c===b+d &&
             a>c &&
             b>d
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1470,9 +2309,13 @@ function generateLevel16(){
 
         conditions:[
 
-            x => x[0]*x[1]+x[2]===2*x[3],
+            x =>
+                x[0]*x[1]+x[2]===
+                2*x[3],
 
-            x => x[0]+x[2]===x[1]+x[3],
+            x =>
+                x[0]+x[2]===
+                x[1]+x[3],
 
             x => x[0]>x[2],
 
@@ -1493,6 +2336,7 @@ function generateLevel16(){
         ]
 
     };
+
 }
 
 
@@ -1503,17 +2347,20 @@ function generateLevel16(){
 function generateLevel17(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+b===10 &&
             c+d===10 &&
             a>c &&
             b<d &&
             a-c===2
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1521,15 +2368,18 @@ function generateLevel17(){
 
         conditions:[
 
-            x => x[0]+x[1]===10,
+            x =>
+                x[0]+x[1]===10,
 
-            x => x[2]+x[3]===10,
+            x =>
+                x[2]+x[3]===10,
 
             x => x[0]>x[2],
 
             x => x[1]<x[3],
 
-            x => x[0]-x[2]===2
+            x =>
+                x[0]-x[2]===2
 
         ],
 
@@ -1548,6 +2398,7 @@ function generateLevel17(){
         ]
 
     };
+
 }
 
 
@@ -1558,17 +2409,20 @@ function generateLevel17(){
 function generateLevel18(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a*b===c+d &&
             a+c===b+d &&
             a>b &&
             c>d &&
             (a+d)%2===0
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1576,15 +2430,20 @@ function generateLevel18(){
 
         conditions:[
 
-            x => x[0]*x[1]===x[2]+x[3],
+            x =>
+                x[0]*x[1]===
+                x[2]+x[3],
 
-            x => x[0]+x[2]===x[1]+x[3],
+            x =>
+                x[0]+x[2]===
+                x[1]+x[3],
 
             x => x[0]>x[1],
 
             x => x[2]>x[3],
 
-            x => (x[0]+x[3])%2===0
+            x =>
+                (x[0]+x[3])%2===0
 
         ],
 
@@ -1603,6 +2462,7 @@ function generateLevel18(){
         ]
 
     };
+
 }
 
 
@@ -1613,17 +2473,20 @@ function generateLevel18(){
 function generateLevel19(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+b+c+d===22 &&
             a*d===b+c+5 &&
             a>b &&
             c>d &&
             (a*b)%2===0
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1631,15 +2494,22 @@ function generateLevel19(){
 
         conditions:[
 
-            x => x[0]+x[1]+x[2]+x[3]===22,
+            x =>
+                x[0]+
+                x[1]+
+                x[2]+
+                x[3]===22,
 
-            x => x[0]*x[3]===x[1]+x[2]+5,
+            x =>
+                x[0]*x[3]===
+                x[1]+x[2]+5,
 
             x => x[0]>x[1],
 
             x => x[2]>x[3],
 
-            x => (x[0]*x[1])%2===0
+            x =>
+                (x[0]*x[1])%2===0
 
         ],
 
@@ -1658,6 +2528,7 @@ function generateLevel19(){
         ]
 
     };
+
 }
 
 
@@ -1668,7 +2539,8 @@ function generateLevel19(){
 function generateLevel20(){
 
     const candidates =
-        allCodes().filter(([a,b,c,d]) =>
+        allCodes().filter(
+            ([a,b,c,d]) =>
 
             a+b===c+d &&
             a*c===b+d+8 &&
@@ -1676,10 +2548,12 @@ function generateLevel20(){
             b+c===12 &&
             a>c &&
             d<b
-
         );
 
-    const code = randomItem(candidates);
+
+    const code =
+        randomItem(candidates);
+
 
     return {
 
@@ -1687,17 +2561,25 @@ function generateLevel20(){
 
         conditions:[
 
-            x => x[0]+x[1]===x[2]+x[3],
+            x =>
+                x[0]+x[1]===
+                x[2]+x[3],
 
-            x => x[0]*x[2]===x[1]+x[3]+8,
+            x =>
+                x[0]*x[2]===
+                x[1]+x[3]+8,
 
-            x => x[0]-x[3]===3,
+            x =>
+                x[0]-x[3]===3,
 
-            x => x[1]+x[2]===12,
+            x =>
+                x[1]+x[2]===12,
 
-            x => x[0]>x[2],
+            x =>
+                x[0]>x[2],
 
-            x => x[3]<x[1]
+            x =>
+                x[3]<x[1]
 
         ],
 
@@ -1718,35 +2600,56 @@ function generateLevel20(){
         ]
 
     };
+
 }
 
 
 /* ============================================================
-   GENERATOR
+   GENERATORS
 ============================================================ */
 
 const generators = {
 
     1:generateLevel1,
+
     2:generateLevel2,
+
     3:generateLevel3,
+
     4:generateLevel4,
+
     5:generateLevel5,
+
     6:generateLevel6,
+
     7:generateLevel7,
+
     8:generateLevel8,
+
     9:generateLevel9,
+
     10:generateLevel10,
+
     11:generateLevel11,
+
     12:generateLevel12,
+
     13:generateLevel13,
+
     14:generateLevel14,
+
     15:generateLevel15,
+
     16:generateLevel16,
+
     17:generateLevel17,
+
     18:generateLevel18,
+
     19:generateLevel19,
+
     20:generateLevel20
+
 };
 
 
@@ -1759,45 +2662,50 @@ function createPuzzle(){
     const generator =
         generators[currentLevel];
 
+
     let puzzle = null;
 
-    /*
-       უსაფრთხოების მიზნით ვცდილობთ
-       რამდენჯერმე.
-    */
 
     for(let i=0;i<100;i++){
 
         puzzle = generator();
+
 
         if(
             puzzle &&
             puzzle.code &&
             puzzle.code.length===4
         ){
+
             break;
+
         }
 
     }
 
+
     if(!puzzle){
 
-        alert(
-            "ამ დონის გენერირება ვერ მოხერხდა."
+        console.log(
+            "Puzzle generation failed"
         );
 
         return;
 
     }
 
+
     secretCode =
         puzzle.code.slice();
+
 
     puzzleConditions =
         puzzle.conditions.slice();
 
+
     puzzleHints =
         puzzle.hints.slice();
+
 
     renderHints();
 
@@ -1812,89 +2720,124 @@ function renderHints(){
 
     hintsList.innerHTML = "";
 
-    puzzleHints.forEach((hint,index)=>{
 
-        const li =
-            document.createElement("li");
-
-        li.textContent = hint;
-
-        hintsList.appendChild(li);
-
-    });
-
-}
+    puzzleHints.forEach(
+        (hint,index)=>{
 
 
-/* ============================================================
-   VERIFY CODE BY CONDITIONS
-============================================================ */
+            const li =
+                document.createElement("li");
 
-function verifyCode(code){
 
-    /*
-       ძალიან მნიშვნელოვანი:
+            li.textContent =
+                hint;
 
-       პასუხი აღარ მოწმდება მხოლოდ
-       secretCode === enteredCode
 
-       არამედ ყველა მინიშნების
-       მათემატიკური პირობა მოწმდება.
+            hintsList.appendChild(li);
 
-       ამიტომ 7189 Level 2-ში:
 
-       7 > 3       TRUE
-       1 < 7       TRUE
-       7+1 = 8     TRUE
-       9 = 9       TRUE
-
-       => სწორი პასუხია.
-    */
-
-    return puzzleConditions.every(
-        condition => condition(code)
+        }
     );
 
 }
 
 
 /* ============================================================
-   COUNT VALID SOLUTIONS
+   VERIFY
 ============================================================ */
 
-function countSolutions(){
+function verifyCode(code){
 
-    let count = 0;
+    return puzzleConditions.every(
+        condition =>
+            condition(code)
+    );
 
-    for(let a=1;a<=9;a++){
+}
 
-        for(let b=0;b<=9;b++){
 
-            for(let c=0;c<=9;c++){
+/* ============================================================
+   SAVE ACHIEVEMENT
+============================================================ */
 
-                for(let d=0;d<=9;d++){
+function updateAchievements(){
 
-                    const code=[a,b,c,d];
+    /*
+        პირველი დონე
+    */
 
-                    if(verifyCode(code)){
+    if(maxLevelReached >= 1){
 
-                        count++;
-
-                        if(count>1){
-                            return count;
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
+        unlockAchievement(1);
 
     }
 
-    return count;
+
+    /*
+        5 დონე
+    */
+
+    if(maxLevelReached >= 5){
+
+        unlockAchievement(2);
+
+    }
+
+
+    /*
+        10 დონე
+    */
+
+    if(maxLevelReached >= 10){
+
+        unlockAchievement(3);
+
+    }
+
+
+    /*
+        15 დონე
+    */
+
+    if(maxLevelReached >= 15){
+
+        unlockAchievement(4);
+
+    }
+
+
+    /*
+        20 დონე
+    */
+
+    if(maxLevelReached >= 20){
+
+        unlockAchievement(5);
+
+    }
+
+}
+
+
+/* ============================================================
+   UNLOCK ACHIEVEMENT
+============================================================ */
+
+function unlockAchievement(number){
+
+    const element =
+        document.getElementById(
+            "achievement"+number
+        );
+
+
+    if(element){
+
+        element.classList.add(
+            "unlocked"
+        );
+
+    }
 
 }
 
@@ -1905,43 +2848,54 @@ function countSolutions(){
 
 function newPuzzle(){
 
-    solved=false;
+    solved = false;
 
-    attempts=0;
+    levelAttempts = 0;
 
-    attemptValue.textContent="0";
 
-    lockIcon.textContent="🔒";
+    lockIcon.textContent =
+        "🔒";
 
-    lockIcon.classList.remove("unlock");
 
-    message.textContent="";
+    lockIcon.classList.remove(
+        "unlock"
+    );
 
-    message.className="message";
 
-    inputs.forEach(input=>{
+    message.textContent =
+        "";
 
-        input.value="";
 
-        input.style.borderColor="#475569";
+    message.className =
+        "message";
 
-        input.disabled=false;
 
-    });
+    inputs.forEach(
+        input=>{
+
+            input.value = "";
+
+            input.disabled = false;
+
+            input.style.borderColor =
+                "#475569";
+
+        }
+    );
+
 
     createPuzzle();
 
+
     updateUI();
 
-    /*
-       ფოკუსი პირველ ველზე
-    */
 
-    setTimeout(()=>{
-
-        inputs[0].focus();
-
-    },50);
+    setTimeout(
+        ()=>{
+            inputs[0].focus();
+        },
+        50
+    );
 
 }
 
@@ -1953,23 +2907,29 @@ function newPuzzle(){
 function checkCode(){
 
     if(solved){
+
         return;
+
     }
 
-    const code=[];
+
+    const code = [];
+
 
     for(const input of inputs){
 
-        if(input.value===""){
+
+        if(input.value === ""){
 
             showMessage(
-                "გთხოვ, შეიყვანე ოთხივე ციფრი!",
+                "⚠️ გთხოვ, შეიყვანე ოთხივე ციფრი.",
                 "error"
             );
 
             return;
 
         }
+
 
         code.push(
             Number(input.value)
@@ -1978,15 +2938,8 @@ function checkCode(){
     }
 
 
-    attempts++;
+    levelAttempts++;
 
-    attemptValue.textContent =
-        attempts;
-
-
-    /*
-       ამოწმებს პირობებს.
-    */
 
     const correct =
         verifyCode(code);
@@ -1994,104 +2947,263 @@ function checkCode(){
 
     if(correct){
 
-        solved=true;
-
-        lockIcon.textContent="🔓";
-
-        lockIcon.classList.add("unlock");
-
-
-        inputs.forEach(input=>{
-
-            input.style.borderColor="#4ade80";
-
-        });
-
-
-        /*
-           ქულა
-        */
-
-        let points =
-            currentLevel * 10;
-
-        points +=
-            Math.max(
-                100 - (attempts-1)*15,
-                20
-            );
-
-        score += points;
-
-        scoreValue.textContent =
-            score;
-
-
-        if(currentLevel===20){
-
-            progressBar.style.width="100%";
-
-            showMessage(
-                "🏆 საოცარია! ყველა 20 დონე გაიარე! საბოლოო ქულა: "+score,
-                "success"
-            );
-
-        }else{
-
-            showMessage(
-                "🎉 სწორია! სეიფი გაიხსნა! +"+points+" ქულა",
-                "success"
-            );
-
-
-            setTimeout(()=>{
-
-                currentLevel++;
-
-                newPuzzle();
-
-            },1500);
-
-        }
+        solveLevel();
 
     }else{
 
-        lockIcon.textContent="🔒";
+        wrongAnswer();
 
-        lockIcon.classList.remove("unlock");
+    }
 
-
-        inputs.forEach(input=>{
-
-            input.style.borderColor="#f87171";
-
-        });
+}
 
 
-        safeDisplay.classList.remove("shake");
+/* ============================================================
+   SOLVE LEVEL
+============================================================ */
 
-        void safeDisplay.offsetWidth;
+function solveLevel(){
 
-        safeDisplay.classList.add("shake");
+    solved = true;
 
+
+    /*
+        ზედიზედ სწორი
+    */
+
+    streak++;
+
+
+    /*
+        გავლილი დონე
+    */
+
+    completedLevels++;
+
+
+    /*
+        რეკორდის განახლება
+    */
+
+    if(currentLevel > maxLevelReached){
+
+        maxLevelReached =
+            currentLevel;
+
+    }
+
+
+    /*
+        ქულები
+    */
+
+    let points = 100;
+
+
+    /*
+        უფრო რთული დონე =
+        მეტი ქულა
+    */
+
+    points +=
+        (currentLevel-1)*10;
+
+
+    /*
+        სწრაფი ამოხსნა =
+        ბონუსი
+    */
+
+    if(levelAttempts === 1){
+
+        points += 50;
+
+    }else if(levelAttempts === 2){
+
+        points += 25;
+
+    }
+
+
+    /*
+        streak bonus
+    */
+
+    if(streak >= 3){
+
+        points += 25;
+
+    }
+
+
+    score += points;
+
+
+    /*
+        ვიზუალური ეფექტი
+    */
+
+    lockIcon.textContent =
+        "🔓";
+
+
+    lockIcon.classList.add(
+        "unlock"
+    );
+
+
+    inputs.forEach(
+        input=>{
+
+            input.style.borderColor =
+                "#4ade80";
+
+            input.disabled = true;
+
+        }
+    );
+
+
+    /*
+        პროგრესის შენახვა
+    */
+
+    saveProgress();
+
+
+    updateAchievements();
+
+
+    updateUI();
+
+
+    /*
+        ბოლო დონე
+    */
+
+    if(currentLevel === 20){
 
         showMessage(
-            "❌ არასწორია. გადაამოწმე ყველა მინიშნება.",
-            "error"
+            "🏆 საოცარია! ყველა 20 დონე გაიარე! საბოლოო ქულა: "+score,
+            "success"
         );
 
 
-        setTimeout(()=>{
-
-            inputs.forEach(input=>{
-
-                input.style.borderColor="#475569";
-
-            });
-
-        },1000);
+        return;
 
     }
+
+
+    showMessage(
+        "🎉 სწორია! სეიფი გაიხსნა! +"+points+" ქულა",
+        "success"
+    );
+
+
+    /*
+        შემდეგ დონეზე გადასვლა
+    */
+
+    setTimeout(
+        ()=>{
+
+            currentLevel++;
+
+
+            /*
+                ახალი დონე შეინახოს
+                მანამდე, სანამ ამოცანა
+                შეიქმნება.
+            */
+
+            saveProgress();
+
+
+            newPuzzle();
+
+
+        },
+        1500
+    );
+
+}
+
+
+/* ============================================================
+   WRONG ANSWER
+============================================================ */
+
+function wrongAnswer(){
+
+    totalMistakes++;
+
+
+    /*
+        streak წყდება
+    */
+
+    streak = 0;
+
+
+    saveProgress();
+
+
+    updateUI();
+
+
+    lockIcon.textContent =
+        "🔒";
+
+
+    lockIcon.classList.remove(
+        "unlock"
+    );
+
+
+    inputs.forEach(
+        input=>{
+
+            input.style.borderColor =
+                "#f87171";
+
+        }
+    );
+
+
+    safeDisplay.classList.remove(
+        "shake"
+    );
+
+
+    void safeDisplay.offsetWidth;
+
+
+    safeDisplay.classList.add(
+        "shake"
+    );
+
+
+    showMessage(
+        "❌ არასწორია. გადაამოწმე ყველა მინიშნება.",
+        "error"
+    );
+
+
+    setTimeout(
+        ()=>{
+
+            inputs.forEach(
+                input=>{
+
+                    input.style.borderColor =
+                        "#475569";
+
+                }
+            );
+
+        },
+        1000
+    );
 
 }
 
@@ -2102,10 +3214,43 @@ function checkCode(){
 
 function showMessage(text,type){
 
-    message.textContent=text;
+    message.textContent =
+        text;
 
-    message.className=
+    message.className =
         "message "+type;
+
+}
+
+
+/* ============================================================
+   DIFFICULTY
+============================================================ */
+
+function getDifficulty(){
+
+    if(currentLevel <= 5){
+
+        return "🟢 მარტივი";
+
+    }
+
+
+    if(currentLevel <= 10){
+
+        return "🟡 საშუალო";
+
+    }
+
+
+    if(currentLevel <= 15){
+
+        return "🟠 რთული";
+
+    }
+
+
+    return "🔴 ექსპერტი";
 
 }
 
@@ -2119,38 +3264,111 @@ function updateUI(){
     levelValue.textContent =
         currentLevel+" / 20";
 
+
     scoreValue.textContent =
         score;
 
-    attemptValue.textContent =
-        attempts;
+
+    mistakeValue.textContent =
+        totalMistakes;
 
 
-    if(currentLevel<=5){
+    recordValue.textContent =
+        maxLevelReached+" / 20";
 
-        difficulty.textContent=
-            "🟢 მარტივი";
 
-    }else if(currentLevel<=10){
+    difficulty.textContent =
+        getDifficulty();
 
-        difficulty.textContent=
-            "🟡 საშუალო";
 
-    }else if(currentLevel<=15){
+    /*
+        პროგრესის ზოლი
+    */
 
-        difficulty.textContent=
-            "🟠 რთული";
+    let progress =
+        ((currentLevel-1)/20)*100;
 
-    }else{
 
-        difficulty.textContent=
-            "🔴 ექსპერტი";
+    if(currentLevel === 20 &&
+       solved){
+
+        progress = 100;
 
     }
 
 
     progressBar.style.width =
-        ((currentLevel-1)/20*100)+"%";
+        progress+"%";
+
+
+    updateAchievements();
+
+}
+
+
+/* ============================================================
+   RESET PROGRESS
+============================================================ */
+
+function resetProgress(){
+
+    const confirmReset =
+        confirm(
+            "ნამდვილად გინდა ყველა მიღწევის, ქულის და პროგრესის წაშლა?"
+        );
+
+
+    if(!confirmReset){
+
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+        SAVE_KEY
+    );
+
+
+    currentLevel = 1;
+
+    score = 0;
+
+    totalMistakes = 0;
+
+    levelAttempts = 0;
+
+    maxLevelReached = 1;
+
+    completedLevels = 0;
+
+    streak = 0;
+
+
+    /*
+        მიღწევების ჩაკეტვა
+    */
+
+    document
+        .querySelectorAll(".achievement")
+        .forEach(
+            element =>
+                element.classList.remove(
+                    "unlocked"
+                )
+        );
+
+
+    newPuzzle();
+
+
+    updateUI();
+
+
+    showMessage(
+        "🔄 პროგრესი განულდა.",
+        "info"
+    );
 
 }
 
@@ -2159,88 +3377,139 @@ function updateUI(){
    INPUT HANDLING
 ============================================================ */
 
-inputs.forEach((input,index)=>{
+inputs.forEach(
+    (input,index)=>{
 
 
-    input.addEventListener(
-        "input",
-        function(){
-
-            this.value =
-                this.value.replace(
-                    /[^0-9]/g,
-                    ""
-                );
+        input.addEventListener(
+            "input",
+            function(){
 
 
-            if(
-                this.value &&
-                index<inputs.length-1
-            ){
-
-                inputs[index+1].focus();
-
-            }
-
-        }
-    );
+                this.value =
+                    this.value.replace(
+                        /[^0-9]/g,
+                        ""
+                    );
 
 
-    input.addEventListener(
-        "keydown",
-        function(e){
+                /*
+                    მხოლოდ ერთი ციფრი
+                */
 
-            if(
-                e.key==="Backspace" &&
-                this.value==="" &&
-                index>0
-            ){
+                if(this.value.length > 1){
 
-                inputs[index-1].focus();
+                    this.value =
+                        this.value.slice(0,1);
 
-            }
+                }
 
 
-            if(
-                e.key==="ArrowLeft" &&
-                index>0
-            ){
+                /*
+                    ავტომატურად შემდეგ ველზე
+                */
 
-                inputs[index-1].focus();
+                if(
+                    this.value &&
+                    index <
+                    inputs.length-1
+                ){
+
+                    inputs[index+1].focus();
+
+                }
 
             }
+        );
 
 
-            if(
-                e.key==="ArrowRight" &&
-                index<inputs.length-1
-            ){
+        input.addEventListener(
+            "keydown",
+            function(e){
 
-                inputs[index+1].focus();
+
+                /*
+                    Backspace
+                */
+
+                if(
+                    e.key === "Backspace" &&
+                    this.value === "" &&
+                    index > 0
+                ){
+
+                    inputs[index-1].focus();
+
+                }
+
+
+                /*
+                    მარცხენა ისარი
+                */
+
+                if(
+                    e.key === "ArrowLeft" &&
+                    index > 0
+                ){
+
+                    inputs[index-1].focus();
+
+                }
+
+
+                /*
+                    მარჯვენა ისარი
+                */
+
+                if(
+                    e.key === "ArrowRight" &&
+                    index <
+                    inputs.length-1
+                ){
+
+                    inputs[index+1].focus();
+
+                }
+
+
+                /*
+                    Enter
+                */
+
+                if(e.key === "Enter"){
+
+                    checkCode();
+
+                }
 
             }
+        );
 
 
-            if(e.key==="Enter"){
-
-                checkCode();
-
-            }
-
-        }
-    );
-
-});
+    }
+);
 
 
 /* ============================================================
-   START
+   LOAD SAVED GAME
 ============================================================ */
 
+loadProgress();
+
+
+/*
+    ახალი ამოცანა იქმნება,
+    მაგრამ მიმდინარე დონე და
+    ყველა სტატისტიკა უკვე
+    აღდგენილია localStorage-დან.
+*/
+
 newPuzzle();
+
+
+updateUI();
 
 </script>
 
 </body>
 </html>
-
