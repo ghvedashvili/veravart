@@ -130,8 +130,16 @@ body.photo #shop h2{color:#fff;opacity:1;text-shadow:0 1px 4px #0008}
 
 /* iPhone-ის სტილის შეტყობინებები */
 #bannerWrap{position:fixed;top:8px;left:50%;transform:translateX(-50%);width:min(95vw,390px);z-index:110;pointer-events:none}
-.ios-banner{pointer-events:auto;background:rgba(245,245,247,.86);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-radius:22px;padding:11px 13px 12px;box-shadow:0 10px 40px rgba(0,0,0,.22);font-family:-apple-system,'Noto Sans Georgian',system-ui,sans-serif;color:#111;cursor:pointer;animation:bdown .45s cubic-bezier(.2,1.2,.4,1);position:relative;overflow:hidden}
-.ios-banner.out{animation:bup .3s ease-in forwards}
+.ios-banner{pointer-events:auto;touch-action:none;transition:transform .2s;background:rgba(245,245,247,.86);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-radius:22px;padding:11px 13px 12px;box-shadow:0 10px 40px rgba(0,0,0,.22);font-family:-apple-system,'Noto Sans Georgian',system-ui,sans-serif;color:#111;cursor:pointer;animation:bdown 1s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+.ios-banner.out{animation:bup .35s ease-in forwards}
+.ios-banner.expanded{cursor:default;padding:14px 14px 14px;border-radius:24px;animation:bexp .3s ease-out}
+@keyframes bexp{from{transform:scale(.96)}}
+.ios-banner .bx{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.12);color:#333;font-size:14px;cursor:pointer;z-index:2}
+.mini-h{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;padding-right:34px}.mini-h .appicon{width:26px;height:26px;font-size:14px;border-radius:7px}.mini-h span{margin-left:auto;color:#888;font-size:12px}
+.mini-b{background:rgba(255,255,255,.75);border-radius:14px;padding:10px 12px}
+.mini-bub{background:#e9e9eb;border-radius:16px;padding:7px 12px;font-size:15px;margin:3px 0;display:inline-block;max-width:92%}
+.mini-b+.bonus-chip{margin-top:8px}
+.ios-banner .timer.t3{animation:tmr 3s linear forwards}
 @keyframes bdown{from{transform:translateY(-130%)}}
 @keyframes bup{to{transform:translateY(-140%);opacity:.4}}
 .ios-banner .row{display:flex;gap:10px;align-items:flex-start}
@@ -674,11 +682,20 @@ let bannerBusy=false,bannerQ=[];
 function pushBanner(b){if(ended)return;if(bannerBusy){if(bannerQ.length<2)bannerQ.push(b);return}showBanner(b)}
 function showBanner(b){
   if(ended)return;bannerBusy=true;const el=document.createElement('div');el.className='ios-banner'+(b.call?' call':'');el.innerHTML=b.html+'<div class="timer"></div>';
-  $('#bannerWrap').appendChild(el);let done=false;
-  const close=()=>{if(done)return;done=true;clearTimeout(to);if(!b.opened&&!b.call)st('nMiss');b.onClose&&b.onClose();el.classList.add('out');setTimeout(()=>{el.remove();bannerBusy=false;if(bannerQ.length)setTimeout(()=>showBanner(bannerQ.shift()),500)},300)};
-  const to=setTimeout(close,5000);
-  el.addEventListener('pointerdown',e=>e.stopPropagation());
-  el.addEventListener('click',e=>{initAudio();const a=e.target.closest('[data-act]');if(a&&a.dataset.act==='no'){close();tone(300,.1,'sine',.04);return}b.opened=true;close();b.onOpen(e)});
+  $('#bannerWrap').appendChild(el);let done=false,swiped=false,sy=null;
+  const close=()=>{if(done)return;done=true;clearTimeout(to);if(!b.opened&&!b.call)st('nMiss');b.onClose&&b.onClose();el.classList.add('out');setTimeout(()=>{el.remove();bannerBusy=false;if(bannerQ.length)setTimeout(()=>{const nb=bannerQ.shift();if(nb&&!bannerBusy)showBanner(nb)},500)},350)};
+  let to=setTimeout(close,5000);
+  const expand=e=>{ // თითის ჩამოწევა — პატარა ფანჯარა 3 წამით
+    if(done||swiped||!b.mini)return;swiped=true;b.opened=true;clearTimeout(to);
+    const bonus=b.onMini(e);el.classList.add('expanded');
+    el.innerHTML=`<button class="bx" aria-label="დახურვა">✕</button>`+b.mini()+(bonus?`<div class="bonus-chip">💰 +${fmt(bonus)}</div>`:'')+'<div class="timer t3"></div>';
+    el.querySelector('.bx').addEventListener('pointerdown',ev=>{ev.stopPropagation();ev.preventDefault();close()});
+    tone(880,.06,'sine',.04);to=setTimeout(close,3000);
+  };
+  el.addEventListener('pointerdown',e=>{e.stopPropagation();sy=e.clientY;try{el.setPointerCapture(e.pointerId)}catch(x){}});
+  el.addEventListener('pointermove',e=>{if(sy==null||swiped)return;const dy=e.clientY-sy;if(dy>0)el.style.transform=`translateY(${Math.min(dy,40)}px)`;if(dy>28)expand(e)});
+  el.addEventListener('pointerup',()=>{sy=null;if(!swiped)el.style.transform=''});
+  el.addEventListener('click',e=>{if(swiped)return;initAudio();const a=e.target.closest('[data-act]');if(a&&a.dataset.act==='no'){close();tone(300,.1,'sine',.04);return}b.opened=true;close();b.onOpen(e)});
   b.onShow&&b.onShow();
 }
 function award(amount,e,label,col){add(amount);popAt(e?e.clientX:innerWidth/2,e?e.clientY+40:120,label+' +'+fmt(amount),col||'#27ae60');coinSound();render()}
@@ -706,6 +723,8 @@ function smsBanner(){
   const [who,lines]=pick(SMS);const txt=lines[0];
   pushBanner({html:`<div class="row"><div class="appicon msg">💬</div><div class="body"><div class="top"><span>${esc(who)}</span><span>ახლა</span></div><div class="txt">${esc(lines.join(' · '))}</div></div></div>`,
     onShow(){tone(1568,.09,'sine',.06);tone(1975,.12,'sine',.05,null,now()+.11)},
+    mini:()=>`<div class="mini-h"><div class="appicon msg">💬</div><b>${esc(who)}</b><span>ახლა</span></div><div class="mini-b">${lines.map(l=>`<div class="mini-bub">${esc(l)}</div>`).join('')}</div>`,
+    onMini(e){const b=Math.max(40,perSec()*4);award(b,e,'💬','#21c13a');st('sms');st('nOpen');return b},
     onOpen(e){const b=Math.max(40,perSec()*4);
       openSheet(`<div class="sms-v"><div class="nav"><span class="back" data-close>‹ უკან</span><span></span><span style="width:50px"></span></div><div class="who"><div class="av">${esc(who[0])}</div><b>${esc(who)} ›</b></div><div class="list"><div class="tm">დღეს, ${new Date().toTimeString().slice(0,5)}</div>${lines.map(l=>`<div class="in">${esc(l)}</div>`).join('')}<div class="bonus-chip">💰 ბონუსი +${fmt(b)}</div></div><div class="bar"><span>iMessage</span></div></div>`);
       award(b,e,'💬','#21c13a');st('sms');st('nOpen');
@@ -796,6 +815,8 @@ function socialBanner(){
   const a=pick(SOCIAL),it=pick(a.items),[who,txt]=it;
   pushBanner({html:`<div class="row"><div class="appicon" style="background:${a.bg}">${a.ic}${iconImg(a.app)}</div><div class="body"><div class="top"><span>${esc(a.app)}</span><span>ახლა</span></div><div class="sub">${esc(who)}</div><div class="txt">${esc(txt)}</div></div></div>`,
     onShow(){tone(1318,.07,'sine',.05);tone(1760,.09,'sine',.04,null,now()+.08)},
+    mini:()=>`<div class="mini-h"><div class="appicon" style="background:${a.bg}">${a.ic}${iconImg(a.app)}</div><b>${esc(a.app)}</b><span>ახლა</span></div><div class="mini-b"><div style="display:flex;gap:9px;align-items:center">${av(who,38)}<div><b>${esc(who)}</b><div style="font-size:15px">${esc(txt)}</div></div></div>${it[2]&&it[2].length>8?`<div style="margin-top:8px;font-size:15px;color:#333">${esc(it[2])}</div>`:''}</div>`,
+    onMini(e){const b=Math.max(50,perSec()*5);award(b,e,a.ic,'#d62976');st('social');st('nOpen');return b},
     onOpen(e){const b=Math.max(50,perSec()*5);openSheet(socialView(a,it,b));award(b,e,a.ic,'#d62976');st('social');st('nOpen')}});
 }
 
@@ -820,6 +841,8 @@ function mailBanner(){
   const [from,subj,body,att]=pick(MAILS);
   pushBanner({html:`<div class="row"><div class="appicon mail">✉️</div><div class="body"><div class="top"><span>${esc(from)}</span><span>ახლა</span></div><div class="sub">${esc(subj)}</div><div class="txt">${esc(body.slice(1).join(' '))}</div></div></div>`,
     onShow(){tone(1175,.08,'sine',.05);tone(880,.14,'sine',.05,null,now()+.09)},
+    mini:()=>`<div class="mini-h"><div class="appicon mail">✉️</div><b>${esc(from)}</b><span>ახლა</span></div><div class="mini-b"><div style="font-weight:700;font-size:15px;margin-bottom:4px">${esc(subj)}</div>${body.slice(1,3).map(x=>`<div style="font-size:14px;color:#333;margin-bottom:4px">${esc(x)}</div>`).join('')}${att?`<div class="att" style="margin:4px 0 0">📎 ${esc(att)}</div>`:''}</div>`,
+    onMini(e){const b=Math.max(60,perSec()*6);award(b,e,'✉️','#0a6cff');st('mail');st('nOpen');return b},
     onOpen(e){const b=Math.max(60,perSec()*6);const col=pick(AD_COL);
       openSheet(`<div class="nav"><span class="back" data-close>‹ შემოსულები</span><span style="font-weight:600">მეილი</span><span style="width:60px;text-align:right;color:#007aff">↩︎</span></div>
       <div class="mail-v"><div class="from"><div class="fa" style="background:linear-gradient(135deg,${col})">${esc(from[0])}</div><div><div class="fn">${esc(from)}</div><div class="fm">ვის: მე · ${new Date().toTimeString().slice(0,5)}</div></div></div>
@@ -870,7 +893,7 @@ function ovl(a,b){const x=Math.min(a.right,b.right)-Math.max(a.left,b.left),y=Ma
 function padR(r,p){return {left:r.left-p,top:r.top-p,right:r.right+p,bottom:r.bottom+p}}
 /* ===== ვიჯეტის გვერდზე შეკეცვა (როგორც აიფონზე პატარა ვიდეო) ===== */
 const TAB_IC={radio:'📻',yt:'📺',slot:'🎰',roulette:'🎡',mood:'😊',stream:'🟣',gif:'🎞',weather:'🌦',crypto:'📈',clockw:'⏰',qt:'🌋',live:'⚽'};
-function offFrac(el){const r=el.getBoundingClientRect();const off=Math.max(0,-r.left)+Math.max(0,r.right-innerWidth);return [r.width?off/r.width:0,(r.left+r.right)/2<innerWidth/2?'left':'right']}
+function offFrac(el){const r=el.getBoundingClientRect();const fx=r.width?(Math.max(0,-r.left)+Math.max(0,r.right-innerWidth))/r.width:0,fy=r.height?(Math.max(0,-r.top)+Math.max(0,r.bottom-innerHeight))/r.height:0;return [Math.max(fx,fy),(r.left+r.right)/2<innerWidth/2?'left':'right']}
 function tabTop(side,want){const used=[...document.querySelectorAll('.wtab.'+side)].map(t=>parseFloat(t.style.top));let y=Math.max(40,Math.min(innerHeight-90,want));
   for(let k=0;k<20&&used.some(u=>Math.abs(u-y)<50);k++)y=y+52>innerHeight-90?40+k*52:y+52;return y}
 function tuck(el,side){
