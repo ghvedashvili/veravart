@@ -1456,8 +1456,7 @@ let booting=true;
 for(const u of UP)if(has(u.id)&&u.id!=='end')activate(u.id);
 booting=false;
 setTimeout(relayoutAll,700);setTimeout(relayoutAll,2500);
-// გვერდის ჩატვირთვისას ვიჯეტები ჯერ გამოჩნდება, მერე გვერდზე შეიკეცება — მოთამაშე ხედავს, რომ ასე შეიძლება
-setTimeout(()=>{visibleWidgets().forEach((el,i)=>setTimeout(()=>{if(ended||el.classList.contains('tucked'))return;const r=el.getBoundingClientRect();tuck(el,(r.left+r.right)/2<innerWidth/2?'left':'right');if(el._tab){el._tab.classList.add('ping');setTimeout(()=>el._tab&&el._tab.classList.remove('ping'),2500)}},i*180))},1300);
+
 
 function hms(sec){sec=Math.floor(sec);const h=sec/3600|0,m=(sec/60|0)%60,x=sec%60;return (h?h+' საათი ':'')+(h||m?m+' წუთი და ':'')+x+' წამი'}
 function ending(){
