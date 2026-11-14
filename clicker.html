@@ -291,6 +291,18 @@ body.mob.sbar #sbar{display:flex}
 body.mob.sbar #app{padding-top:128px}
 body.mob #weather,body.mob #crypto,body.mob #clockw,body.mob #qt,body.mob #live{display:none!important}
 .widget.parked{display:none!important}
+.widget.edgeHint{outline:3px dashed #2f80ed;outline-offset:3px;opacity:.85}
+.widget.tucked{pointer-events:none}
+.wtab{position:fixed;z-index:31;width:34px;height:46px;display:flex;align-items:center;justify-content:center;background:rgba(20,20,26,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);animation:tabin .35s cubic-bezier(.2,1.4,.4,1);touch-action:manipulation}
+.wtab.left{left:0;border-radius:0 14px 14px 0}.wtab.right{right:0;border-radius:14px 0 0 14px}
+.wtab.left::after,.wtab.right::after{content:'';position:absolute;top:50%;width:3px;height:16px;margin-top:-8px;border-radius:2px;background:rgba(255,255,255,.5)}
+.wtab.left::after{right:4px}.wtab.right::after{left:4px}
+.wtab i{position:absolute;top:5px;width:9px;height:9px;border-radius:50%;background:#ff3b30;opacity:0}
+.wtab.left i{right:5px}.wtab.right i{left:5px}
+.wtab.ping i{opacity:1;animation:blink .6s infinite}
+.wtab.ping{animation:tabping .5s ease-in-out 3}
+@keyframes tabin{from{transform:scale(.3)}}
+@keyframes tabping{50%{transform:scale(1.15)}}
 #ending .ewrap{width:min(100%,460px);display:flex;flex-direction:column;align-items:center;gap:12px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 4px 70px}
 #ending .achs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px}
 #ending .achs span{display:flex;flex-direction:column;align-items:center;width:72px;font-size:10px;text-align:center;line-height:1.2;background:rgba(255,216,74,.12);border:1px solid rgba(255,216,74,.5);border-radius:12px;padding:6px 2px}
@@ -570,7 +582,7 @@ function spinSlot(){
   $('#slotTxt').textContent='ტრიალებს…';let k=0;
   const iv=setInterval(()=>{k++;reels.forEach((r,i)=>{r.textContent=k<8+i*5?pick(SYM):res[i]});tone(900+R()*300,.03,'square',.03);if([8,13,18].includes(k))noiseHit(.08,.3,500,'lowpass');
     if(k>=18){clearInterval(iv);spinning=false;let m=0;if(res[0]===res[1]&&res[1]===res[2])m=res[0]==='7️⃣'?30:6;else if(res[0]===res[1]||res[1]===res[2]||res[0]===res[2])m=1.1;
-      if(m){const w=Math.floor(bet*m);add(w);st('slotWon',w);if(m>=6)st('jackpots');$('#slotTxt').textContent=(m>=10?'🎉 ჯეკპოტი! +':'მოგება +')+fmt(w);m>=10?jackpotSound():coinSound();if(m>=10)confetti(innerWidth/2,innerHeight/2)}else{$('#slotTxt').textContent='წააგე '+fmt(bet)+' 😬';tone(200,.3,'sawtooth',.04)}
+      if(m){const w=Math.floor(bet*m);add(w);st('slotWon',w);if(m>=6){st('jackpots');pingTab('slot')}$('#slotTxt').textContent=(m>=10?'🎉 ჯეკპოტი! +':'მოგება +')+fmt(w);m>=10?jackpotSound():coinSound();if(m>=10)confetti(innerWidth/2,innerHeight/2)}else{$('#slotTxt').textContent='წააგე '+fmt(bet)+' 😬';tone(200,.3,'sawtooth',.04)}
       render()}},60);
 }
 const RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
@@ -641,8 +653,8 @@ function draggable(el,onTap){
   let sx,sy,ox,oy,moved=false,id=null;
   let downT=null;
   el.addEventListener('pointerdown',e=>{downT=e.target;id=e.pointerId;moved=false;sx=e.clientX;sy=e.clientY;const r=el.getBoundingClientRect();ox=r.left;oy=r.top;try{el.setPointerCapture(id)}catch(x){}e.stopPropagation()});
-  el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)>7){moved=true;el._dragged=true;const z=parseFloat(getComputedStyle(el).zoom)||1;el._z=z;el.style.right='auto';el.style.bottom='auto';el.style.transform='none';el.style.left=ox/z+'px';el.style.top=oy/z+'px'}if(moved){const z=el._z||1;el.style.left=(ox+dx)/z+'px';el.style.top=(oy+dy)/z+'px'}});
-  el.addEventListener('pointerup',e=>{if(e.pointerId!==id)return;id=null;if(moved)keepOffButton(el);if(!moved&&onTap){initAudio();onTap({target:downT,clientX:e.clientX,clientY:e.clientY})}});
+  el.addEventListener('pointermove',e=>{if(e.pointerId!==id)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)>7){moved=true;el._dragged=true;const z=parseFloat(getComputedStyle(el).zoom)||1;el._z=z;el.style.right='auto';el.style.bottom='auto';el.style.transform='none';el.style.left=ox/z+'px';el.style.top=oy/z+'px'}if(moved){const z=el._z||1;el.style.left=(ox+dx)/z+'px';el.style.top=(oy+dy)/z+'px'};if(moved&&el.classList.contains('widget'))el.classList.toggle('edgeHint',offFrac(el)[0]>.3)});
+  el.addEventListener('pointerup',e=>{if(e.pointerId!==id)return;id=null;el.classList.remove('edgeHint');if(moved){const [f,side]=offFrac(el);if(f>.3&&el.classList.contains('widget'))tuck(el,side);else keepOffButton(el)}if(!moved&&onTap){initAudio();onTap({target:downT,clientX:e.clientX,clientY:e.clientY})}});
 }
 ['#crypto','#weather','#fb','#yt','#qt'].forEach(s=>draggable($(s)));
 draggable($('#radio'),radioTap);
@@ -825,7 +837,7 @@ function stepAlarm(){
   const left=Math.max(0,Math.ceil((alarmNext-Date.now())/1000));$('#acNext').textContent='შემდეგი ზარი: '+left+' წმ';
   if(left<=0)ringAlarm();
 }
-function ringAlarm(){
+function ringAlarm(){pingTab('clockw');
   alarmRinging=true;const w=$('#clockw');w.classList.add('ringing');$('#acNext').textContent='⏰ შეეხე და გამორთე!';
   let k=0;const beep=()=>{if(AC&&k++%4<3){tone(1760,.08,'square',.06);tone(1760,.08,'square',.06,null,now()+.12)}};beep();alarmIv=setInterval(beep,300);
   alarmTO=setTimeout(()=>stopAlarm(false),5000);
@@ -856,7 +868,44 @@ function earthquake(){
 /* ვიჯეტების განლაგება: ყველაზე ცარიელი ადგილის პოვნა */
 function ovl(a,b){const x=Math.min(a.right,b.right)-Math.max(a.left,b.left),y=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top);return x>0&&y>0?x*y:0}
 function padR(r,p){return {left:r.left-p,top:r.top-p,right:r.right+p,bottom:r.bottom+p}}
-function visibleWidgets(){return [...document.querySelectorAll('.widget')].filter(w=>getComputedStyle(w).display!=='none')}
+/* ===== ვიჯეტის გვერდზე შეკეცვა (როგორც აიფონზე პატარა ვიდეო) ===== */
+const TAB_IC={radio:'📻',yt:'📺',slot:'🎰',roulette:'🎡',mood:'😊',stream:'🟣',gif:'🎞',weather:'🌦',crypto:'📈',clockw:'⏰',qt:'🌋',live:'⚽'};
+function offFrac(el){const r=el.getBoundingClientRect();const off=Math.max(0,-r.left)+Math.max(0,r.right-innerWidth);return [r.width?off/r.width:0,(r.left+r.right)/2<innerWidth/2?'left':'right']}
+function tabTop(side,want){const used=[...document.querySelectorAll('.wtab.'+side)].map(t=>parseFloat(t.style.top));let y=Math.max(40,Math.min(innerHeight-90,want));
+  for(let k=0;k<20&&used.some(u=>Math.abs(u-y)<50);k++)y=y+52>innerHeight-90?40+k*52:y+52;return y}
+function tuck(el,side){
+  if(el.classList.contains('tucked'))return;
+  const z=parseFloat(getComputedStyle(el).zoom)||1,r=el.getBoundingClientRect();
+  el._tuckTop=r.top;el._tuckSide=side;el.classList.add('tucked','fly');
+  el.style.right='auto';el.style.bottom='auto';el.style.transform='none';
+  el.style.left=(side==='left'?-r.width-20:innerWidth+20)/z+'px';
+  setTimeout(()=>el.classList.remove('fly'),700);
+  const tab=document.createElement('div');tab.className='wtab '+side;tab.innerHTML=`<span>${TAB_IC[el.id]||'▣'}</span><i></i>`;
+  tab.style.top=tabTop(side,r.top+10)+'px';document.body.appendChild(tab);el._tab=tab;
+  tab.addEventListener('pointerdown',e=>e.stopPropagation());
+  tab.addEventListener('click',()=>{initAudio();untuck(el)});
+  tone(500,.08,'sine',.04);tone(350,.1,'sine',.04,null,now()+.06);
+  if(!S.tipTuck){S.tipTuck=1}
+}
+function untuck(el,noAnim){
+  if(!el.classList.contains('tucked'))return;
+  const z=parseFloat(getComputedStyle(el).zoom)||1;el.classList.remove('tucked');
+  if(el._tab){el._tab.remove();el._tab=null}
+  if(!noAnim){el.classList.add('fly');setTimeout(()=>el.classList.remove('fly'),700)}
+  el.style.visibility='hidden';const w=el.getBoundingClientRect().width;el.style.visibility='';
+  const y=Math.max(34,Math.min(innerHeight-60,el._tuckTop||100));
+  el.style.left=(el._tuckSide==='left'?6:innerWidth-w-6)/z+'px';el.style.top=y/z+'px';
+  setTimeout(()=>keepOffButton(el),noAnim?0:650);
+  tone(350,.08,'sine',.04);tone(560,.1,'sine',.04,null,now()+.06);
+}
+function tuckTip(){if(S.tipTuckShown)return;S.tipTuckShown=1;save();
+  const el=document.createElement('div');el.className='achToast';el.style.background='linear-gradient(135deg,#0b3d91,#1e88e5)';el.style.borderColor='#9fd8ff';
+  el.innerHTML='<div class="ai">👉</div><div><div class="at" style="color:#fff">რჩევა</div><div class="ad">ვიჯეტი თითით ეკრანის კიდისკენ გაასრიალე — გვერდზე შეიკეცება. ჩანართზე შეხებით დაბრუნდება.</div></div>';
+  document.body.appendChild(el);setTimeout(()=>el.classList.add('out'),6500);setTimeout(()=>el.remove(),7000)}
+function pingTab(id){const el=$('#'+id);if(el&&el._tab){el._tab.classList.remove('ping');void el._tab.offsetWidth;el._tab.classList.add('ping');clearTimeout(el._pingTO);el._pingTO=setTimeout(()=>el._tab&&el._tab.classList.remove('ping'),5000)}}
+addEventListener('resize',()=>document.querySelectorAll('.widget.tucked').forEach(el=>{const z=parseFloat(getComputedStyle(el).zoom)||1,w=el.getBoundingClientRect().width;el.style.left=(el._tuckSide==='left'?-w-20:innerWidth+20)/z+'px'}));
+
+function visibleWidgets(){return [...document.querySelectorAll('.widget')].filter(w=>getComputedStyle(w).display!=='none'&&!w.classList.contains('tucked'))}
 function findSpot(w,h,occ,jitter){
   const W=innerWidth,H=innerHeight-(has('ticker')?36:0);
   const ko=[padR($('#stats').getBoundingClientRect(),8)],btn=btnZone();
@@ -896,6 +945,7 @@ function placeWidget(el){
 }
 function relayoutAll(){const placed=[];for(const el of visibleWidgets()){if(el._dragged){placed.push(padR(el.getBoundingClientRect(),4));continue}const r=el.getBoundingClientRect();const [x,y]=findSpot(r.width,r.height,placed,false);placed.push(padR({left:x,top:y,right:x+r.width,bottom:y+r.height},4));setWidgetPos(el,x,y,false)}}
 function scramble(){
+  document.querySelectorAll('.widget.tucked').forEach(el=>untuck(el,true));
   if(AC){noiseHit(1.2,.9,120,'lowpass');noiseHit(.5,.5,300,'lowpass',null,now()+.2)}
   const f=$('#flash');f.style.transition='none';f.style.background='#000';f.style.opacity=.25;setTimeout(()=>{f.style.transition='opacity .5s';f.style.opacity=0},90);
   // შემთხვევითი რიგით, თითოეული ყველაზე ცარიელ (ოდნავ შემთხვევით) ადგილზე
@@ -922,7 +972,7 @@ async function fetchLive(){
   ms.forEach(m=>{const k=m.id,prev=lastScores[k];if(prev!=null&&m.hs+m.as>prev)goal(m);lastScores[k]=m.hs+m.as});
   return ms;
 }
-function goal(m){st('goals');const w=$('#live');w.classList.remove('goal');void w.offsetWidth;w.classList.add('goal');award(Math.max(200,perSec()*20),null,'⚽ გოოოლი! '+m.h+'-'+m.a,'#19c35b');
+function goal(m){st('goals');pingTab('live');const w=$('#live');w.classList.remove('goal');void w.offsetWidth;w.classList.add('goal');award(Math.max(200,perSec()*20),null,'⚽ გოოოლი! '+m.h+'-'+m.a,'#19c35b');
   if(AC){noiseHit(2,.35,1500,'bandpass');[0,.15,.3].forEach(d=>tone(880,.12,'square',.05,null,now()+d))}}
 async function refreshLive(){
   try{const ms=await fetchLive();if(ms.length){liveMatches=ms;liveSrc='live'}else throw 0}
@@ -1215,7 +1265,7 @@ function showQuiz(){const q=$('#quiz');if(q.style.display==='block')return;const
 $('#quiz').addEventListener('pointerdown',e=>e.stopPropagation());
 
 
-const show=(id,disp='block')=>{const el=$(id);const was=el.style.display;el.style.display=disp;if(el.classList.contains('widget')&&was!==disp){const k=id.slice(1);if(mob&&BIG.includes(k)){if(booting){rotShown.push(k);while(rotShown.length>MAXROT){const o=rotShown.shift();park(o);rotParked.push(o)}}else{ensureRot(k)}}placeWidget(el);if(!booting)setTimeout(()=>{if(!el._dragged)placeWidget(el)},500)}};
+const show=(id,disp='block')=>{const el=$(id);const was=el.style.display;el.style.display=disp;if(el.classList.contains('widget')&&was!==disp){const k=id.slice(1);if(mob&&BIG.includes(k)){if(booting){rotShown.push(k);while(rotShown.length>MAXROT){const o=rotShown.shift();park(o);rotParked.push(o)}}else{ensureRot(k)}}placeWidget(el);if(!booting){setTimeout(()=>{if(!el._dragged)placeWidget(el)},500);setTimeout(tuckTip,1500)}}};
 function activate(id){
   const u=UP.find(x=>x.id===id);if(u&&u.btn)setBtn(u.btn);
   if(id==='bounce')addBouncer();
@@ -1305,7 +1355,7 @@ function openStats(){
 
 /* ================== მობილური: სტატუს-ზოლი და მონაცვლე ვიჯეტები ================== */
 const mq=matchMedia('(max-width:600px)');let mob=mq.matches;
-const BIG=['radio','slot','roulette','mood','stream','gif'],MAXROT=2;let rotShown=[],rotParked=[];
+/* მობილურზეც ვიჯეტები აღარ იმალება */const BIG=['radio','slot','roulette','mood','stream','gif'],MAXROT=99;let rotShown=[],rotParked=[];
 const wEl=id=>$('#'+(id==='clock'?'clockw':id==='shake'?'qt':id));
 function park(id){wEl(id).classList.add('parked')}
 function unpark(id){const el=wEl(id);if(!el.classList.contains('parked'))return;el.classList.remove('parked');el._dragged=false;placeWidget(el)}
@@ -1314,7 +1364,7 @@ function ensureRot(id){
   rotShown=rotShown.filter(x=>x!==id);rotParked=rotParked.filter(x=>x!==id);rotShown.push(id);unpark(id);
   while(rotShown.length>MAXROT){const o=rotShown.shift();park(o);rotParked.push(o)}
 }
-function bringFront(id){if(mob&&rotParked.includes(id))ensureRot(id)}
+function bringFront(id){pingTab(id);if(mob&&rotParked.includes(id))ensureRot(id)}
 function rotTick(){if(!mob||!rotParked.length)return;ensureRot(rotParked[0])}
 function applyMob(){
   mob=mq.matches;document.body.classList.toggle('mob',mob);
@@ -1409,7 +1459,7 @@ setTimeout(relayoutAll,700);setTimeout(relayoutAll,2500);
 
 function hms(sec){sec=Math.floor(sec);const h=sec/3600|0,m=(sec/60|0)%60,x=sec%60;return (h?h+' საათი ':'')+(h||m?m+' წუთი და ':'')+x+' წამი'}
 function ending(){
-  ended=true;closeStill();FLIES.forEach(f=>{f.alive=false;buzzStop(f);f.el.remove()});ANTS.forEach(a=>a.el.remove());ANTS.length=0;$('#qt').style.display='none';$('#glass').innerHTML='';clearInterval(ringIv);closeSheet();$('#bannerWrap').innerHTML='';clearInterval(alarmIv);document.querySelectorAll('.adpop').forEach(x=>x.remove());$('#quiz').style.display='none';
+  ended=true;document.querySelectorAll('.wtab').forEach(t=>t.remove());closeStill();FLIES.forEach(f=>{f.alive=false;buzzStop(f);f.el.remove()});ANTS.forEach(a=>a.el.remove());ANTS.length=0;$('#qt').style.display='none';$('#glass').innerHTML='';clearInterval(ringIv);closeSheet();$('#bannerWrap').innerHTML='';clearInterval(alarmIv);document.querySelectorAll('.adpop').forEach(x=>x.remove());$('#quiz').style.display='none';
   stopEl(rA.cors);stopEl(rA.plain);if(vid){vid.pause();vid.remove()}$('#yt').style.display='none';
   const e=$('#ending');e.style.display='block';e.scrollTop=0;requestAnimationFrame(()=>e.style.opacity=1);
   $('#endTime').textContent=hms(S.play||0);$('#endClicks').textContent=(S.clicks||0).toLocaleString('en-US');fillEnding();if(RB.el)RB.el.remove();
