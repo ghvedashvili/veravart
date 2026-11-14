@@ -2,12 +2,13 @@
 <html lang="ka">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>სტიმულის ღილაკი</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;touch-action:manipulation;-webkit-text-size-adjust:100%}
+button,a,.up,#app,#sheet,#ending,.ios-banner,.adpop,#quiz,#still,#achBtn,#sbar{touch-action:manipulation}
 body{font-family:'Noto Sans Georgian',-apple-system,system-ui,sans-serif;background:#f4f1ea;color:#1d1d1f;user-select:none;-webkit-user-select:none}
 body.photo{background:var(--bg) center/cover no-repeat fixed}
 body.photo #stats{background:rgba(255,255,255,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 18px;border-radius:16px}
@@ -591,6 +592,10 @@ function spinRoulette(){
 /* ================= UI ================= */
 function popAt(x,y,txt,col){const p=document.createElement('div');p.className='pop';p.textContent=txt;p.style.left=(x-15)+'px';p.style.top=(y-20)+'px';if(col)p.style.color=col;document.body.appendChild(p);setTimeout(()=>p.remove(),900)}
 function confetti(x,y){const cols=['#e2341d','#f2c94c','#27ae60','#2f80ed','#9b51e0'];for(let i=0;i<26;i++){const c=document.createElement('div');c.className='conf';c.style.left=x+'px';c.style.top=y+'px';c.style.background=cols[i%5];c.style.setProperty('--x',(R()*300-150)+'px');c.style.setProperty('--y',(R()*-250+40)+'px');document.body.appendChild(c);setTimeout(()=>c.remove(),1200)}}
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+let lastTE=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastTE<350&&!e.target.closest('input,textarea'))e.preventDefault();lastTE=n},{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
 document.addEventListener('pointerdown',()=>{lastTouch=Date.now();userGestured=true;initAudio();vidUnmute()},{capture:true});
 addEventListener('keydown',()=>{lastTouch=Date.now()});
 addEventListener('visibilitychange',()=>{if(!document.hidden)lastTouch=Date.now()-10001});
